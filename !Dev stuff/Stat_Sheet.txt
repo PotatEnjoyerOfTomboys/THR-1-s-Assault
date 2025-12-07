@@ -1,0 +1,140 @@
+-------------------------------------------------------------------------------------------------------------------------------
+	Player Weapon
+?	Name	Dmg	Rg	Capa.	Rlod	Hand	Rof	Soun	BuTy	DmgT		Description
+Lord
+	MsslLn.	M/H	M/H	L	M/H	L/M	L	H	Mssl	Expl		Fires missiles who'll track their target
+	GrendMG	M/H	M	M/H	H++	L	M/H	H	Grend	Expl		Shoots small explosive bullets on a timed fuse
+	ExplRev	M	M	L/M	L/M	M/H	L/M	H	Expl	Expl		Huge revolver which uses round that explodes on impact
+Emperor
+	GuBlade	L/M	M	L/M	L	H	M/H	M	Norm	Phis/Mele	.
+	OldRilf	M	M/H	L/M	L/M	M	M	M	Norm	Phis		Support weapon
+	StnBatn	H	L	-------	-------	H	M	L/M	Elec	Ener/Mele	.
+Wizard
+	Sp.ShGu	H	L/M	M	M/H	M	L/M	M/H	Norm	Phis		.
+	LsrCutr	H++	L	L	H	M/H	-------	L	Lsr	Ener		Battery powered laser cutter. Melts through people but has poor battery life
+	MecRado	M	H	L	M/H	H++	L	L	Ar	Expl		Used to make Crippled Laddie shoot various shell types (Smoke, Illumination, Anti-Pers)
+Jester
+	Br.Heal	-------	L/M	M	M/H	M/H	L or H	L/M	Heal	Heal		Has 2 healing modes, burst and over time
+	APC	-------	-------	-------	-------	------- -------	-------	------- -------		Let's M3-D1C restraint and carry ANYONE around. Alt fire let's him throw the "patient" to deal damage to both the patient and people hit
+	EnerShd	L	M	H++	L/M	L	-------	M	-------	Ener		Generate a sheild in front of M3-D1C which destroys projectiles.
+Sovreig
+	SupRilf	M/H	M/H	L/M	M	M	L/M	L	Norm	Phis		.
+	AntRilf	H++	H	L--	H++	L--	L--	H++	Lsr	Phis		Slows Corrine when carried. Can be dropped. Very lound, unweildy and powerful
+	MorFlar	M	M	L	M/H	M	L	L	ArFl	Fire		Shoots flares over walls. Reveal enemies
+	WpnFst	L--	L--	-------	-------	H++	H	L--	Mele	Mele		Useless.
+Duke
+	AxChain M	M	-------	-------	H	M	L	Mele	Mele		Charging attacks generates lots of agro
+	HokSwrd	M	L	-------	-------	H	H	L	Mele	Mele		Can be used to restrain enemies
+	GunFu	L	L/M	L/M	L	H	H++	M	Norm	Phis/Mele	.
+Condor
+	DualSMG	L	M	M/H	M	M/H	H	M/H	Norm	Phis		Alt fire launches a gas grenade
+	RitShGu	M	M	M	L/M	L/M	L/M	M	Norm	Phis		Can use the shield to protect agaisnt bullets and charge
+	3BrRifl M	M	H	M	M	M	M	Flec	Phis		Fires flechettes who ignore armour
+
+Curtis
+	StnShGu	M	L/M	L/M	H	H	M/H	M	Norm	Phis		Alt fires lets Crutis unload it in all directions
+	LvARifl	M	M	L/M	H	H	M/H	M	Norm	Phis		.
+Law.
+	SwrdNGu H	L/M	L--	H	H	H	L/M	FirNorm	Fire/Mele/Phis	Lawrence likes to put oil on his blade and set fire to places
+	
+Mark
+	MrkRifl	M/H	H	L/M	M	M	L/M	L--	Norm	Phis		Alt fire reveals enemies in stealth that are in a narrow cone in front of Marks.
+Viv.
+	VivRifl	M	M	M/H	M	M	H	M	Norm	Phis		Can switch betweem ammo types
+-------------------------------------------------------------------------------------------------------------------------------
+	Enemy Weapon
+?	Name	Dmg	Rg	Capa.	Rlod	Hand	Rof	Soun	BuTy	DmgT		Description
+Fac1 O
+BodyGrd	LsrRifl	M	M/H	.	.	.	.	.	Lsr	.		Has a laser pointer.
+HeSinpr	HeLsr	M/H	H	.	.	.	.	.	Lsr	Ener		Has a laser pointer. Has variable handle rate
+RadarOp	Radar	-------	-------	-------	-------	-------	-------	-------	-------	-------		Sends a ping at regular intervals to detect new targets
+MsslOp	MsslPod	.	M++	.	.	.	.	.	Mssl	Expl		Fires salvos of missiles
+MrksMan	.	L	H	.	.	.	.	.	Lsr	Ener		Hitting a target marks it. Making their location always known
+Enforcr	AllRgWS	M/H	H	H	H++	L/M	H	H	Vars	Lsr/Expl	Fires both lasers and missiles. Blows up when killed cause fuk you
+
+Fac2 >
+Skirmsh	PlsRilf	M/H	L/M	M	M	M	L/M	L/M	Norm	Ener		Bullets are slow
+BoomStk	LsrShGu	M/H	L	M	M	M	L	H	Lsr	Ener		It's a laser shotgun. Shoots multiple lasers
+Smoker	SmkDisp	-------	M	L	H	H	L/M	L	Grend	-------		Shoots smoke grenades, deals no damage
+Snare	.	.	.	.	.	.	.	.	.	.		.
+Crusher	GuHamer	H	L	-------	-------	M	L	H	Mele3	Mele		Creates shockwaves that crushes armour
+Assasin	PileBun	H++	L	-------	H	H	L--	L	Expl	Expl		Pile Bunker, makes a loud clink before making the attack. Can one shot weaker characters
+
+Fac3 =
+Infntry	ComRilf	M	M/H	M	M	M/H	M	M/H	Norm	Phys		Really has nothing special
+Flamer	FlaThwr	L/M	M	H	H	M/H	H++	M	Fire	Fire		Doesn't have much spread
+Peeper	Binculr	-------	-------	-------	-------	-------	-------	-------	-------	-------		Has the "share targets" effect
+Artlery	ArtRado	M/H	H++	L--	H	H++	-------	L/M	Art	Expl		Calls in the artillery strikes
+Grenadr	GrendLn	M/H	M	L/M	M	M	M	L/M	Grend	Fire		Grenades leave napalm
+Bulwark Minigun	L	M	H++	-------	M	H++	H++	Norm	Phys		Doesn't need to reload, has spin up time
+-------------------------------------------------------------------------------------------------------------------------------
+	Player Characters
+	MHlt	MArm	Resits	Spd 	VisRg	SltMod	SltCntr	Size	Driving	DshSpd	DshInv	DshReco	Description
+Lord	M/H	M	M/H	M	M/H	L--	L/M	H	M	H	L/M	M	Generates tons of agro, all weapons do AoE damage
+Emperor	M	L/M	M	M/H	H	M	M/H	M	M	M	H	H	Jack of all tardes
+Wizard	L/M	M	M/H	M	M	L/M	M	M	H	M	H	M	Area denial
+Jester	L--	H++	H	L	L	L/M	H++	M/H	L/M	L--	H++	L	Primary support. Helps them not dying
+Sovreig	L/M	L/M	L	M	H++	M/H	H	L	L	L/M	L	M	Sniper recon
+Duke	M/H	M	M	H	M	H	M	L/M	L	H	H	H	Plays with agro
+Condor	H	H	M/H	L/M	M	L	L/M	H	M/H	M	L	L	Tank and cause debuffs
+
+Curtis	M	M	M	H++	H	M/H	M	M	M/H	H++	H++	H++	Great at fighting. Pressing reload with a gun that can't be reloaded switch the gun
+Law.	H	H	M	H	M	H	M	M	L	H	H	H	AoE attacks
+Mark	M	L/M	M	M	H++	H	H++	M	H	M	M	M	Sniper, causes debuffs on his targets
+Viv.	L/M	M	M	M	M	M	M/H	M	H	M	M	M	Primary support. Make weapons work better
+-------------------------------------------------------------------------------------------------------------------------------
+	Enemies
+	MHlt	MArm	Resits	Spd 	VisRg	SltMod	SltCntr	Size	Description
+Fac1 O
+BodyGrd	M	M	L/M	M	M/H	L/M	M	M	Escorts HeSnipr
+HeSinpr	M	M	M	L/M	H	L	M	M/H	Main damage source
+RadarOp	L/M	L/M	L/M	M	H++	L	L	M	Share detected targets. Useful for MsslOp
+MsslOp	M	M	M	L/M	M	L	M	M	Uses missiles
+MrksMan	M	M	L/M	M	M/H	M	H	M	Mark players. Marked players' location is always known
+Enforcr	H	M/H	H	L	M/H	L--	M	H	Multiple attacks for all ranges
+
+Fac2 >
+Skirmsh	L/M	L--	L/M	M/H	M	M	M/H	L/M	No armour, low range. FAST. Dodges to stay alive
+BoomStk	M	L/M	M	M	M	M	M	M	Slower, high damage
+Smoker	M	L/M	L/M	M/H	M	M	M/H	M	Throws smoke grenades to conceal other enemies
+Snare	M	L/M	L/M	L/M	M	M	M	M	Debuffs players
+Crusher	M/H	M/H	M	M	L/M	M	M	M/H	Destroys armour
+Assasin	M/H	M	M	H	M	H	M/H	M	Tries to flank the player
+
+Fac3 =
+Infntry	M/H	M/H	M/H	L/M	M	L	M	M	Basic and tough.
+Flamer	M/H	M/H	M/H	L/M	M	L--	M	M/H	Uses a flamethower to counter close range attacks.
+Spoter	M/H	M	M/H	L/M	M/H	L/M	L/M	M	Can see through walls. Share targets.
+Artlery	M/H	M/H	M/H	L/M	M	L	M	L/M	Causes artillery strikes
+Grenadr	M/H	M/H	M/H	L/M	M	L	L/M	M/H	Uses incendiary grenades to deny area
+Bulwark	H	H++	H++	L--	M	L--	M	H++	Use minigun. Slow. 
+
+-------------------------------------------------------------------------------------------------------------------------------
+	Manifacturers
+Old West Firearms & Replicas		Far west, WW weapons. Has a reputation of selling range toys	Use weapon nicknames and cowboy references
+	Never forget the classics.
+Socrates				Do the scifi weapons. Viewed as snobish				Name weapons after Schools of Philisophy
+	Advanced weapons for advanced minds.
+Factory Munition Ballistics		Make the heavier weapons and massed produced ones		<Weapon type>-<Model number>-<Variation>		Better known as FMB (Fucking Massive Balls or Fuck My Bitch (Thanks Grant))
+Novak & Boyko				Do the soviet block weapons act. Very wide price range.		Type <Model number> <Weapon type>			Founders are Croatian and Ukrainian
+Toolkit Manifacturing			Construction equipement.					Mk <Model number> <Name and purpose of the tool>
+	The right tools for any job.
+
+Compagnie d'Fusils Chasses d'3 Rivières Rifles and shotguns for hunting. They can be overkill		Names of lakes and rivers in Québec
+	Tradition et puissance de feu
+Advanced Systems United Manifacturers	Missiles, computer tech and other explosive weapons		Geographic Features of Africa				Better known as ASUM
+Old English Armoury			Make older melee weapons. Comapany is runned by the elderly	Tea cause they are Brits				Also known as Silver Haired Smiths
+	Nothing beats experience.
+Zoar Colony's Gun Shop			Weapons that are either made or heavily modified by Vivianne	No real naming convention. Names are descriptive	Better know as "The Gun Shop" in Zoar
+	We sell guns and swords!
+Dickinson Technologies			They do crackhead guns.						.							Better known as Dic-Tec
+	The bleeding edge in weapon design!
+Jeanne's				Weapons created or modified by Jeanne				Describe the effects the weapon would have
+
+
+X Weapons RnD Division			X manifacturer. Specialise in energy and missile		MID-W-<Poduct model ID(8 digits)> (Model ID-)
+Steel Wings				Tailurian manifacturer. Specialises in ship but make some guns 	Ortologists last names
+
+
+
+

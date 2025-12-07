@@ -1,0 +1,254 @@
+	Name		Description
+Lord
+	Gauntlet Punch	Charged punch that does massive damage. Knockback on enemies and M3-D1C
+	Beast Mode	Generates agro faster. Skip reloads. 5 Sec
+Emperor
+	Stun Kick	Quick Kick that stuns enemies on hit. 
+	MEGA BUFF	Buffs attack speed and Dash recovery speed for 10 sec.
+			If Zan'dr and Lord are both present. Zan'dr gets the attack speed buff and Lord gets the Dash recovery speed buff
+Wizard
+	Building	Jeanne places 1 of 3 buildings. Buildings can be pushed around by Stun Kick and Gauntlet Punch. Limit of 3 building at the same time
+				1 Cover
+				2 Turret
+				3 
+	Guns Blazing	Increases fire rate and give 75% of magazine back (rounded up). Makes Lord invincible for 5 sec.
+Jester
+	Discharge	Stuns M3-D1C along with any enemines in range. M3-D1C can avoid being stun if Jeanne is close enough
+	Robot Fuck Off	Pushes hostiles away and inflicts some damage
+Sovreig
+	Cardboard box	Puts Corrine in a state where she can't move but her stealth mod is increased.
+			Stun Kick can move her around.
+	Detect Targets	Counters stealth. Let's Corrine find targets behind walls.
+Duke
+	Tail Swipe 	Parry bullets around him
+	Smoke Screen	Creates a smoke grenates which lowers agro and can stun enemies
+Condor
+	Armour Break	Remove half the total armour of enemies within range.
+	Last Stand	Vincent recieves an aura that let's him cheat death while active. When activated, Vincent get's back 20% of his health and gets some buffs
+			More effective if Zan'dr or Corrine is in the party
+
+
+Curtis
+	Kick		Parries bullets. Reloads quickly
+	Le Mat		Causes bullets to behave differently. Can freeze them in place. make them go faster or make them curve toward the closest enemy
+Law.
+	Flame Canyon	Shoots naplam in a line
+	Flame Burst	Creates a miassive amount of naplam in an radius around user
+Mark
+	Target Locator	Mark marks all enemies in his sightline, counters stealth
+	Smoke Grenade	Mark lowers his agro and forces those who targets him to switch targets
+Viv.
+	Ratshot		Give x3 bullet and lower accuracy, cannot be active as the same time as x
+	Reaper Round	Giev higher speed, reduce duration of bullets, cannot be active as the same time as Ratshot
+
+
+-------------------------------------------------------------------------------------------------------------------------------
+Effects trigger
+	Entity Death
+	On dash
+	Shooting
+	Using a skill
+
+-------------------------------------------------------------------------------------------------------------------------------
+Team	T1				T2					T3
+	Friendly Fire On	---	---	---	---	---	---	Free Healthcare
+	Awareness
+	Lucky Shot	---	-|-	(Safe Bet 	---	---	---	Risk Management
+				 |-	∨ All in)	---	---	---	Double Down
+
+	<Any Blue Ball Upgrade> -|-	(Seeking Blue Balls	---	---	Homing Blue Balls
+				 |-	∨ Bouncing Blue Balls)	---	---	Bouncy Blue Balls
+				 |-	Speeding Blue Balls
+				 |-	(Piercing Blue Balls
+				 |-	∨ Durable Blue Balls)
+
+M	Lucky Shot
+		Increase drasticaly everybody's luck
+M	Safe Bet
+		Increase everybody's luck a bit more
+M	All in
+		Double crit multiplier
+M/H	Risk Management
+		Increase everybody's luck a bit more, again
+M/H	Double Down
+		Double crit multiplier, AGAIN
+
+M	Awareness
+		Increase everybody's Stealth Counter Modifier (Make it easier to spot enemies in stealth)
+M	Seeking Blue Balls
+		Blue Balls take a few seconds before starting to move, then move toward the closest enemy
+M/H	Homing Blue Balls
+		Blue balls home toward the closest enemy
+M	Bouncing Blue Balls
+		Blue Balls now bounces on walls
+M/H	Bouncy Blue Balls
+		Blue Balls gain speed when hitting walls
+M	Speeding Blue Balls
+		Blue Balls now accelerate
+M	Piercing Blue Balls
+		Blue Balls now go through enemies
+M	Durable Blue Balls
+		Blue Balls last longer
+	Exploding Blue Balls
+		Yeah now they go boom
+
+L/M	Friendly Fire On
+		Increased damage on all attacks. Friendly fire is enabled.
+H++	Free Healthcare
+		Healing team members between missions is free. Cost is so high that you'd need to not spend money for 5 missions
+
+-------------------------------------------------------------------------------------------------------------------------------
+Lord	T1				T2					T3
+	(3rd Degree ∨ Shrapnel)	-|-	expl_1		-|
+				 |-	expl_2		-|-			Ult
+	Giga ton Punch	-|-	---	agro_1		-|
+	Taunt		-|	
+					Dashing Blue Balls			Super Duper Ultimate Death Defyng Plus Ultra Supreme Beast Mode DELUXE
+
+H	Super Duper Ultimate Death Defyng Plus Ultra Supreme Beast Mode DELUXE
+		Upgrades Beast Mode. Doubles duration. Lord gets max agro. Lord cannot die during the duration, still takes damage but doesn't go under 1.
+		Can't use weapons for 5 sec after the effect ends
+M	3rd Degree
+		Explosions caused by Lord causes the burning status effect.
+M	Shrapnel
+		Explosions shoots shrapnel in random directions.	
+L/M	Giga ton Punch
+		Everybody is affected by the knockback. Speeds up the punch
+L/M	Taunt
+		Punching mutilplies current agro by 1.5 current agro
+L/M	Dashing Blue Balls
+		When dashing, summons 3 blue balls that point toward the dash angle
+
+-------------------------------------------------------------------------------------------------------------------------------
+Emperor	T1				T2					T3
+	Kick and run	---	-|-	Kick to the balls
+
+					Kicking Blue Balls
+M	Kick to the balls
+		Victims take more damage from all sources while they are stunned
+L/M	Kick and run
+		Successfully kicking someone gives Kai a speed boost
+M	Kicking Blue Balls
+		After Kai charges a bar, summons Blue Balls. Bar is charged by hitting enemies.
+-------------------------------------------------------------------------------------------------------------------------------
+Wizard	T1				T2					T3
+			 |-	---	Self Destruct	-|-	---	---	Engineering Mayhem
+	Overclocked	-+-	---	Field repair	-|
+	Sturdy Building	-+-	---	Special Coating	-|
+			 |-	---	Resupply	-|
+	Short Temper 	---	---	Wrench Wench	---	---	---	Action Girl
+					Busting Blue Balls
+
+L/M	Overclocked
+		Turrets are more effective but lose half their ammo capacity
+L/M	Sturdy Building
+		Doubles durabilty of buildings
+L	Self Destruct
+		Buildings explode when destroyed. This does deal damage. Shrapnel is shot.
+L	Field repair
+		Building can be used to give temporary armour points to M3-D1C
+L	Special Coating
+		Doesn't take damage from fire and energy
+L	Resupply
+		Ammo extra ammo gained from Guns Blazing goes into ammo pool. Turrets regain all their ammo.
+M	Engineering Mayhem
+		No building limit.
+H	Short Temper
+		Jeanne get a speed boost and gains time 1.5 resistance for 5 sec after getting hit
+H	Wrench Wench
+		Jeanne receives half her clip size back whenever a building is destroyed.
+H	Action Girl
+		Jeanne reloads twice as fast
+M	Busting Blue Balls
+		Summons Blue Balls aimed at the nearset enemy when a building is destroyed.
+-------------------------------------------------------------------------------------------------------------------------------
+Jester	T1				T2					T3
+					Super Kidnapping
+	Surge Protection	-|-	Power Boost		-|
+				 |-	OUT OF MY WAY!		-|-	---	(Improved Hardware ∨ Improved Software)
+	Profanity Update	-|-	S41-Lor Firmware	-|
+				 |-	ugd_2			-|
+					Brittle Blue Balls
+
+L	Surge Protection
+		M3-D1C no longer stuns himself while using Discharge.
+L/M	Profanity Update
+		Robot Fuck Off deals more damage and destroys enemy bullets.
+M	S41-Lor Firmware
+		Increased range of Robot Fuck Off
+L/M	Power Boost
+		Allies near M3-D1C get their skills recharged byt a bit when he uses Discharge
+L	Super Kidnapping
+		You can now carry the Armed Shield Generator, Hover IFV, Fire Support Mech and Fortress APC with M3-D1C second's weapon.
+		Movement speed is halved while doing so, and they still get to attack
+M 	OUT OF MY WAY!
+		Dash into enemies damages and stuns them
+M/H	Improved Hardware
+		Major Stat increase to; Spd, VisRg, SltMod, DshSpd, DshReco
+M/H	Improved Software
+		Major Stat increase to; VisRg, SltCntr, Driving, Skill recharge rate
+L	Brittle Blue Balls
+		When M3-D1C get's damage, summon blue balls that aim at the nearest enemy. M3-D1C dying generates a lot more
+
+-------------------------------------------------------------------------------------------------------------------------------
+Sovreig	T1				T2					T3
+	Trick shot
+	Scavenge
+
+M/H	Trick shot
+		Bullets bounce on walls
+M/H	Scavenge
+		Killing an enemy has a change of giving back 1 bullet
+-------------------------------------------------------------------------------------------------------------------------------
+Duke	T1				T2					T3
+	Stun Strike	---	-|-
+				 |-	Piercing Strike
+	Shadow Walk
+					"Tail" & Blue Balls
+
+L/M	Stun Strike
+		Landing a hit with AxChain over a certian amount of charge stuns nearby enemies for a little bit
+L/M	Piercing Strike
+		Attacks with melee damage ignore armour
+M	Shadow Walk
+		Walking doesn't make noises anymore
+M	"Tail" & Blue Balls
+		Projectiles parried with Tail Swipe become Blue Balls
+-------------------------------------------------------------------------------------------------------------------------------
+Condor	T1				T2					T3
+bullet	Ricochet	-|-	---	bu_1		---		-|-	Bullying
+			 +-	---	Intimidation	---		 +	
+debuff	Spread		-|-	-|-	de_1		-|-		-|-	Terror
+				 |-	de_2		-|
+	Guardian			Unbreaking Blue Balls
+
+M	Spread
+		When Vincent kills an enemy, any remaing debuffs get's tranfered to enemies close by
+L/M	Intimidation
+		On hit, enemies have a 25% chance to get the inacuracy debuff for 10 sec
+M	Terror
+		Enemies targeting Vincent get a speed penalty (80% of their normal max speed)
+M/H	Bullying
+		Ignore resistances of enemies without armour.
+
+M	Ricochet
+		Bullets splits in 2 and bounces when hitting walls. Split and bounce only happens once. Flechettes bounces 3 times and do not split
+L/M	Unbreaking Blue Balls
+		When Last Stand's effect is used, summon a circle of blue balls around Vincent
+M	Guardian
+		If Zan'dr or Corrine is in the party. While Vincent is standing still and not attacking, double resistances and increased agro gain.
+
+-------------------------------------------------------------------------------------------------------------------------------
+Curtis	T1				T2					T3
+	.				.
+	.				.					.
+	.				.					.
+	.				.
+-------------------------------------------------------------------------------------------------------------------------------
+Law.	T1				T2					T3
+-------------------------------------------------------------------------------------------------------------------------------
+Mark	T1				T2					T3
+-------------------------------------------------------------------------------------------------------------------------------
+Viv.	T1				T2					T3
+
+

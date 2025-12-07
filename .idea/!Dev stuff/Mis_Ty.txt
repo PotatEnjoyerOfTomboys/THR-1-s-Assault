@@ -1,0 +1,56 @@
+-------------------------------------------------------------------------------------------------------------------------------
+Mission types
+Capture			Keep enemies from zone
+Seek and Destroy	Remove all enemies
+Intel			Capture enemy intel
+Eliminate Commander	Remove enemy commander
+
+Escort			Move APC from P.A to P.B. Heavy enemy presence
+Defense			Keep APC alive for set amount of wave
+
+Eliminate Elite	Unit	Boss fight
+
+-------------------------------------------------------------------------------------------------------------------------------
+Modifiers
+Name			Reward Mod	Effect
+						Conditions
+Skip mission		x-0.75		Skip the mission. Can set you in debt. Everybody get's put to max health. 
+						Only happens if there just 2 or less teamates with health over 50% and before starting mission 6 or 11.
+
+Lessen presence		x0.5		Half as many enemies spawn. 
+						More likely to happen on the faction you did missions agaisnt the most
+
+Fortress can deploy	x0.9		You can deploy the APC on a mission who doesn't require it. The Reward mod only applies if you deploy the APC.
+						Curtis' party do not have an APC.
+
+Ambush Risk		x1.2		A group of enemies will spawn unexpectedly.
+						More likely with faction 2 >.
+
+Grunt party		x1		Spawn no specialists or support and few shock troopers. You get lots of Grunts tho.
+Sandstrom		x1.25		Vision range is reduced.
+
+Landmines		x1.33		Landmines are placed in operation zone.
+						More likely on missions where the APC can be used. (Fortress can deploy contirbutes to increased rate)
+
+Artillery Strikes	x1.5		Artillery attacks when you are spotted. 
+						More likey on faction 3 =.
+
+Enemy armour		x1.75		Faction's Level 5 boss spawns.
+						The faction who owns the level 5 boss you fought can't get this modifier. Can occur after 10
+
+Lots of Elite 		x2		Spawn rate of enemy elite units doubles
+Increased presence	x2		Double enemy spawns.
+						No special conditions
+
+Unknown Forces		x2		Either Curtis' party or Padraig appears. 
+						More likely on faction 1 O.
+
+-------------------------------------------------------------------------------------------------------------------------------
+Mission environment
+Old Spaceport Industrial Park	2 - 4 wide roads, many side paths
+Entrance Gate			Support vehicle boss
+New Sinai Desert Rock Plains	1 - 3 wide open area, connected by many paths
+Sand cave			Elite squd boss
+Old Iron Mining Operation	Strips
+Flooded Salt Flat		Just there for the final boss
+

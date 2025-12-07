@@ -1,0 +1,75 @@
+{
+	"Annals": {
+		"2100": ["Solar War | January - April", "Solar War | May - August", "Solar War | Setptember - December"],
+		"2101": ["Solar War | January - April", "Solar War | May - August", "Solar War | Setptember - December"],
+		"2102": ["End of the Solar War"],
+		"2105": ["Pirate attack on Zoar"]
+	},
+	"Enemies": {
+		"Group 1": [
+			"Grunt",
+			"Shock",
+			"Support",
+			"Specialist 1",
+			"Specialist 2",
+			"Elite",
+			"VIP",
+			"Boss 1",
+			"Boss 2"
+		],
+		"Group 2": [
+			"Grunt",
+			"Shock",
+			"Support",
+			"Specialist 1",
+			"Specialist 2",
+			"Elite",
+			"VIP",
+			"Boss 1",
+			"Boss 2"
+		],
+		"Group 3": [
+			"Grunt",
+			"Shock",
+			"Support",
+			"Specialist 1",
+			"Specialist 2",
+			"Elite",
+			"VIP",
+			"Boss 1",
+			"Boss 2"
+		],
+		"Misc.": [
+			"Rigel",
+			"Padraig"
+		]
+	},
+	"Geography": [],
+	"Organizations": {
+		"Armed groups": [],
+		"Mercenary Teams": {
+			"THR-1": ["Overview", "Leopld LORD Storch"], 
+		"Zoar Colony's Gun Shop": []},
+		"Weapon Manufacturer": ["Old West Firearms & Replicas",
+								"Socrates",
+								"Factory Munition Ballistics",
+								"Novak & Boyko",
+								"Toolkit Manifacturing",
+								"Compagnie d'Fusils Chasses d'3 Rivières",
+								"ASUM",
+								"Old English Armoury",
+								"Zoar Colony's Gun Shop",
+								"Dickinson Technologies"]
+	},
+	"Weapon": {
+		"Handgun": ["Big Iron", "War and Peace"],
+		"Rifle": ["Corrine's Old Rifle", "St-Maurice", "St-Laurent Gen 1", "Type 47 Rifle", "Cowboy's Repeater", "Mark's Rifle", "Type 30 Rifle", "Vivianne's Rifle", "Combat Rifle"],
+		"Sub Machine Gun": ["Type 41 SMG"],
+		"Shotgun": ["Jeanne's Family Shotgun", "Type 23 Shotgun", "Standard Shotgun", "Vivianne's Shotgun", "Desert Shotgun"],
+		"Energy": ["Custom Mk18 Laser cutter", "Laser Carbine", "Laser Rifle", "Heavy Laser", "Marker Laser", "Plasma Spray", "Plasma Rifle", "Laser Shotgun"],
+		"Melee": ["Oversized stun baton", "Unarmed", "Chain Axe", "Hook Swords", "Hunk of Steel", "Vivianne's Leg", "Gun Hammer", "Pile Bunker"],
+		"Combo": ["GunBlade", "Gun and Ballistic Knife", "Lawrence's Cutlass & Flintlock", "Captain's Axe & Blunderbuss"],
+		"Heavy": ["Saloum Mk-2", "GMG-04B", "Fortress Machine Gun", "Musket .360", "Buggy Gun", "Missile Pod", "ARWS", "Flamethrower", "Napalm Grenade Launcher", "Bulwark Minigun"],
+		"Gear": ["Crippled Laddie FCS Radio", "Mk16 Flare Mortar", "Epicurean Medic Rifle", "Nihilist Stretcher", "Stoic Shield generator", "C4", "Binoculars", "Radar", "Smoke Dispenser", "Artillery Radio"]
+	}
+}

@@ -1,0 +1,42 @@
+
+
+Starting a run
+	Pick between Lord's or Curtis' party
+	Pick each teammate's weapon for the fist 5 missions
+
+Playing during a run
+	Get modifiers
+	Pick 1 of 3 mission
+		after the first mission, the player can visit the shop
+		on mission 5 and 10 pick between 2 boss missions
+		on mission 15, the player has to fight 1 of 2 final bosses
+			if using Lord's party
+				Curtis alone if the player took more then X
+				True final boss if the player took less then x
+			if using Curtis' party
+				Lord's Party if the player took more then X
+				True final boss if the player took less then x
+
+	Pick who goes out on the mission
+	Find mission money reward
+
+	Play the mission
+
+	Gain money
+	Teammates who didn't go on the mission get healed
+	Everybody gets their ammo back
+	After mission 5 and 10
+		Pick each teammate's weapon for the next 5 missions
+
+Shop
+	The player can
+		Buy upgrades randomly choosen from a pool. 
+			Upgrades stay in the shop until bought or after a boss mission. 
+				Then they are replaced by a diffrent upgrade randomly choosen from the pool.
+		Heal injured characters
+			This is not cost effective.
+
+
+
+The money reward for finishing mission stay constant through a run but modifiers gives chances to make more if you take risks. Modifiers are more common as the run goes on
+	

@@ -1,0 +1,136 @@
+Get it done in a year
+Music	8
+	1 menu track
+	3 mission track
+	1 regular boss track
+	1 final boss track
+	1 Curtis boss theme	(use something from No Name TSS)
+	1 Padraig boss theme
+
+Inputs
+
+Move		WASD		Left Stick
+Dash		Space		R3
+Aim		Mouse		Right Stick
+Shoot		Left Mouse	L2
+Alt fire	Right Mouse	R2
+Reload		R		Top Face button
+Interact	E		Right Face button
+Skill 1		1		L1
+Skill 2		2		R1
+Order Hold	Z		DPAD
+Order Follow	X		-
+Order Attack	C		-
+Order Act Free	V		-
+
+Pause		ESCAPE		Start
+Screenshot	.		Select
+
+
+
+
+
+Version 0.1 - Minimum Viable Product
+	Procedural mission objective generation
+		Generate Map
+			Get wall
+		Set mission type/objectives
+			Choose objective location based on type
+			Choose spawn based on objective location and type
+		Generate enemy spawns
+			Choose spawn location based on objective location and type
+			Insure minimum spread
+			Add items to mission
+		Generate render
+			Divide map in segment
+			Choose tileset based on which current mission
+			Generate zones for render
+			Add noise
+		Spawn player
+	4 Playable Characters
+		Curtis
+		Lawrence
+		Mark
+		Vivianne
+	Player can give orders to other characters
+		Hold
+		Follow
+		Attack
+		Act Freely
+	Engine upgrades
+		Bullet
+			Bullets have on hit effects that can affect their owners
+			Bullets must keep track of their owners
+			All bullets should be stored into 1 list
+		Better parity between enemies/boss and player/ally classes
+			Might be easier to make a single entity class. This is mostly because I would like to make it easier to have NPC battles
+		Animations
+			Animated weapons. Mostly for the pile bunker
+			Animated radio transmission portraits
+		Multiplayer
+			Use separate input functions for each players
+			Scrolling must allow both players to see, use render zoom with that to make it easier
+		Better controller input
+
+		AI
+			New targeting
+				Agro, Each entity have an agro value. The AI will target those with higher Agro values. Agro goes down over time
+				Persistent targeting
+					entities will look for targets every 1 sec, could give entities an offset to make it more natural
+					they can switch target when they look for one or the original is dead
+					Mostly for performances, but also has some gameplay interaction
+			Team system
+				Each bullets/entity have a string which identifies which team they are part of
+			Pathfinding for all NPC
+				Only use the pathfinding if there's a wall between the entity and the target
+
+
+Version 0.2 - Add the real characters and enemies
+	Add the 7 main characters
+		First weapon option
+		2 skills
+		Act freely AI
+	Enemy factions 1 - 3
+		Range
+			VIP
+			Grunt
+			Shock
+			Support
+			Specialist 1
+			Specialist 2
+			Elite
+		Speed
+			VIP
+			Grunt
+			Shock
+			Support
+			Specialist 1
+			Specialist 2
+			Elite
+		Defense
+			VIP
+			Grunt
+			Shock
+			Support
+			Specialist 1
+			Specialist 2
+			Elite
+	Finish implementing Escort and Defense mission
+
+Version 0.3 - Progression, mission modifiers and bosses
+	Updgrades
+	Second and third weapon options
+	Bosses
+		Armed Shield Generator
+		Hover IFV
+		Fire Support Mech
+
+		Dept Collection Squad
+		Burning Winds Band
+		Team Echo Zulu 8
+	Modfiers
+
+Version 0.4 - Padraig
+	Padraig
+
+Version 1.0 - Final version

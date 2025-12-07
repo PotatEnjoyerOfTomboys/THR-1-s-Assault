@@ -1,0 +1,440 @@
+	Name		Description
+Lord
+	Gauntlet Punch	Charged punch that does massive damage. Knockback on enemies and M3-D1C
+	Beast Mode	Generates agro faster. Skip reloads. 5 Sec
+Emperor
+	Stun Kick	Quick Kick that stuns enemies on hit. 
+	MEGA BUFF	Buffs attack speed and Dash recovery speed for 10 sec.
+			If Zan'dr and Lord are both present. Zan'dr gets the attack speed buff and Lord gets the Dash recovery speed buff
+Wizard
+	Building	Jeanne places 1 of 3 buildings. Buildings can be pushed around by Stun Kick and Gauntlet Punch. Limit of 3 building at the same time
+				1 Cover
+				2 Turret
+				3 Demolition Charge
+	Guns Blazing	Increases fire rate and give 75% of magazine back (rounded up). Makes Lord invincible for 5 sec.
+Jester
+	Discharge	Stuns M3-D1C along with any enemines in range. M3-D1C can avoid being stun if Jeanne is close enough
+	Robot Fuck Off	Pushes hostiles away and inflicts some damage
+Sovreig
+	Cardboard box	Puts Corrine in a state where she can't move but her stealth mod is increased.
+			Stun Kick can move her around.
+	Detect Targets	Counters stealth. Let's Corrine find targets behind walls.
+Duke
+	Tail Swipe 	Parry bullets around him
+	Smoke Screen	Creates a smoke grenates which lowers agro and can stun enemies
+Condor
+	Armour Break	Remove half the total armour of enemies within range.
+	Last Stand	Vincent recieves an aura that let's him cheat death while active. When activated, Vincent get's back 20% of his health and gets some buffs
+			More effective if Zan'dr or Corrine is in the party
+
+
+Curtis
+	Kick		Parries bullets. Reloads quickly
+	Le Mat		Causes bullets to behave differently. Can freeze them in place. make them go faster or make them curve toward the closest enemy
+Law.
+	.		.
+	.		.
+Mark
+	.		Mark lowers his agro and forces those who targets him to switch targets
+	.		Mark marks enemies in his sightline
+Viv.
+	.		.
+	.		.
+
+
+-------------------------------------------------------------------------------------------------------------------------------
+Effects trigger
+	Entity Death
+	On dash
+	Shooting
+	Using a skill
+
+-------------------------------------------------------------------------------------------------------------------------------
+Team	T1				T2					T3
+	Friendly Fire On	---	---	---	---	---	---	Free Healthcare
+	Awareness
+	Lucky Shot	---	-|-	(Safe Bet 	---	---	---	Risk Management
+				 |-	∨ All in)	---	---	---	Double Down
+
+	<Any Blue Ball Upgrade> -|-	(Seeking Blue Balls	---	---	Homing Blue Balls
+				 |-	∨ Bouncing Blue Balls)	---	---	Bouncy Blue Balls
+				 |-	Speeding Blue Balls
+				 |-	(Piercing Blue Balls
+				 |-	∨ Durable Blue Balls)
+	Additional Body Armour	---	Renforced Plates	---	---	Bullet Eater
+
+M	Lucky Shots
+		Increase drasticaly everybody's luck
+M	Safe Bet
+		Increase everybody's luck a bit more
+M	All in
+		Double crit multiplier
+M/H	Risk Management
+		Increase everybody's luck a bit more, again
+M/H	Double Down
+		Double crit multiplier, AGAIN
+M	Awareness
+		Increase everybody's Stealth Counter Modifier (Make it easier to spot enemies in stealth)
+.	Skill Solution
+		.
+.	Skill Issue
+		.
+.	Limits REMOVED
+		Remove mutually exclusives condition
+
+
+M	Seeking Blue Balls
+		Blue Balls take a few seconds before starting to move, then move toward the closest enemy
+M/H	Homing Blue Balls
+		Blue balls home toward the closest enemy
+M	Bouncing Blue Balls
+		Blue Balls now bounces on walls
+M/H	Bouncy Blue Balls
+		Blue Balls gain speed when hitting walls
+M	Speeding Blue Balls
+		Blue Balls now accelerate
+M	Piercing Blue Balls
+		Blue Balls now go through enemies
+M	Durable Blue Balls
+		Blue Balls last longer
+
+L/M	Friendly Fire On
+		Increased damage on all attacks. Friendly fire is enabled.
+H++	Free Healthcare
+		Healing team members between missions is free. Cost is so high that you'd need to not spend money for 5 missions
+
+-------------------------------------------------------------------------------------------------------------------------------
+Lord	T1				T2					T3
+	(3rd Degree ∨ Shrapnel)	-|-	Rubber grenades	-|
+				 |-	Bigger Booms	-|-			Remote detonation
+	Giga ton Punch	-|-	---	Can't touch me	-|
+	Taunt		-|
+					Dashing Blue Balls			Super Duper Ultimate Death Defyng Plus Ultra Supreme Heavenly Beast Mode DELUXE
+
+H	Super Duper Ultimate Death Defyng Plus Ultra Supreme Heavenly Beast Mode DELUXE
+		Upgrades Beast Mode. Doubles duration. Lord gets max agro. Lord cannot die during the duration, still takes damage but doesn't go under 1.
+		Can't use weapons for 5 sec after the effect ends
+M	3rd Degree
+		Explosions caused by Lord causes the burning status effect.
+M	Shrapnel
+		Explosions caused by Lord shoots shrapnel in random directions.	
+M	Rubber grenades
+		Projectiles shot by Lord bounce on walls
+M/H	Bigger Booms
+		Explosions havea bigger growth rate
+L/M	Giga ton Punch
+		Everybody is affected by the knockback. Speeds up the punch. Not by much
+L/M	Taunt
+		Punching mutilplies current agro by 1.5
+H	Can't touch me
+		Better when agro is maxed
+M	Remote detonation
+		Presssing the interact key let's you detonate your projectiles early, they get a damage boost when doing so
+L/M	Dashing Blue Balls
+		When dashing, summons 3 blue balls that point toward the dash angle
+
+-------------------------------------------------------------------------------------------------------------------------------
+Emperor	T1				T2					T3
+	Kick and run	---	-|-	Kick to the balls
+					Skilled					*α Buff
+	2				Bad Luck?
+	Overly Prepared	---	---	Mastermind				Ω Buff
+					Kicking Blue Balls
+
+M	Kick to the balls
+		Victims take more damage from all sources while they are stunned
+L/M	Kick and run
+		Successfully kicking someone gives Kai a speed boost
+?	Overly Prepared
+		Buffs the party based on mission type and enemy faction
+?	Seduced Shopkeeper
+		Emperor can switch weapons out for free
+?	Skilled
+		Kai copies some effects of deployed allies
+			Lord		
+			Wizard		Reloads current weapon
+			Sovereign	Nearby enemies recived the Visible effect
+			Jester		Gives some armour to either Emperor or Allies
+			Duke		Nearby bullets get parried
+			Condor
+?	Bad Luck?
+		Some enemies' guns have a chance to jam
+?	Mastermind
+		Each time an ally activates their second skill. Emperor's Mega Buff get recharged
+?	α Buff
+		Set HP to 1. Buff everything
+?	Ω Buff 
+		Double duration
+M	Kicking Blue Balls
+		After Kai charges a bar, summons Blue Balls. Bar is charged by hitting enemies.
+-------------------------------------------------------------------------------------------------------------------------------
+Wizard	T1				T2					T3
+			 |-	---	Self Destruct	-|-	---	---	Engineering Mayhem
+	Overclocked	-+-	---	Field repair	-|
+	Sturdy Building	-+-	---	Special Coating	-|
+			 |-	---	Resupply	-|
+	Short Temper 	---	---	Wrench Wench	---	---	---	Action Girl
+					Busting Blue Balls
+
+L/M	Overclocked
+		Turrets are more effective but lose some ammo capacity
+L/M	Sturdy Building
+		Doubles durabilty of buildings
+L	Self Destruct
+		Buildings explode when destroyed. This does deal damage. Shrapnel is shot.
+L	Field repair
+		Building can be used to give temporary armour points to M3-D1C
+L	Special Coating
+		Doesn't take damage from fire and energy
+L	Resupply
+		Extra ammo gained from Guns Blazing goes into ammo pool. Turrets regain all their ammo.
+M	Engineering Mayhem
+		Jeanne build skill recharges faster
+H	Short Temper
+		Jeanne get a speed boost and gains time 1.5 resistance for 5 sec after getting hit
+H	Wrench Wench
+		Jeanne receives half her clip size back whenever a building is destroyed.
+H	Action Girl
+		Jeanne reloads twice as fast
+M	Busting Blue Balls
+		Summons Blue Balls aimed at the nearset enemy when a building is destroyed.
+-------------------------------------------------------------------------------------------------------------------------------
+Jester	T1				T2					T3
+					Super Kidnapping
+	Surge Protection	-|-	Power Boost		-|
+				 |-	OUT OF MY WAY!		-|-	---	(Improved Hardware ∨ Improved Software)
+	Profanity Update	-|-	S41-Lor Firmware	-|
+				 |-	Electronic Swearfare	-|
+					Brittle Blue Balls
+
+L	Surge Protection
+		M3-D1C no longer stuns himself while using Discharge.
+L/M	Profanity Update
+		Robot Fuck Off deals more damage and destroys enemy bullets.
+M	S41-Lor Firmware
+		Increased range of Robot Fuck Off
+L/M	Power Boost
+		Allies near M3-D1C get their skills recharged byt a bit when he uses Discharge
+L	Super Kidnapping
+		You can now carry the Armed Shield Generator, Hover IFV, Fire Support Mech and Fortress APC with M3-D1C second's weapon.
+		Movement speed is halved while doing so. and they still get to attck
+M 	OUT OF MY WAY!
+		Dash into enemies damage and stuns them
+?	Electronic Swearfare
+		Discharge makes enemy missiles work for you.
+M/H	Improved Hardware
+		Major Stat increase to; Spd, VisRg, SltMod, DshSpd, DshReco
+M/H	Improved Software
+		Major Stat increase to; VisRg, SltCntr, Driving, Skill recharge rate
+L	Brittle Blue Balls
+		When M3-D1C get's damage, summon blue balls that aim at the nearest enemy. M3-D1C dying generates a lot more
+
+-------------------------------------------------------------------------------------------------------------------------------
+Sovreig	T1				T2					T3
+	Trick shot	---	-|-	Stick more in	-|
+				 |-	I See You!	-|-	---	---	Mini Rambo
+	Scavenge	---	-|	
+
+	Duck and Cover	---	-|-	Nothing to see!	-|-	---	---	4
+				 |-	Safety Corner	-|
+
+					Exposed Blue Balls
+
+L	Trick Shot
+		Bullets bounce on walls
+M	Scavenge
+		Killing an enemy gives back 1 bullet
+M/H	I See You!
+		Deal extra damage to enemies with the visible status effect.
+L/M	Safety Corner
+		Can't take damage while in the cardboard box
+?	Stick more in
+		Doubles magazine capacity
+?	Nothing to see
+		Agro starts to decreases faster
+?	Duck and Cover
+		Dashing lowers agro
+?	4
+		.
+M	Mini Rambo
+		Reload times are heavily shorten
+?	Exposed Blue Balls
+		Generates blue balls when detected
+
+-------------------------------------------------------------------------------------------------------------------------------
+Duke	T1				T2					T3
+				 |-	Discombobulate			-|
+	(Stun Strike ∨ 		-|-	concussion			-|
+									 |-	Piercing Strike
+ 	 Poison  Strike)	-|-	Infection			-|
+				 |-	4				-|
+	Shadow Walk								Out of Sight, Out of Mind
+					"Tail" & Blue Balls
+
+L/M	Stun Strike
+		Some melee attacks can stun enemies
+			AxChain, attacking over an amount of charge
+			Hook Swords,
+			Pistol & Ballistic Knife, Ballistic Knife can stun
+L/M	Poison Strike
+		Enemies hit recieve a damage over time effect, they also take slightly more damage for other sources
+?	Discombobulate
+		Increase stun time and give some knockback
+?	Concussion
+		Decreses Duke's agro on stun strikes hits
+?	Infection
+		Also apply slowness to poisened enemies
+?	Neurotoxin
+		Poison raises agro on affected enemies
+M	Piercing Strike
+		Attacks with melee damage ignore armour
+L	Shadow Walk
+		Walking doesn't make noises anymore
+
+?	Out of Sight, Out of Mind
+		Duke doesn't take damage if he's not being targeted.
+
+M	"Tail" & Blue Balls
+		Projectiles parried with Tail Swipe become Blue Balls
+-------------------------------------------------------------------------------------------------------------------------------
+Condor	T1				T2					T3
+bullet	Ricochet	-|-	---	Pierce		---		-|-	Bullying
+			 +-	---	Intimidation	---		 +	
+debuff	Spread		-|-	-|-	Fear		-|-		-|-	Terror
+				 |-	Menace		-|
+	Guardian			Unbreaking Blue Balls
+
+M	Spread
+		When Vincent kills an enemy, any remaing debuffs get's tranfered to enemies close by
+L/M	Intimidation
+		On hit, enemies have a 25% chance to get the inacuracy debuff for 10 sec
+M	Terror
+		Enemies targeting Vincent get a speed penalty (80% of their normal max speed)
+M/H	Bullying
+		Ignore resistances of enemies without armour.
+?	Fear
+		On hit, enemies have a 25% chance to get a fire speed debuff for 10 sec
+?	Pierce
+		Bullets have a piercing effect
+?	Menace
+		Enemies near Condor do not attack.
+M	Ricochet
+		Bullets splits in 2 and bounces when hitting walls. Split and bounce only happens once. Flechettes bounces 3 times and do not split
+M	Guardian
+		If Zan'dr or Corrine is in the party. While Vincent is standing still and not attacking, double resistances and increased agro gain.
+L/M	Unbreaking Blue Balls
+		When Last Stand's effect is used, summon a circle of blue balls around Vincent
+
+
+-------------------------------------------------------------------------------------------------------------------------------
+Curtis	T1				T2					T3
+				 +-	VI, L'Amoureux		---	-+
+	III, L'Impératrice	-+-	VIII, La Justice	---	-+-	XIII, La Mort
+	X, La Roue de Fortune	-+-	XI, La Force		---	-+-	XII, Le Pendu
+	VII, Le Chariot		-+-	XIV, Tempérance		---	-+
+
+L	III, L'Impératrice
+		Kick now has knockback, give them low friction
+L	X, La Roue de Fortune
+		Each time a bullet is parried with Kick, Curtis has a chance to receive a random buff
+M/H	VII, Le Chariot
+		Dashing summons a homing sword. Has a cooldown
+H	VI, L'Amoureux
+		If Curtis is deployed alone, he creates a doppelganger of himself. Doppelganger has half health and armour. Can't be controlled by player
+?	VIII, La Justice
+		Strong skill gives a homing effect instead of just redirecting them
+L	XI, La Force
+		Dash into enemies deals damage.
+M	XIV, Tempérance
+		Gives back armour on armour break. Small amount
+M	XIII, La Mort
+		Killing enemies give some health back
+M/H	XII, Le Pendu
+		When under a certain armount of health, Curtis deals more damage
+M	XX, Le Jugement
+		Blue balls generated by Curtis will explode
+-------------------------------------------------------------------------------------------------------------------------------
+Law.	T1				T2					T3
+	Cremation	---	-|-	Slow Burn	---	---	-|
+				 |-	Spontanous Combustion	---	-|-	Inferno
+	Salamander	---	---	Dragon's Breath		---	-|
+	Sulfur	---	---	---	Brimstone	---	---	---	Hellfire
+					Burning Blue Balls
+?	Cremation
+		.
+?	Salamander
+		Lawrence is immune to fire damage
+?	Dragon's Breath
+		Lawrence deals more damage while on fire. Burning's duration is doubled on Lawrence
+?	Spontanous Combustion
+		Burn duration is shorten, damage of fire attack get's increased
+?	Slow Burn
+		Burn duration get's increased drastically
+?	Sulfur
+		.
+?	Brimstone
+		.
+?	Hellfire
+		.
+?	Inferno
+		Every 2 seconds, a wave of fire comming from Lawrence appears. This set's him on fire
+H	Burning Blue Balls
+		Hitting an enemy who aready have the burning effect generate blue balls
+-------------------------------------------------------------------------------------------------------------------------------
+Mark	T1				T2					T3
+	.	---	---	---	.
+					.	---	---	---	---	.
+	Slow mark	---	-|-	Disable weapon mark 	---	-|-	Stun Mark
+	Burning mark	---	-|-	Helping mark	---	---	-|-
+					Marked Blue Balls
+
+?	.
+		.
+?	.
+		.
+L/M	Slow mark
+		When reloading, place a mark on a randomly choosen enemy in sight
+M	Burning mark
+		When hitting enemies 25% chance to place a mark which cause burn on hit
+M	Disable weapon mark
+		When using Smoke Grenade. Multiple random enemies recives a mark which make them lose all ammo in magazine. Bosses are immune. Cancel attacks with startup lag
+M/H	Helping mark
+		When spoting an enemy with Target Locator. Place a mark that give them a bigger hitbox
+H	Stun mark
+		When hitting enemies with no bullet remaining in the magazine at the time of hitting. Place a mark that stuns them on hit.
+?	.
+		.
+?	.
+		.
+M	Marked Blue Balls
+		When a mark is activated, create a blue ball
+-------------------------------------------------------------------------------------------------------------------------------
+Viv.	T1				T2					T3
+	Birna & Sardine			Azura					Makoto
+	Elecktra	---	---	M (Marisa)
+	Agatha	---	---	---	Sierra
+					Speed Dial
+					Conference Call
+					Blue Ballin
+
+?	Birna & Sardine
+		Summons Birna and Sardine. She flies toward enemies and launches Sardine (Sardine is a reskined Missile that has peircing and is slow as fuck)
+?	Elecktra
+		Summons Elecktra. Doesn't move, she shoot at the target closest to Vivianne
+?	Agatha
+		Summons Agatha. She'll charge at enemies if they get too close.
+?	M (Marisa)
+		Summons M. Does a charge, then an AOE spin attack
+?	Azura
+		Summons Azura. 
+?	Sierra
+		Summons Sierra. Follows, shoot enemies with different guns based on range. Stays until out of ammo.
+?	Speed Dial
+		Decrease summons cooldown.
+?	Conference Call
+		Removes limit on active summons.
+?	Makoto
+		Summons Makoto. Makoto follows Vivianne. She destroys bullets, do combos that stun on enemies
+?	Blue Ball'in
+		Summons pass a ball to Vivianne when they disspawn. If Vivianne catches the ball, blue balls are generated
+

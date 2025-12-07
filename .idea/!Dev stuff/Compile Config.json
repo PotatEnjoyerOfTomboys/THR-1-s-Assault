@@ -1,0 +1,97 @@
+{
+ "version": "auto-py-to-exe-configuration_v1",
+ "pyinstallerOptions": [
+  {
+   "optionDest": "noconfirm",
+   "value": true
+  },
+  {
+   "optionDest": "filenames",
+   "value": "E:/P.P/SquadTac/Main.py"
+  },
+  {
+   "optionDest": "onefile",
+   "value": true
+  },
+  {
+   "optionDest": "console",
+   "value": false
+  },
+  {
+   "optionDest": "icon_file",
+   "value": "E:/P.P/SquadTac/Sprites/Icon.ico"
+  },
+  {
+   "optionDest": "clean_build",
+   "value": false
+  },
+  {
+   "optionDest": "strip",
+   "value": false
+  },
+  {
+   "optionDest": "noupx",
+   "value": false
+  },
+  {
+   "optionDest": "hide_console",
+   "value": "minimize-early"
+  },
+  {
+   "optionDest": "disable_windowed_traceback",
+   "value": false
+  },
+  {
+   "optionDest": "uac_admin",
+   "value": false
+  },
+  {
+   "optionDest": "uac_uiaccess",
+   "value": false
+  },
+  {
+   "optionDest": "argv_emulation",
+   "value": false
+  },
+  {
+   "optionDest": "bootloader_ignore_signals",
+   "value": false
+  },
+  {
+   "optionDest": "datas",
+   "value": "E:/P.P/SquadTac/Weapons.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "E:/P.P/SquadTac/Skills.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "E:/P.P/SquadTac/Render.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "E:/P.P/SquadTac/Items.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "E:/P.P/SquadTac/Fun.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "E:/P.P/SquadTac/Event.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "E:/P.P/SquadTac/Entity.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "E:/P.P/SquadTac/Bullets.py;."
+  }
+ ],
+ "nonPyinstallerOptions": {
+  "increaseRecursionLimit": true,
+  "manualArguments": ""
+ }
+}

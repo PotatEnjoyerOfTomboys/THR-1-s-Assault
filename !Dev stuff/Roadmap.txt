@@ -1,0 +1,88 @@
+Get it done in a year
+Music	8
+	1 menu track
+	3 mission track
+	1 regular boss track
+	1 final boss track
+	1 Curtis boss theme	(use something from No Name TSS)
+	1 Padraig boss theme
+
+Inputs
+
+Move		WASD		Left Stick
+Dash		Space		R3
+Aim		Mouse		Right Stick
+Shoot		Left Mouse	L2
+Alt fire	Right Mouse	R2
+Reload		R		Top Face button
+Interact	E		Right Face button
+Skill 1		1		L1
+Skill 2		2		R1
+Order Hold	Z		DPAD
+Order Follow	X		-
+Order Attack	C		-
+Order Act Free	V		-
+
+Pause		ESCAPE		Start
+Screenshot	.		Select
+
+
+
+
+
+Version 0.1 - Minimum Viable Product - Completed
+	Procedural mission objective generation
+	4 Playable Characters
+	Player can give orders to AI allies
+	Engine upgrades
+		Bullet
+			Bullets must keep track of their owners
+		No more split entity classes
+		Local multiplayer
+		Better controller input
+		Team system
+		Pathfinding for all Entities
+
+
+Version 0.2 - Add the main characters and enemies - Deadline: Early/Mid June
+	Add first playable group, THR-1
+		7 characters, all in various completion stages
+	Add rebind menus
+
+	Improve pathfinding, very broken right now
+	Finish implementing the first enemy group
+	Implement second and third enemy groups
+
+	Engine Upgrades
+		Animated weapons. Mostly for the pile bunker
+		Animated radio transmission portraits
+	Improve ally AI
+		Give more context based actions
+	Implement Escort and Defense missions
+
+	Stage 5 bosses if I got time before the deadline
+
+Version 0.3 - Progression, mission modifiers and bosses - Deadline: Early/Mid September
+	Implement upgrade system
+	Unlockable weapons
+		22 total, 2 unlockable per playable characters, 14 aleardy planned out
+	Mission Modifiers
+	All unimplemented regular bosses
+		Stage 5
+			Armed Shield Generator
+			Hover IFV
+			Fire Support Mech
+		Stage 10
+			Dept Collection Squad
+			Burning Winds Band
+	 		Team Echo Zulu 8
+		Final boss
+			Rigel   
+
+Version 1.0 - Quality Control / Final version - April 2026 at most, trying to release early
+	Fix bugs
+	Balance weapons and characters (buffs over nerfs)
+	Polish
+	Additional content
+		Secret stage
+		Secret boss

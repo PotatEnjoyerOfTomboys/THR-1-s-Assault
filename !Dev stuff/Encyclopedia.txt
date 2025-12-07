@@ -1,0 +1,96 @@
+	Tutorials
+
+	Characters
+Leopold, LORD, Storch
+
+Kai, EMPEROR
+
+Jeanne, WIZARD
+
+	Enemy units
+Manager
+Body Guard
+Heavy Sniper
+Radar Operator
+Missile Operator
+Marksman
+Enforcer
+
+Sculptor
+Skirmisher
+Smoker
+Snare
+Crusher
+Assasin
+
+Commanding Officer
+Infantry
+Flamer
+Spotter
+Artilleryman
+Grenadier
+Bulwark
+
+	Weapons
+
+	Zoar's regions
+
+	Events
+Solar War
+On January 2100, numerous unknown warships appeared in the solar system and started attacking human settlements. This started the conflict known as the 
+Solar War. The conflict would end on March 2102 after a series of raid on the capital ship of the allien forces. The conflict would devastate large portion 
+of the Earth, cause the death of nearly all colonies past the first asteroid belt and devastation in the rest of them. 
+
+After the war's end, the Coallition proposed the leaders of humanity to join them. A few nations did.
+
+
+	Faction
+Coalition
+An alliance of many Tailurian and Reptillian nations. Recently some human nations joined them. Their stated goal is to protectec themselves from further <X>
+invasions.
+
+The Nest
+
+
+	Manufactuer
+Old West Firearms & Replicas
+
+
+Socrates
+Originally a utility company, after some success with nuclear fusion reactors they would start doing research on 
+
+Factory Munition Ballistics
+
+
+Novak & Boyko				Do the soviet block weapons act. Very wide price range.		Type <Model number> <Weapon type>			Founders are Croatian and Ukrainian
+Toolkit Manifacturing			Construction equipement.					Mk <Model number> <Name and purpose of the tool>
+	The right tools for any job.
+
+Compagnie d'Fusils Chasses d'3 Rivières
+Based in the city 
+
+Advanced Systems United Manifacturers
+Originally a small syndicate of computer hardware and software manufacturers.
+
+Old English Armoury
+Ran by a group of ten elderly men. They produce some for the finest weapons.
+
+Zoar Colony's Gun Shop
+The shop is ran by Vivianne Miller a young gunsmith who settled in the Zoar Colony with her older brother Curtis shortly after the end of the Solar War.
+The main source of income for the shop comes from the maintenance that the guns of the colonists due to the sand. 
+There's a wide selection of firearms on sale at the shop, all of them are guns that she know how to modify for the customers desires. No matter how questionnable they are.
+Curtis also operates his mercenary bussiness from the shop.
+
+
+
+Dickinson Technologies			They do crackhead guns.						.							Better known as Dic-Tec
+	The bleeding edge in weapon design!
+
+
+Jeanne's				Weapons created or modified by Jeanne				Describe the effects the weapon would have
+
+
+X Weapons RnD Division			X manifacturer. Specialise in energy and missile		MID-W-<Poduct model ID(8 digits)> (Model ID-)
+Steel Wings				Tailurian manifacturer. Specialises in ship but make some guns 	Ortologists last names
+
+

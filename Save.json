@@ -1,0 +1,49 @@
+{
+      "Version": "Pre - 0.5",
+      "Character weapons unlocked": {
+            "Lord": [
+                  1,
+                  2
+            ],
+            "Emperor": [
+                  1,
+                  2
+            ],
+            "Wizard": [
+                  2,
+                  1
+            ],
+            "Sovereign": [
+                  1,
+                  2
+            ],
+            "Duke": [
+                  1,
+                  2
+            ],
+            "Jester": [
+                  1,
+                  2
+            ],
+            "Condor": [
+                  1,
+                  2
+            ],
+            "Curtis": [
+                  1,
+                  2
+            ],
+            "Lawrence": [
+                  1,
+                  2
+            ],
+            "Mark": [
+                  1,
+                  2
+            ],
+            "Vivianne": [
+                  1,
+                  2
+            ]
+      }
+}
