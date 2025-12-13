@@ -108,10 +108,10 @@ def trigger_mastermind(self, entities, level):
 
 def trigger_exposed_blue_balls(self, entities, level):
     if self.owner.is_targeted:
-        self.owner.free_car["Exposed blue ball timer"] += 1
+        self.owner.free_var["Exposed blue ball timer"] += 1
     else:
-        self.owner.free_car["Exposed blue ball timer"] = 0
-    return self.owner.free_car["Exposed blue ball timer"] > 120
+        self.owner.free_var["Exposed blue ball timer"] = 0
+    return self.owner.free_var["Exposed blue ball timer"] > 120
 
 
 def trigger_low_health(self, entities, level):
@@ -229,13 +229,38 @@ def effect_risk_management(self, entities, level):
 def effect_double_down(self, entities, level):
     self.owner.weapon.crit_multiplier *= 2
 
-# Additional Body Armour, increases max armour
-# Reinforced Plates, increases resistance
-# Bullet Eater,
 
-# Skill Solution, Skills charge faster, minor stat decrease
-# Skill Issue, Skills charge slower, minor stat increase
-# Limits Removed, Remove mutually exclusives condition for all upgrades. Tier 3, low cost
+def effect_additional_body_armour(self, entities, level):
+    self.owner.max_armour = round(self.owner.max_armour * 1.25)
+    self.owner.armour = self.owner.max_armour
+
+
+def effect_reinforced_plates(self, entities, level):
+    self.owner.resistances["Physical"] *= 0.75
+
+
+def effect_fire_retardant_armour(self, entities, level):
+    self.owner.resistances["Fire"] *= 0.75
+
+
+def effect_anti_boom_boom_armour(self, entities, level):
+    self.owner.resistances["Explosion"] *= 0.75
+
+
+def effect_anti_laser_coating(self, entities, level):
+    self.owner.resistances["Energy"] *= 0.75
+
+
+def effect_skill_solution(self, entities, level):
+    self.owner.skills.recharge_rate *= 1.75
+    self.owner.vel_max *= 0.9
+    self.owner.targeting_angle *= 0.9
+
+
+def effect_skill_issue(self, entities, level):
+    self.owner.skills.recharge_rate *= 0.75
+    self.owner.vel_max *= 1.3
+    self.owner.targeting_angle *= 1.3
 
 
 # Lord

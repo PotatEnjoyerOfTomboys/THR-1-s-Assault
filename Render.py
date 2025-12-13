@@ -172,8 +172,7 @@ def draw(WIN, CLOCK, time_passed, scrolling, scrolling_target, level, entities, 
         # Only draw enemies who can be seen by a player
         for ee in players:
             # Get stealth range modifier
-            detection_modifier = e.stealth_mod * ee.stealth_counter
-            if detection_modifier > 1: detection_modifier = 1
+            detection_modifier = pg.math.clamp(e.stealth_mod * ee.stealth_counter, -20, 1)
             if not (Fun.distance_between(e.pos, ee.pos) < ee.targeting_range // 10 * detection_modifier or
                     Fun.check_point_in_cone(
                         ee.targeting_range * detection_modifier, ee.pos[0], ee.pos[1],

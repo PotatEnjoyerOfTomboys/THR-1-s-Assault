@@ -525,7 +525,7 @@ class Mech:
             mech_surface.blit(layer_surf,
                               (self.pos[0] - layer_surf.get_width() // 2,
                                self.pos[1] - layer_surf.get_height() // 2 - HEIGHT_DIFF * draw_height
-                               # * (1 +math.sin(t/20))
+                                * (1 +math.sin(t/20))
                                ))
 
         mech_surface = pg.transform.scale_by(mech_surface, 2.5)

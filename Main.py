@@ -59,17 +59,6 @@ import random
 # + Halloween outfits
 
 # Next version has all bosses
-#       Armed Shield Generator  Laser, Missiles, Electric. Tries to run you over too.
-#       Fire Support Mech       Fire, Artillery, Bullets
-#       AA Site                 Made of a few installations
-#           AA laser            Targets last position of a player. Infinite range
-#           Drone builder       Launches drones
-#           Missile Battery     Launches missiles, they have low speed and high manoeuvrability
-#           Shield Generator    Give other building a shield.
-#                                If the shield takes too much damage they get disabled for a time
-#           Energy Generator    If destroyed, kills the boss. Highest amount of health
-#       .                       Uses a massive sword,
-#       Rigel   (Final boss)
 # + Mission Modifiers       (Skip mission Works but cancelled for now)
 
 # TODO: fix enemy spawn in defense
@@ -81,19 +70,27 @@ import random
 #           Mark
 #           Vivianne
 #       Vehicle
-#       Universal
 
 #   Bosses
-#       Armed Shield Generator
-#       Fire Support mech
-#       AA Site
-#       Gilgamesh
-#       Rigel
+#       Armed Shield Generator  Laser, Missiles, Electric. Tries to run you over too.
+#       Fire Support Mech       Fire, Artillery, Bullets
+
+#       AA Site                 Made of a few installations
+#           AA laser            Targets last position of a player. Infinite range
+#           Drone builder       Launches drones
+#           Missile Battery     Launches missiles, they have low speed and high manoeuvrability
+#           Shield Generator    Give other building a shield.
+#                                If the shield takes too much damage they get disabled for a time
+#           Energy Generator    If destroyed, kills the boss. Highest amount of health
+
+#       Gilgamesh               Uses a massive sword,
+#       Rigel   (Final boss)
 # 	Mission Modifiers
 #       Unknown Forces
 #       Boss rush
 
 #   Versus mode
+#       Balance changes
 
 #   Character conversations
 
@@ -135,9 +132,10 @@ def main_game(party_info):
         "Player party": player_party,
         "Missions completed": 0,
         "Mission historic": [],  # {"Name": <str>, "Faction": <int>}
-        "Funds": 10000000000,
+
         # "Funds": 0,
         "Upgrades": [],
+        "Funds": 10000000000, # "Upgrades": [i for i in Fun.UPGRADE_INFO],    # Used for testing
         "Available upgrades": [],
         "Upgrade pool": []
     }

@@ -1904,7 +1904,6 @@ class RadioTransmission:
     def draw(self, WIN, scrolling):
         # Fade in
         if self.duration > 0:
-            # zoom = get_from_json("Settings.json", "Render zoom")    # This is bad
             zoom = FRAME_MAX_SIZE[0] / 630
             # Draws the text box
             width = WIN.get_width()
@@ -2339,9 +2338,17 @@ class PseudoPlayer:
         self.input_mode = "Keyboard"
 
     def get_input(self, keys):
-        keyboard = keyboard_mouse_input(self, keys, False)
+        keyboard_mouse_input(self, keys, False)
         input_copy = self.input.copy()
-        controller = controller_input(self, True)
+
+        keyboard = False
+        for keyboard_input in input_copy:
+            if input_copy[keyboard_input]:
+                keyboard = True
+                break
+
+        controller_input(self, True)
+
         if keyboard:
             self.input_mode = "Keyboard"
         if self.input != input_copy:
@@ -4474,8 +4481,9 @@ def versus_arena_menu(WIN, CLOCK, missions_to_choose, party_info):
     for mission in mission_names:
         options.append({"Name": mission, "Value": mission, "On select": "Return", "Render func": "Text only"},)
 
-    options.append({"Name": "Give up", "Value": "Quit", "On select": "Return", "Render func": "Text only"},)
+    options.append({"Name": "Go back to main menu", "Value": "Quit", "On select": "Return", "Render func": "Text only"},)
     menu_logic = UniversalMenuLogic(options)
+    menu_logic.width = 2.8
 
     new_player_party_info = {}
     x_mod = -210-63
@@ -4639,18 +4647,14 @@ def versus_character_menu(WIN, CLOCK, missions_to_choose, player_party, mission_
             # {"Name": "Shop", "Value": "Shop", "On select": "Return", "Render func": "Text only"}
         ]
         for c in player_party:
-            if player_party[c]["Health"] > 0:
-                # Make sure no repeat happens
-                if not check_for_repeat_in_list(out_party, 0, c):
-                    name = player_party[c]["Name"]
-                    options.append({"Name": name, "Value": name, "On select": "Return", "Render func": "Text only"})
+            name = player_party[c]["Name"]
+            options.append({"Name": name, "Value": name, "On select": "Return", "Render func": "Text only"})
         text = "Exit Menu"
         if len(out_party) > 0:
             text = "Cancel"
             if len(out_party) >= 2:
                 options.append({"Name": "Skip", "Value": "Skip", "On select": "Return", "Render func": "Text only"})
         options.append({"Name": text, "Value": "Return", "On select": "Return", "Render func": "Text only"})
-
 
         menu_logic = UniversalMenuLogic(options)
         while True:
@@ -4668,21 +4672,27 @@ def versus_character_menu(WIN, CLOCK, missions_to_choose, player_party, mission_
                     keep_going = False
                     break
                 else:
+                    # Builds the pop up to choose input type
                     input_method_option = []
                     for i in input_method_pool:
                         if len(out_party) == 0 and i == "COM":
                             continue
-                        if not check_for_repeat_in_list(out_party, 1, i) or i == "COM":
+
+                        allow_non_com_input = True
+                        for used_input_method in out_party:
+                            if i == used_input_method[1] and i != "COM":
+                                allow_non_com_input = False
+                                break
+                        if allow_non_com_input:
                             input_method_option.append(
                                 {"Name": i, "Value": i, "On select": "Return", "Render func": "Text only"})
                     input_method_option.append(
                         {"Name": "Cancel", "Value": "Return", "On select": "Return", "Render func": "Text only"})
-
                     input_method = confirmation_popup(WIN, CLOCK, [315 - 128, 300], input_method_option,
                                                       text="Choose input type")
-
                     if input_method != "Return":
                         out_party.append([do_shit, input_method, False])
+
                         break
                 menu_logic.cooldown()
 
@@ -4749,7 +4759,6 @@ def versus_character_menu(WIN, CLOCK, missions_to_choose, player_party, mission_
                     menu_transition_doom_screen_melt(WIN, CLOCK, WIN, win_copy)
                 pg.display.update()
             CLOCK.tick(60)
-
     return out_party
 
 
@@ -4763,29 +4772,12 @@ def versus_end_menu(WIN, CLOCK, party_info, status):
         "Win": "COMPLETED",
         "Loss": "FAILED"
     }[status]
-    elements_to_show =[
-        {"Sender": "SYS", "Message": str_to_list(f"MISSION STATUS: {p1}")},
-    ]
-    for x in party_info:
-        p_diddy = party_info[x]
-        message = f"HEALTH STATUS {p_diddy['Health']} / {p_diddy['Info']['health']}"
-        if p_diddy['Health'] == 0:
-            message = p_diddy['Death message']
-        elements_to_show.append(
-            {"Sender": f"{p_diddy['Name']}", "Message": str_to_list(message)}
-        )
-    elements_to_show.append(
-        {"Sender": "SYS", "Message": str_to_list(f"FTL transmission from user '{b}' to user group 'THR-1'")},
-    )
-    extra_message = {
-        "Win": "Objective completed, funds have been transferred.",
-        "Loss": "I expected better of you. Get lost."
-    }[status]
-    elements_to_show.append({"Sender": f"{b}", "Message": str_to_list(f"{extra_message}")})
-
-    menu_render = UICommunicationLog(elements_to_show, [20, 300], speed=1)
+    menu_render = UICommunicationLog([
+        {"Sender": "SYS", "Message": str_to_list(f"FIGHT IS OVER.")},
+        {"Sender": "SYS", "Message": str_to_list(f"FTL transmission from user '{b}' to user group 'THR-1'")}
+    ], [20, 300], speed=1)
     end_timer = 60*60
-    while elements_to_show or end_timer > 0:
+    while end_timer > 0:
         frame = pg.Surface((630, 450))
         surface_to_draw = frame
         WIN.fill(BLACK)
@@ -4871,8 +4863,35 @@ UPGRADE_INFO = {
     'Tier': 3, 'Cost': COST_MH, 'Owner': 'Party', 'Condition': {'Require': ['Bouncing Blue Balls']}, 'Icon': UPGRADE_SHEET.subsurface(40, 760, 40, 40),
     'name': 'Bouncy Blue Balls', 'effect': 'effect_give_blue_balls', 'trigger': 'trigger_when_loaded'},
 
+"Additional Body Armour": {
+    'Tier': 1, 'Cost': COST_M, 'Owner': 'Party', 'Icon': UPGRADE_SHEET.subsurface(40, 480, 40, 40),
+    'name': 'Additional Body Armour', 'effect': 'effect_additional_body_armour', 'trigger': 'trigger_when_loaded'},
 
+"Reinforced Plates": {
+    'Tier': 2, 'Cost': COST_M, 'Owner': 'Party', 'Condition': {'Require': ['Additional Body Armour'], 'No': ["Fire Retardant Armour", "Anti Boom Boom Armour", "Anti Laser Coating"]},
+    'Icon': UPGRADE_SHEET.subsurface(80, 480, 40, 40), 'name': 'Reinforced Plates', 'effect': 'effect_reinforced_plates', 'trigger': 'trigger_when_loaded'},
+"Fire Retardant Armour": {
+    'Tier': 2, 'Cost': COST_M, 'Owner': 'Party', 'Condition': {'Require': ['Additional Body Armour'], 'No': ["Reinforced Plates", "Anti Boom Boom Armour", "Anti Laser Coating"]},
+    'Icon': UPGRADE_SHEET.subsurface(120, 480, 40, 40), 'name': 'Reinforced Plates', 'effect': 'effect_fire_retardant_armour', 'trigger': 'trigger_when_loaded'},
+"Anti Boom Boom Armour": {
+    'Tier': 2, 'Cost': COST_M, 'Owner': 'Party', 'Condition': {'Require': ['Additional Body Armour'], 'No': ["Reinforced Plates", "Fire Retardant Armour", "Anti Laser Coating"]},
+    'Icon': UPGRADE_SHEET.subsurface(160, 480, 40, 40), 'name': 'Reinforced Plates', 'effect': 'effect_anti_boom_boom_armour', 'trigger': 'trigger_when_loaded'},
+"Anti Laser Coating": {
+    'Tier': 2, 'Cost': COST_M, 'Owner': 'Party', 'Condition': {'Require': ['Additional Body Armour'], 'No': ["Reinforced Plates", "Fire Retardant Armour", "Anti Boom Boom Armour"]},
+    'Icon': UPGRADE_SHEET.subsurface(200, 480, 40, 40), 'name': 'Anti Laser Coating', 'effect': 'effect_anti_laser_coating', 'trigger': 'trigger_when_loaded'},
 
+"Breaking Limits": {
+    'Tier': 3, 'Cost': COST_H, 'Owner': 'Party', 'Icon': UPGRADE_SHEET.subsurface(120, 560, 40, 40),
+    'name': 'Breaking Limits', 'effect': 'effect_none', 'trigger': 'trigger_when_loaded'},
+
+"Skill Issue": {
+    'Tier': 2, 'Cost': COST_LM, 'Owner': 'Party', 'Icon': UPGRADE_SHEET.subsurface(0, 560, 40, 40),
+    'Condition': {'No': ["Skill Solution"]},
+    'name': 'Skill Issue', 'effect': 'effect_skill_issue', 'trigger': 'trigger_when_loaded'},
+"Skill Solution": {
+    'Tier': 2, 'Cost': COST_LM, 'Owner': 'Party', 'Icon': UPGRADE_SHEET.subsurface(40, 560, 40, 40),
+    'Condition': {'No': ["Skill Issue"]},
+    'name': 'Skill Solution', 'effect': 'effect_skill_solution', 'trigger': 'trigger_when_loaded'},
 
 
 # Lord
@@ -4913,7 +4932,7 @@ UPGRADE_INFO = {
     'name': 'Kick and Run', 'effect': 'effect_skill_activate', 'trigger': 'trigger_when_loaded'},
 "Seduced Shopkeeper": { #
     'Tier': 1, 'Cost': COST_Z, 'Owner': 'Emperor', 'Icon': UPGRADE_SHEET.subsurface(40, 40, 40, 40),
-    'name': 'Emperor Tier 1 1', 'effect': 'effect_none', 'trigger': 'trigger_when_loaded'},
+    'name': 'Seduced Shopkeeper', 'effect': 'effect_none', 'trigger': 'trigger_when_loaded'},
 "Overly Prepared": {# Gives  bonuses at the start of a mission
     'Tier': 1, 'Cost': COST_LM, 'Owner': 'Emperor', 'Icon': UPGRADE_SHEET.subsurface(80, 40, 40, 40),
     'name': 'Emperor Tier 1 2', 'effect': 'effect_overly_prepared', 'trigger': 'trigger_when_loaded'},
@@ -5319,12 +5338,18 @@ def update_upgrade_pool(run_info, party_info):
                 if upgrade in run_info["Upgrades"]:
                     upgrade_record[character][f"T{tier}"] += 1
                     continue
-                if "Condition" in UPGRADE_INFO[upgrade]:
+                if "Condition" in UPGRADE_INFO[upgrade] and "Breaking Limits" not in run_info["Upgrades"]:
                     condition = UPGRADE_INFO[upgrade]["Condition"]
+
                     if "No" in condition:
-                        if condition["No"] in run_info["Upgrades"]:
-                            remove_available_upgrade(run_info, upgrade)
-                            continue
+                        if type(condition["No"]) != list:
+                            condition["No"] = [condition["No"]]
+
+                        for ass_cheeks in condition:
+                            if ass_cheeks in run_info["Upgrades"]:
+                                remove_available_upgrade(run_info, upgrade)
+                                break
+
                     if "Require" in condition:
                         allow = False
                         for requirement in condition["Require"]:
@@ -5595,6 +5620,25 @@ def shop_menu(WIN, CLOCK, party_info, run_info):
                 # Writes description
                 for count, text in enumerate(split_text(write_textline(f'Upgrade-Desc-{current_option['Value']}', send_back=True), limit=28)):
                     details_display.blit(temp_ui_font.render(text, True, AMBER), (info_zero[0], info_zero[1] + 76 + 14 * count))
+
+                # Writes any upgrades that is not compatible  with
+                if "Breaking Limits" not in run_info["Upgrades"]:
+                    upgrade = UPGRADE_INFO[current_option["Value"]]
+                    #                     details_display.blit(temp_ui_font.render(text, True, AMBER), (info_zero[0], info_zero[1] + 76 + 14 * count))
+                    if "Condition" in upgrade:
+                        if "No" in upgrade["Condition"]:
+                            if type(upgrade["Condition"]["No"]) != list:
+                                upgrade["Condition"]["No"] = [upgrade["Condition"]["No"]]
+                            count += 2
+                            details_display.blit(temp_ui_font.render("Cannot be used with:", True, AMBER),
+                                                 (info_zero[0], info_zero[1] + 76 + 14 * count + 14))
+
+                            for ass_cheeks in upgrade["Condition"]["No"]:
+                                count += 1
+                                details_display.blit(temp_ui_font.render(f"- {ass_cheeks}", True, AMBER),
+                                                     (info_zero[0], info_zero[1] + 76 + 14 * count + 14))
+
+
 
             elif current_option["Value"] == "Other services":
                 # details_display.blit(temp_ui_font.render(f"{current_option['Value']}", True, AMBER), (info_zero[0], info_zero[1]+14+8))
@@ -6516,7 +6560,6 @@ def find_closest_in_cone(self, entities, targeting_range, target_type, angle, ta
 
 # |Game stuff|----------------------------------------------------------------------------------------------------------
 def keyboard_mouse_input(self, keys, mouse_key):
-
     for input_check in KEYBOARD_BOND_INPUT:
         self.input[input_check] = keys[self.control[input_check]]
 

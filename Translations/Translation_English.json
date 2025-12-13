@@ -439,6 +439,18 @@
 	"Upgrade-Desc-All in": "Increases damage of critical shots. Cannot be used with Safe Bet.",
 	"Upgrade-Desc-Risk Management": "Further increases chance to have critical shots.",
 	"Upgrade-Desc-Double Down": "Further increases damage of critical shots.",
+	
+	"Upgrade-Desc-Additional Body Armour": "Increase the amount of armour each character starts with.",
+	"Upgrade-Desc-Reinforced Plates": "Increase physical damage resistance for every character.",
+	"Upgrade-Desc-Fire Retardant Armour": "Increase fire damage resistance for every character.",
+	"Upgrade-Desc-Anti Boom Boom Armour": "Increase explosion damage resistance for every character.",
+	"Upgrade-Desc-Anti Laser Coating": "Increase energy damage resistance for every character.",
+
+	"Upgrade-Desc-Breaking Limits": "Unlocks all remainging upgrades",
+
+	"Upgrade-Desc-Skill Issue": "Skill recharge slower",
+	"Upgrade-Desc-Skill Solution": "Skills recharge faster. ",
+
 	"Upgrade-Desc-Seeking Blue Balls": "Blue Balls take a few seconds before starting to move, then move toward the closest enemy",
 	"Upgrade-Desc-Bouncing Blue Balls": "Blue balls will now bounce when hitting walls. Cannot be used with Seeking Blue Balls",
 	"Upgrade-Desc-Speeding Blue Balls": "Blue Balls now accelerate.",
