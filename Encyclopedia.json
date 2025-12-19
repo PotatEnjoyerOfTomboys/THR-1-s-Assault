@@ -48,8 +48,9 @@
 	"Organizations": {
 		"Armed groups": [],
 		"Mercenary Teams": {
-			"THR-1": ["Overview", "Leopld LORD Storch"], 
-		"Zoar Colony's Gun Shop": []},
+			"THR-1": ["Overview", "Leopld LORD Storch", "Jeanne WIZARD McNeil", "M4-D1C Jester"], 
+			"Zoar Colony's Gun Shop": ["Overview", "Curtis Miller", "Vivianne Miller", "Lawrence Reed", "Mark"]
+			},
 		"Weapon Manufacturer": ["Old West Firearms & Replicas",
 								"Socrates",
 								"Factory Munition Ballistics",

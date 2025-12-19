@@ -3906,7 +3906,8 @@ player_repertory = {
         "targeting range": 750,
         "targeting angle": 33,
         "wall hack": False,
-        "free var": {"Ally waypoint": [0, 0], "Summon cooldown time": 360, "Summon cooldown": 0, "Summon limit": 1}
+        "free var": {"Ally waypoint": [0, 0], "Summon cooldown time": 360, "Summon cooldown": 0, "Summon limit": 1,
+                     "Summon pool": [], "Active summons": []}
     },
 
     "Sand Buggy": {

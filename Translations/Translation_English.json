@@ -432,7 +432,7 @@
 	
 	"__Upgrades": "",
 	"Upgrade-Desc-Driving License": "Unlocks vechicle uprades.",
-	
+
 	"Upgrade-Desc-Awareness": "Increase everybody's Stealth Counter Modifier (Make it easier to spot enemies in stealth)",
 	"Upgrade-Desc-Lucky Shot": "Unlocks critical shots. Different rates based on weapon.",
 	"Upgrade-Desc-Safe Bet": "Increases chance to have critical shots. Cannot be used with All in.",
@@ -559,10 +559,10 @@
 	"Upgrade-Desc-Hellfire": "WIP",
 	"Upgrade-Desc-Burning Blue Balls": "WIP",
 
-	"Upgrade-Desc-Mark tier 1": "WIP",
+	"Upgrade-Desc-Low Pressure Reloader": "Mark reloads are faster if whe he isn't targeted",
 	"Upgrade-Desc-Slow mark": "WIP",
 	"Upgrade-Desc-Burning mark": "WIP",
-	"Upgrade-Desc-Mark tier 2 1": "WIP",
+	"Upgrade-Desc-Like a Shadow": "Mark's weapons are quieter and makes no noise while walking.",
 	"Upgrade-Desc-Mark tier 2 2": "WIP",
 	"Upgrade-Desc-Disable weapon mark": "WIP",
 	"Upgrade-Desc-Helping mark": "WIP",
@@ -591,11 +591,19 @@
 	"Annals-2102-End of the Solar War": "",
 	"Annals-2105-Pirate attack on Zoar": "In March of 2105, the gang of space pirate let by Morgan Reed attacked various installations of the Zoar colony.|| ||Bounties for key figures of the gang were quickly issued. Curtis Miller, a mercenary was able to capture all the targets within a week.|| ||The following trial ended up revraling that Morgan Reed was convinced by an unknown group to cause mayhem as cover for an clandestine operation.Presence this group was proven by an attack on the gun shop of Curtis' sister, Vivianne Miller.|| ||A few hideouts of the group were found thanks to Lawrence Reed but only corpses were found.|| ||Most members of the gang were released due to the lack of prison capacity. The only ones to walk away as innocent were Mary Reed due to her status as a minor, Lawrence Reed and portion of the gang under his control due to them aiding the capture of Morgan Reed and the following investigation.",	
 	
-	"Organizations-Armed groups-Mercenary Teams-THR-1-Overview": "",
-	"Organizations-Armed groups-Mercenary Teams-THR-1-Leopld LORD Storch": "",
+	"Organizations-Mercenary Teams-THR-1-Overview": "",
+	"Organizations-Mercenary Teams-THR-1-Leopld LORD Storch": "",
+	"Organizations-Mercenary Teams-THR-1-Jeanne WIZARD McNeil": "",
+	"Organizations-Mercenary Teams-THR-1-M4-D1C Jester": "",
+	
+	"Organizations-Mercenary Teams-Zoar Colony's Gun Shop-Overview": "As the name might suggest, this organization primarly acts as a gun store located in Zoar. The store is opporated by Vivianne Miller who manages the store and acts as a handler for Curtis Miller. ||||Curtis is the only mercenary soley working with the store but makes frequent partnerships with Mark, a local bounty hunter and more recently with Lawrence Reed.",
+	"Organizations-Mercenary Teams-Zoar Colony's Gun Shop-Curtis Miller": "Birthday: xx/xx/2085||Occupation: Merc./Handyman||||Curtis Miller",
+	"Organizations-Mercenary Teams-Zoar Colony's Gun Shop-Vivianne Miller": "",
+	"Organizations-Mercenary Teams-Zoar Colony's Gun Shop-Lawrence Reed": "",
+	"Organizations-Mercenary Teams-Zoar Colony's Gun Shop-Mark": "",
 	
 	"Weapon-Handgun-Big Iron": "",
-	"Weapon-Handgun-War and Peace": "Manifacturer: Unkown||CALIBER: .45 ACP",
+	"Weapon-Handgun-War and Peace": "Manifacturer: Unkown||Caliber: .45 ACP",
 	
 	"Weapon-Rifle-Corrine's Old Rifle": "",
 	"Weapon-Rifle-St-Maurice": "",

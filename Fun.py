@@ -3501,7 +3501,6 @@ def game_intro(WIN, CLOCK, controls, player):
     temp_ui_font =  create_temp_font_2(450, font_name="Sprites/JetBrainsMono-SemiBold.ttf")
     # Curtis is 20, Curtis was 15 at the start of the war
     # Vivianne is 19 Vivianne was 14 at the start of the war
-
     b = "Secretary" # use a bird name, she is part of the Nest but
     elements_to_show =[
         # {"Sender": "SYS", "Message": "Incoming FTL transmission from user ID: "},
@@ -3998,12 +3997,15 @@ def encyclopedia_menu(WIN, CLOCK):
                 encyclopedia_section = encyclopedia
                 for p in current_position:
                     encyclopedia_section = encyclopedia_section[p]
-
                 for op in encyclopedia_section:
-                    on_select = "Normal"
-                    if type(encyclopedia_section) != list:
-                        if type(encyclopedia_section[op]) in [dir, list]:
-                            on_select = "Return"
+                    # Text entries are strings, the rest is either a dict or list
+                    on_select = "Return"
+                    # Had an issue where you had to get into a category stored in a list to go into one stored in a dict
+                    # This solution is so stupid, I can't believe that worked
+                    try:
+                        encyclopedia_section[op]
+                    except TypeError:
+                        on_select = "Normal"    # Should only be used for text entries, or everything fucks up
                     options.append({"Name": op, "Value": op, "On select": on_select, "Render func": "Text only"})
                 options.append({"Name": "Go back", "Value": "Quit", "On select": "Return", "Render func": "Text only"})
 
@@ -4593,6 +4595,7 @@ def versus_arena_menu(WIN, CLOCK, missions_to_choose, party_info):
 
 
 def versus_character_menu(WIN, CLOCK, missions_to_choose, player_party, mission_name):
+    unlocked_weapons = get_from_json("Save.json", "Character weapons unlocked")
     character_portraits = {
         # THR-1
         "Lord": SPRITE_RADIO_LORD[0],
@@ -4690,8 +4693,24 @@ def versus_character_menu(WIN, CLOCK, missions_to_choose, player_party, mission_
                         {"Name": "Cancel", "Value": "Return", "On select": "Return", "Render func": "Text only"})
                     input_method = confirmation_popup(WIN, CLOCK, [315 - 128, 300], input_method_option,
                                                       text="Choose input type")
+                    # Check for alt weapons
+                    chosen_weapon = 0
+                    if unlocked_weapons[do_shit]:
+                        weapon_options = [
+                            {"Name": f"{weapon_ownership_table[do_shit][0]}", "Value": 1, "On select": "Return",
+                             "Render func": "Text only"}
+                        ]
+
+                        for i in unlocked_weapons[do_shit]:
+                            weapon_options.append(
+                                {"Name": f"{weapon_ownership_table[do_shit][i]}", "Value": i+1, "On select": "Return",
+                                 "Render func": "Text only"})
+
+                        chosen_weapon = confirmation_popup(WIN, CLOCK, [315 - 128, 300], weapon_options,
+                                                          text="Choose weapon")
+
                     if input_method != "Return":
-                        out_party.append([do_shit, input_method, False])
+                        out_party.append([do_shit, input_method, weapon_ownership_table[do_shit][chosen_weapon-1]])
 
                         break
                 menu_logic.cooldown()
@@ -4809,6 +4828,8 @@ def versus_end_menu(WIN, CLOCK, party_info, status):
         CLOCK.tick(60)
         end_timer -= 1
     # popups here when you unlock shit
+
+
 
 UPGRADE_SHEET = get_image('Sprites/UI/Upgrades Sheet.png')
 
@@ -5202,48 +5223,33 @@ UPGRADE_INFO = {
     'name': "Burning Blue Balls", 'effect': 'effect_none', 'trigger': 'trigger_on_hit_effect'},
 
 # Mark
-"Mark tier 1": {
+"Low Pressure Reloader": {
     'Tier': 1, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(0, 360, 40, 40),
-    'name': "Stun mark", 'effect': 'effect_none', 'trigger': 'trigger_standing_still'},
-# L/M	Slow mark
-# 		When reloading, place a mark on a randomly chosen enemy in sight
+    'name': "Low Pressure Reloader", 'effect': 'effect_low_pressure_reloader', 'trigger': 'trigger_reloading'},
+"Like a Shadow": {
+    'Tier': 2, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(0, 360, 40, 40),
+    'name': "Like a Shadow", 'effect': 'effect_like_a_shadow', 'trigger': 'trigger_when_loaded'},
 "Slow mark": {
     'Tier': 1, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(40, 360, 40, 40),
-    'name': "Slow mark", 'effect': 'effect_none', 'trigger': 'trigger_standing_still'},
-    # M	Burning mark
-    # 		When hitting enemies 25% chance to place a mark which cause burn on hit
+    'name': "Slow mark", 'effect': 'effect_none', 'trigger': 'trigger_reloading'},
 "Burning mark": {
     'Tier': 1, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(80, 360, 40, 40),
     'name': "Burning mark", 'effect': 'effect_none', 'trigger': 'trigger_on_hit_effect'},
-
-"Mark tier 2 1": {
-    'Tier': 2, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(0, 360, 40, 40),
-    'name': "Mark tier 2 1", 'effect': 'effect_none', 'trigger': 'trigger_standing_still'},
 "Mark tier 2 2": {
     'Tier': 2, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(0, 360, 40, 40),
     'name': "Mark tier 2 2", 'effect': 'effect_none', 'trigger': 'trigger_standing_still'},
-    # M	Disable weapon mark
-    # 		When using Smoke Grenade. Multiple random enemies recieves a mark which make them lose all ammo in magazine. Bosses are immune. Cancel attacks with startup lag
 "Disable weapon mark": {
     'Tier': 2, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(200, 360, 40, 40),
     'name': "Disable weapon mark", 'effect': 'effect_skill_activate', 'trigger': 'trigger_when_loaded'},
-    # M/H	Helping mark
-    # 		When spoting an enemy with Target Locator. Place a mark that give them a bigger hitbox
 "Helping mark": {
     'Tier': 2, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(240, 360, 40, 40),
     'name': "Helping mark", 'effect': 'effect_skill_activate', 'trigger': 'trigger_when_loaded'},
-    # H	Stun mark
-    # 		When hitting enemies with no bullet remaining in the magazine at the time of hitting. Place a mark that stuns them on hit.
 "Stun mark": {
     'Tier': 3, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(320, 360, 40, 40),
-    'name': "Stun mark", 'effect': 'effect_none', 'trigger': 'trigger_standing_still'},
-    # ?	.
-    # 		.
+    'name': "Stun mark", 'effect': 'effect_none', 'trigger': 'trigger_on_hit_effect'},
 "Mark Tier 3": {
     'Tier': 3, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(320, 360, 40, 40),
     'name': "Mark Tier 3", 'effect': 'effect_none', 'trigger': 'trigger_standing_still'},
-    # M	Marked Blue Balls
-    # 		When a mark is activated, create blue balls
 "Marked Blue Balls": {
     'Tier': 2, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(360, 360, 40, 40),
     'name': "Marked Blue Balls", 'effect': 'effect_skill_activate', 'trigger': 'trigger_when_loaded'},
@@ -5251,22 +5257,22 @@ UPGRADE_INFO = {
 # Vivianne
 "Birna & Sardine": {
     'Tier': 1, 'Cost': 1000, 'Owner': 'Vivianne', 'Icon': UPGRADE_SHEET.subsurface(0, 400, 40, 40),
-    'name': "Birna & Sardine", 'effect': 'effect_none', 'trigger': 'trigger_when_loaded'},
+    'name': "Birna & Sardine", 'effect': 'effect_add_summon', 'trigger': 'trigger_when_loaded'},
 "Elecktra": {
     'Tier': 1, 'Cost': 1000, 'Owner': 'Vivianne', 'Icon': UPGRADE_SHEET.subsurface(40, 400, 40, 40),
-    'name': "Elecktra", 'effect': 'effect_none', 'trigger': 'trigger_when_loaded'},
+    'name': "Elecktra", 'effect': 'effect_add_summon', 'trigger': 'trigger_when_loaded'},
 "Agatha": {
     'Tier': 1, 'Cost': 1000, 'Owner': 'Vivianne', 'Icon': UPGRADE_SHEET.subsurface(80, 400, 40, 40),
-    'name': "Agatha", 'effect': 'effect_none', 'trigger': 'trigger_when_loaded'},
+    'name': "Agatha", 'effect': 'effect_add_summon', 'trigger': 'trigger_when_loaded'},
 "Azura": {
     'Tier': 2, 'Cost': 1000, 'Owner': 'Vivianne', 'Icon': UPGRADE_SHEET.subsurface(120, 400, 40, 40),
-    'name': "Azura", 'effect': 'effect_none', 'trigger': 'trigger_when_loaded'},
+    'name': "Azura", 'effect': 'effect_add_summon', 'trigger': 'trigger_when_loaded'},
 "M (Marisa)": {
     'Tier': 2, 'Cost': 1000, 'Owner': 'Vivianne', 'Icon': UPGRADE_SHEET.subsurface(160, 400, 40, 40),
-    'name': "M (Marisa)", 'effect': 'effect_none', 'trigger': 'trigger_when_loaded'},
+    'name': "M (Marisa)", 'effect': 'effect_add_summon', 'trigger': 'trigger_when_loaded'},
 "Sierra": {
     'Tier': 2, 'Cost': 1000, 'Owner': 'Vivianne', 'Icon': UPGRADE_SHEET.subsurface(200, 400, 40, 40),
-    'name': "Sierra", 'effect': 'effect_none', 'trigger': 'trigger_when_loaded'},
+    'name': "Sierra", 'effect': 'effect_add_summon', 'trigger': 'trigger_when_loaded'},
 "Speed Dial": {
     'Tier': 2, 'Cost': 1000, 'Owner': 'Vivianne', 'Icon': UPGRADE_SHEET.subsurface(240, 400, 40, 40),
     'name': "Speed Dial", 'effect': 'effect_speed_dial', 'trigger': 'trigger_when_loaded'},
@@ -5275,7 +5281,7 @@ UPGRADE_INFO = {
     'name': "Conference Call", 'effect': 'effect_conference_call', 'trigger': 'trigger_when_loaded'},
 "Makoto": {
     'Tier': 3, 'Cost': 1000, 'Owner': 'Vivianne', 'Icon': UPGRADE_SHEET.subsurface(320, 400, 40, 40),
-    'name': "Makoto", 'effect': 'effect_none', 'trigger': 'trigger_when_loaded'},
+    'name': "Makoto", 'effect': 'effect_add_summon', 'trigger': 'trigger_when_loaded'},
 "Blue Ballin": {
     'Tier': 2, 'Cost': 1000, 'Owner': 'Vivianne', 'Icon': UPGRADE_SHEET.subsurface(360, 400, 40, 40),
     'name': "Blue Ballin", 'effect': 'effect_none', 'trigger': 'trigger_when_loaded'},

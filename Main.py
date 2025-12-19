@@ -433,6 +433,9 @@ def versus_mode(party_info):
                 }[input_method]
                 info["Input mode"] = "Controller"
 
+            # Change weapons
+            info["weapon"] = player_to_add[2]
+
             # Add outline based on position number and players in
             info["free var"].update({"Outline": Fun.PLAYER_OUTLINE_COLOUR[player_count]})
             entities["entities"].append(Entity.Entity(info))

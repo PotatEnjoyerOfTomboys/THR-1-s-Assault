@@ -122,6 +122,10 @@ def trigger_low_health(self, entities, level):
     return self.owner.health < self.owner.max_health * 0.33
 
 
+def trigger_reloading(self, entities, level):
+    return self.owner.reloading and self.owner.no_shoot_state == self.owner.weapon.reload_time
+
+
 def trigger_every_2_sec(self, entities, level):
     return self.owner.time % 120 == 0
 
@@ -741,17 +745,22 @@ def effect_burning_blue_balls(self, entities, level):
 # 	Slow mark          -|- Disable weapon mark 	---	-|-	Stun Mark
 # 	Burning mark       -|-	Helping mark	---	---	-|-
 # 					Marked Blue Balls
-#
-# ?	Low Pressure Reloader
-# 		Mark reloads are faster if whe he isn't targeted
-# ?	Like a Shadow
-# 		Mark's weapons are quieter, Mark makes less noise while working
+def effect_low_pressure_reloader(self, entities, level):
+    if not self.owner.is_targeted:
+        self.owner.no_shoot_state //= 2
+
+
+def effect_like_a_shadow(self, entities, level):
+    self.owner.sound_mod = 0
+    self.owner.weapon.volume *= 0.25
+
+
 # L/M	Slow mark
-# 		When reloading, place a mark on a randomly choosen enemy in sight
+# 		When reloading, place a mark on a randomly chosen enemy in sight
 # M	Burning mark
 # 		When hitting enemies 25% chance to place a mark which cause burn on hit
 # M	Disable weapon mark
-# 		When using Smoke Grenade. Multiple random enemies recives a mark which make them lose all ammo in magazine. Bosses are immune. Cancel attacks with startup lag
+# 		When using Smoke Grenade. Multiple random enemies receives a mark which make them lose all ammo in magazine. Bosses are immune. Cancel attacks with startup lag
 # M/H	Helping mark
 # 		When spotting an enemy with Target Locator. Place a mark that give them a bigger hitbox
 # H	Stun mark
@@ -771,7 +780,10 @@ def effect_burning_blue_balls(self, entities, level):
 # 					    Speed Dial
 # 					    Conference Call
 # 					    Blue Ballin'
-#
+
+def effect_add_summon(self, entities, level):
+    # Adds the name of the upgrade in the Free var, skill functions check for them to add effects
+    self.owner.free_var["Summon pool"].append(self.name)
 # ?	Birna & Sardine
 # 		Summons Birna and Sardine. She flies toward enemies and launches Sardine (Sardine is a re-skinned Missile that has piercing and is slow as fuck)
 # ?	Elecktra
@@ -784,17 +796,13 @@ def effect_burning_blue_balls(self, entities, level):
 # 		Summons Azura. Stays in one place. Lunges at an enemy when they get too close.
 # ?	Sierra
 # 		Summons Sierra. Follows, shoot enemies with different guns based on range. Stays until out of ammo.
-# ?	Speed Dial
-# 		Decrease summons cooldown.
 def effect_speed_dial(self, entities, level):
     self.owner.free_var["Summon cooldown time"] //= 2
 
 
-# ?	Conference Call
-# 		Removes limit on active summons.
 def effect_conference_call(self, entities, level):
     self.owner.free_var["Summon limit"] = 7
 # ?	Makoto
-# 		Summons Makoto. Makoto follows Vivianne. She destroys bullets, do combos that stun on enemies
+# 		Summons Makoto. Makoto follows Vivianne. She destroys bullets, do combos that stuns enemies
 # ?	Blue Ball'in
 # 		Summons pass a ball to Vivianne when they disspawn. If Vivianne catches the ball, blue balls are generated

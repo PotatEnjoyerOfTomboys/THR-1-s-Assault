@@ -109,7 +109,7 @@ def blue_ball_bouncy(self):
 
 
 def blue_ball_judgement(self):
-    self.wall_physics = bouncy_blue_wall_hit
+    self.secondary_explosion = {"Duration": 5, "Growth": 2, "Damage mod": 0.75}
 
 
 class BlueBall(BasicBullet):
@@ -136,6 +136,7 @@ class BlueBall(BasicBullet):
         self.targeting_angle = 360
         self.move_angle = self.angle
         self.target_pos = False
+        self.secondary_explosion = False
 
     def act(self, entities, level):
         # Spends some time homing on a target
@@ -209,6 +210,14 @@ class BlueBall(BasicBullet):
                         self.duration = 0
 
             self.duration -= 1
+        if self.duration == 0:
+            if self.secondary_explosion:
+                spawn_bullet(
+                    self, entities,
+                    ExplosionSecondary,
+                    self.pos,
+                    self.angle,
+                    [0, 5, self.radius, self.damage, self.secondary_explosion])
         #
 
 
