@@ -6,6 +6,8 @@ import Entity
 import Fun
 import Bullets
 import Items
+import Particles
+
 
 class Upgrade:
     def __init__(self, owner, info):
@@ -304,7 +306,7 @@ def effect_bigger_booms(self, entities, level):
 def effect_cant_touch_me(self, entities, level):
     pos = Fun.random_point_in_circle(self.owner.pos, 32)
     entities["particles"].append(
-        Fun.RandomParticle1(pos, Fun.DARK_RED, random.random(), round(10 + 10 * random.random()), size=(2, 4))
+        Particles.RandomParticle1(pos, Fun.DARK_RED, random.random(), round(10 + 10 * random.random()), size=(2, 4))
     )
     self.owner.status["Dash recovery up"] += 1
 
@@ -324,7 +326,7 @@ def effect_remote_detonation(self, entities, level):
                                                                   [0, b.secondary_explosion["Duration"],
                                                                    b.radius,
                                                                    b.damage, b.secondary_explosion], b.owner))
-            Fun.random_particle_2_circle(entities, b.pos, 4, 30, 16, colour=Fun.WHITE, size=6, angle_mod=180 * random.random())
+            Particles.random_particle_2_circle(entities, b.pos, 4, 30, 16, colour=Fun.WHITE, size=6, angle_mod=180 * random.random())
 
 
 def effect_dashing_blue_balls(self, entities, level):
@@ -408,7 +410,7 @@ def effect_bad_luck_jamming(self, entities, level):
         for x in range(3):
             pos = Fun.random_point_in_circle(self.owner.pos, 16)
             entities["particles"].append(
-                Fun.RandomParticle1(pos, Fun.GRAY, 2, round(10 + 10 * random.random()), size=(2, 4))
+                Particles.RandomParticle1(pos, Fun.GRAY, 2, round(10 + 10 * random.random()), size=(2, 4))
             )
 
 
@@ -422,7 +424,7 @@ def effect_mastermind(self, entities, level):
     for x in range(5):
         pos = Fun.random_point_in_circle(self.owner.pos, 16)
         entities["particles"].append(
-            Fun.RandomParticle1(pos, Fun.YELLOW, -2, round(10 + 10 * random.random()),
+            Particles.RandomParticle1(pos, Fun.YELLOW, -2, round(10 + 10 * random.random()),
                                 size=(1, 4))
         )
 
@@ -452,7 +454,7 @@ def effect_short_temper(self, entities, level):
     for x in range(10):
         pos = Fun.random_point_in_circle(self.owner.pos, 32)
         entities["particles"].append(
-            Fun.RandomParticle1(pos, (64, 64, 128), random.random(), round(10 + 10 * random.random()), size=(2, 4))
+            Particles.RandomParticle1(pos, (64, 64, 128), random.random(), round(10 + 10 * random.random()), size=(2, 4))
         )
 
 
@@ -479,7 +481,7 @@ def effect_duck_and_cover(self, entities, level):
         for x in range(5):
             pos = Fun.random_point_in_circle(e.pos, 16)
             entities["particles"].append(
-                Fun.RandomParticle1(pos, Fun.BLUE, 2, round(10 + 10 * random.random()),
+                Particles.RandomParticle1(pos, Fun.BLUE, 2, round(10 + 10 * random.random()),
                                     size=(2, 4))
             )
         if self.owner.agro > control + 10:
@@ -528,7 +530,7 @@ def effect_shadow_walk(self, entities, level):
 def effect_out_of_sight_out_of_mind(self, entities, level):
     if self.owner.status["No damage"] < 60:
         self.owner.status["No damage"] = 60
-    entities["particles"].append(Fun.Smoke(
+    entities["particles"].append(Particles.Smoke(
             Fun.random_point_in_circle(self.owner.pos, 16),
         ))
 
@@ -600,7 +602,7 @@ def effect_guardian(self, entities, level):
     if self.owner.time % 10 == 0:
         self.owner.agro += 1
         self.owner.agro_decrease_rate = 3 * 60
-        Fun.random_particle_2_circle_start_offset(
+        Particles.random_particle_2_circle_start_offset(
             entities, self.owner.pos, 64, -2, 20, random.randint(2, 18), colour=Fun.DARK_RED,
             angle_mod=180 * random.random())
 

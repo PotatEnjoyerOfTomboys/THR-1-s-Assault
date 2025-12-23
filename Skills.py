@@ -6,7 +6,7 @@ import Bullets
 import Entity
 import Fun
 import Items
-# from Fun import none, get_image
+import Particles
 
 
 def handle_skill_normal(self, skill_id, skill_input):
@@ -148,14 +148,14 @@ def leopold_gauntlet_punch(self, skill, entities, level):
     corner_4 = Fun.move_with_vel_angle(corner_3, 128, self.angle + 180)
     points = [self.pos, corner_1, corner_2, corner_3, corner_4]
 
-    entities["background particles"].append(Fun.TransparentPolygon(points, Fun.DARK_RED, 1, 96))
+    entities["background particles"].append(Particles.TransparentPolygon(points, Fun.DARK_RED, 1, 96))
     mod = 1 - skill.recharge / skill.recharge_max
     corner_1_p2 = Fun.move_with_vel_angle(self.pos, 32, self.angle + 90)
     corner_2_p2 = Fun.move_with_vel_angle(corner_1_p2, 128 * mod, self.angle)
     corner_3_p2 = Fun.move_with_vel_angle(corner_2_p2, 64, self.angle - 90)
     corner_4_p2 = Fun.move_with_vel_angle(corner_3_p2, 128 * mod, self.angle + 180)
     points_p2 = [self.pos, corner_1_p2, corner_2_p2, corner_3_p2, corner_4_p2]
-    entities["background particles"].append(Fun.TransparentPolygon(points_p2, Fun.DARK_RED, 1, 96))
+    entities["background particles"].append(Particles.TransparentPolygon(points_p2, Fun.DARK_RED, 1, 96))
 
     if mod == 1:
         entities["screen shake"] = [20, 5, self.aim_angle, 20]
@@ -163,7 +163,7 @@ def leopold_gauntlet_punch(self, skill, entities, level):
 
         if "Taunt" in self.free_var:
             self.agro *= 1.5
-            Fun.random_particle_2_circle(entities, self.pos, 4, 45, 36, colour=Fun.RED, angle_mod=180 * random.random())
+            Particles.random_particle_2_circle(entities, self.pos, 4, 45, 36, colour=Fun.RED, angle_mod=180 * random.random())
         knockback = 7
         if "Giga ton Punch" in self.free_var:
             knockback = 14
@@ -178,7 +178,7 @@ def leopold_gauntlet_punch(self, skill, entities, level):
                         e.vel = Fun.move_with_vel_angle([0, 0], knockback, self.angle)
                         for x in range(12):
                             num = x % 2
-                            entities["particles"].append(Fun.RandomParticle2(
+                            entities["particles"].append(Particles.RandomParticle2(
                                 e.pos.copy(), Fun.YELLOW, 4 * [1, 1.75][num], 15,
                                 self.angle + [-90, 90][num] + random.uniform(-15, 15), size=4 * [1, 2][num]))
                 continue
@@ -193,7 +193,7 @@ def leopold_gauntlet_punch(self, skill, entities, level):
                     e.free_var["Startup lag"] = 0
                 for x in range(12):
                     num = x % 2
-                    entities["particles"].append(Fun.RandomParticle2(
+                    entities["particles"].append(Particles.RandomParticle2(
                         e.pos.copy(), Fun.DARK_RED, 4 * [1, 1.75][num], 15,
                         self.angle + [-90, 90][num] + random.uniform(-15, 15), size=4 * [1, 2][num]))
 
@@ -202,7 +202,7 @@ def leopold_gauntlet_punch(self, skill, entities, level):
                     if self.weapon.ammo > self.weapon.max_ammo:
                         self.weapon.ammo = self.weapon.max_ammo
         Fun.play_sound("Hitting 3")
-        entities["particles"].append(Fun.AfterImageRotated(
+        entities["particles"].append(Particles.AfterImageRotated(
             Fun.move_with_vel_angle(self.pos, 64, self.angle), Fun.SPRITE_LORD_GAUNTLET, 30, self.angle))
 
         return
@@ -210,7 +210,7 @@ def leopold_gauntlet_punch(self, skill, entities, level):
     if self.time % 5 == 0:
         Fun.play_sound("Charge")
 
-    entities["particles"].append(Fun.AfterImageRotated(
+    entities["particles"].append(Particles.AfterImageRotated(
         Fun.move_with_vel_angle(self.pos, 16 * mod * -1, self.angle),
         Fun.SPRITE_LORD_GAUNTLET, 1, self.angle))
     #sd
@@ -235,8 +235,8 @@ def leopold_beast_mode(self, skill, entities, level):
     self.did_agro_raise = 60 * 3
     # Particle effect should be always moving toward the user
     if skill.first_active_frame:
-        entities["particles"].append(Fun.GrowingCircle(self.pos, Fun.WHITE, 4, 16, 0, 16))
-        entities["background particles"].append(Fun.BeastModeParticle(self.pos, 5*60* mod, Fun.ORANGE))
+        entities["particles"].append(Particles.GrowingCircle(self.pos, Fun.WHITE, 4, 16, 0, 16))
+        entities["background particles"].append(Particles.BeastModeParticle(self.pos, 5*60* mod, Fun.ORANGE))
 
 
 # |Emperor|-------------------------------------------------------------------------------------------------------------
@@ -275,7 +275,7 @@ def kai_kick(self, skill, entities, level):
         for x in range(7):
             angle = self.aim_angle - 5 * 3 + 5 * x + random.uniform(-30, 30)
             num = int(random.random() > 0.7)
-            entities["particles"].append(Fun.RandomParticle2(
+            entities["particles"].append(Particles.RandomParticle2(
                 Fun.move_with_vel_angle(self.pos, 6, angle),
                 [Fun.WHITE, Fun.YELLOW][num], 4 * [1, 1.75][num], 15, angle, size=4 * [1, 2][num]))
 
@@ -300,9 +300,9 @@ def kai_mega_buff(self, skill, entities, level):
         lord.status["Dash recovery up"] += duration
         duke.status["Fuller auto"] += duration
         for p in [lord, duke]:
-            Fun.random_particle_2_circle(entities, p.pos, 2, 20, 18, colour=Fun.WHITE,
+            Particles.random_particle_2_circle(entities, p.pos, 2, 20, 18, colour=Fun.WHITE,
                                          angle_mod=180 * random.random())
-            Fun.random_particle_2_circle(entities, p.pos, 1, 45, 16, colour=Fun.WHITE, size=5,
+            Particles.random_particle_2_circle(entities, p.pos, 1, 45, 16, colour=Fun.WHITE, size=5,
                                          angle_mod=180 * random.random())
 
     if "Skilled" in self.free_var:
@@ -316,7 +316,7 @@ def kai_mega_buff(self, skill, entities, level):
             for x in range(5):
                 pos = Fun.random_point_in_circle(self.pos, 16)
                 entities["particles"].append(
-                    Fun.RandomParticle1(pos, Fun.RED, -2, round(10 + 10 * random.random()),
+                    Particles.RandomParticle1(pos, Fun.RED, -2, round(10 + 10 * random.random()),
                                         size=(2, 4))
                 )
         if "Sovereign" in self.free_var:
@@ -327,7 +327,7 @@ def kai_mega_buff(self, skill, entities, level):
                 if Fun.distance_between(self.pos, e.pos) < self.targeting_range:
                     self.status["Visible"] += duration // 2
 
-                    entities["particles"].append(Fun.GrowingCircleEntityBound(e, Fun.DARK_GREEN, "Visible", 2))
+                    entities["particles"].append(Particles.GrowingCircleEntityBound(e, Fun.DARK_GREEN, "Visible", 2))
         if "Jester" in self.free_var:
             # Gives some armour to either Emperor or Allies
             targets = []
@@ -347,7 +347,7 @@ def kai_mega_buff(self, skill, entities, level):
                     for x in range(5):
                         pos = Fun.random_point_in_circle(t.pos, 16)
                         entities["particles"].append(
-                            Fun.RandomParticle1(pos, Fun.GREEN, -2, round(10 + 10 * random.random()), size=(2, 4))
+                            Particles.RandomParticle1(pos, Fun.GREEN, -2, round(10 + 10 * random.random()), size=(2, 4))
                         )
             else:
                 self.armour += 120
@@ -357,7 +357,7 @@ def kai_mega_buff(self, skill, entities, level):
                 for x in range(5):
                     pos = Fun.random_point_in_circle(self.pos, 16)
                     entities["particles"].append(
-                        Fun.RandomParticle1(pos, Fun.GREEN, -2, round(10 + 10 * random.random()), size=(2, 4))
+                        Particles.RandomParticle1(pos, Fun.GREEN, -2, round(10 + 10 * random.random()), size=(2, 4))
                     )
 
     if "Alpha Buff" in self.free_var:
@@ -378,20 +378,20 @@ def kai_mega_buff(self, skill, entities, level):
         self.dash_charge_time = 30
 
         center = self.pos
-        Fun.random_particle_2_circle(entities, self.pos, 4, 45, 36, colour=Fun.WHITE, angle_mod=180 * random.random())
-        Fun.random_particle_2_circle(entities, self.pos, 2, 90, 36, colour=Fun.LIGHT_BLUE, size=5,
+        Particles.random_particle_2_circle(entities, self.pos, 4, 45, 36, colour=Fun.WHITE, angle_mod=180 * random.random())
+        Particles.random_particle_2_circle(entities, self.pos, 2, 90, 36, colour=Fun.LIGHT_BLUE, size=5,
                                      angle_mod=180 * random.random())
         for x in range(4):
             for particles_to_add in range(10):
                 entities["background particles"].append(
-                    Fun.RandomParticle2([center[0], center[1]], Fun.RED, 1 + particles_to_add * 0.66, 90,
+                    Particles.RandomParticle2([center[0], center[1]], Fun.RED, 1 + particles_to_add * 0.66, 90,
                                         particles_to_add * 10 + 90 * x))
 
         return
     self.status["Dash recovery up"] += duration
     self.status["Fuller auto"] += duration
-    Fun.random_particle_2_circle(entities, self.pos, 4, 45, 36, colour=Fun.WHITE, angle_mod=180 * random.random())
-    Fun.random_particle_2_circle(entities, self.pos, 2, 90, 36, colour=Fun.LIGHT_BLUE, size=5, angle_mod=180 * random.random())
+    Particles.random_particle_2_circle(entities, self.pos, 4, 45, 36, colour=Fun.WHITE, angle_mod=180 * random.random())
+    Particles.random_particle_2_circle(entities, self.pos, 2, 90, 36, colour=Fun.LIGHT_BLUE, size=5, angle_mod=180 * random.random())
     Fun.play_sound("Sword launch")
 
 
@@ -430,7 +430,7 @@ def jeanne_building(self, skill, entities, level):
                     for x in range(5):
                         pos = Fun.random_point_in_circle(p, 16)
                         entities["particles"].append(
-                            Fun.RandomParticle1(pos, Fun.GREEN, -2, round(10 + 10 * random.random()),
+                            Particles.RandomParticle1(pos, Fun.GREEN, -2, round(10 + 10 * random.random()),
                                                 size=(2, 4))
                         )
                     entities["items"][-1].free_var["Health"] *= 2
@@ -440,7 +440,7 @@ def jeanne_building(self, skill, entities, level):
                 for x in range(5):
                     pos = Fun.random_point_in_circle(p, 16)
                     entities["particles"].append(
-                        Fun.RandomParticle1(pos, Fun.RED, -2, round(10 + 10 * random.random()),
+                        Particles.RandomParticle1(pos, Fun.RED, -2, round(10 + 10 * random.random()),
                                             size=(2, 4))
                     )
                 entities["items"][-1].free_var["Fire rate"] = 10
@@ -464,7 +464,7 @@ def jeanne_building(self, skill, entities, level):
                     for x in range(5):
                         pos = Fun.random_point_in_circle(e.pos, 16)
                         entities["particles"].append(
-                            Fun.RandomParticle1(pos, Fun.GREEN, -2, round(10 + 10 * random.random()),
+                            Particles.RandomParticle1(pos, Fun.GREEN, -2, round(10 + 10 * random.random()),
                                                 size=(2, 4))
                         )
                     break
@@ -477,12 +477,12 @@ def jeanne_building(self, skill, entities, level):
         img_1 = img.subsurface((96, 00, 16, 16))
         img_2 = img.subsurface((00, 00, 16, 16))
         for p in pos:
-            entities["particles"].append(Fun.AfterImage(p, img_1, 1))
-            entities["particles"].append(Fun.AfterImage([p[0], p[1]-4], img_2, 1))
+            entities["particles"].append(Particles.AfterImage(p, img_1, 1))
+            entities["particles"].append(Particles.AfterImage([p[0], p[1]-4], img_2, 1))
         return
 
     for p in pos:
-        entities["particles"].append(Fun.AfterImage(p, img, 1))
+        entities["particles"].append(Particles.AfterImage(p, img, 1))
 
 
 def jeanne_guns_blazing(self, skill, entities, level):
@@ -503,17 +503,17 @@ def jeanne_guns_blazing(self, skill, entities, level):
         e.weapon.ammo += magazine_ammo_back
         e.status["Fuller auto"] += 5 * 60
 
-        Fun.random_particle_2_circle(entities, e.pos, 4, 15, 36, colour=Fun.RED, angle_mod=180 * random.random())
-        Fun.random_particle_2_circle(entities, self.pos, 4, 15, 36, colour=Fun.RED, angle_mod=180 * random.random())
+        Particles.random_particle_2_circle(entities, e.pos, 4, 15, 36, colour=Fun.RED, angle_mod=180 * random.random())
+        Particles.random_particle_2_circle(entities, self.pos, 4, 15, 36, colour=Fun.RED, angle_mod=180 * random.random())
         if e.name == "Lord":
-            Fun.random_particle_2_circle(entities, e.pos, 2, 60, 36, colour=Fun.YELLOW, size=5,
+            Particles.random_particle_2_circle(entities, e.pos, 2, 60, 36, colour=Fun.YELLOW, size=5,
                                          angle_mod=180 * random.random())
             e.weapon.ammo_pool += 100
             e.status["No damage"] += 5 * 60
     if "Resupply" in self.free_var:
         for i in entities["items"]:
             if i.name == "Jeanne Turret":
-                Fun.random_particle_2_circle(entities, i.pos, 4, 15, 36, colour=Fun.RED,
+                Particles.random_particle_2_circle(entities, i.pos, 4, 15, 36, colour=Fun.RED,
                                              angle_mod=180 * random.random())
                 self.free_var["Ammo"] = 25
     # TODO: Add sound
@@ -548,7 +548,7 @@ def corrine_detect_targets(self, skill, entities, level):
         if e.team == self.team:
             continue
         if Fun.check_point_in_circle(self.targeting_range, self.pos[0], self.pos[1], e.pos[0], e.pos[1]):
-            entities["particles"].append(Fun.GrowingCircleEntityBound(e, Fun.DARK_GREEN, "Visible", 2))
+            entities["particles"].append(Particles.GrowingCircleEntityBound(e, Fun.DARK_GREEN, "Visible", 2))
             e.status["Visible"] += duration
     # TODO: Add visual effect and sound
 
@@ -584,7 +584,7 @@ def zander_smoke_screen(self, skill, entities, level):
     # Creates a smoke grenade in front
     for x in range(32):
         pos = Fun.random_point_in_cone(self.pos, 64, self.angle, 60)
-        entities["particles"].append(Fun.Smoke(
+        entities["particles"].append(Particles.Smoke(
             pos,
             # duration=(self.free_var["Duration"] // 4, self.free_var["Duration"] // 3)
         ))
@@ -640,11 +640,11 @@ def m3d1c_discharge(self, skill, entities, level):
     Fun.play_sound("Electricity 1")
     number_of_particle = 18
     for particles_to_add in range(360 // number_of_particle):
-        entities["particles"].append(Fun.RandomParticle2(
-            [self.pos[0], self.pos[1]], Fun.YELLOW, 1 + 3 * random.random(), random.randint(45, 90),
+        entities["particles"].append(Particles.RandomParticle2(
+            [self.pos[0], self.pos[1]], Particles.YELLOW, 1 + 3 * random.random(), random.randint(45, 90),
             particles_to_add * number_of_particle, size=Fun.get_random_element_from_list([3, 4 ,6])))
     duration = 9
-    entities["particles"].append(Fun.GrowingCircleTransparent(
+    entities["particles"].append(Particles.GrowingCircleTransparent(
         self.pos, Fun.WHITE, dist/duration, duration, 0, 4, alpha=62))
 
 
@@ -673,7 +673,7 @@ def m3d1c_robot_fuck_off(self, skill, entities, level):
     Fun.play_sound("Electricity 2")
 
     duration = 9
-    entities["particles"].append(Fun.GrowingCircleTransparent(
+    entities["particles"].append(Particles.GrowingCircleTransparent(
         self.pos, Fun.WHITE, dist/duration, duration, 0, 4, alpha=62))
 
 
@@ -699,7 +699,7 @@ def vincent_armour_breaker(self, skill, entities, level):
         # Visual
         number_of_particle = 9
         for particles_to_add in range(360 // number_of_particle):
-            entities["background particles"].append(Fun.RandomParticle2(
+            entities["background particles"].append(Particles.RandomParticle2(
                 [e.pos[0], e.pos[1]], Fun.GREEN, 2 * random.random(), random.randint(15, 45),
                                                        particles_to_add * number_of_particle,
                 size=Fun.get_random_element_from_list([3, 4, 6])))
@@ -709,7 +709,7 @@ def vincent_armour_breaker(self, skill, entities, level):
         for x in range(7):
             angle = self.aim_angle - 5 * 3 + 5 * x + random.uniform(-30, 30)
             num = int(random.random() > 0.7)
-            entities["particles"].append(Fun.RandomParticle2(
+            entities["particles"].append(Particles.RandomParticle2(
                 Fun.move_with_vel_angle(self.pos, 6, angle),
                 [Fun.LIGHT_GREEN, Fun.DARK_GREEN][num], 4 * [1, 1.75][num], 15, angle, size=4 * [1, 2][num]))
 
@@ -726,7 +726,7 @@ def vincent_last_stand(self, skill, entities, level):
         speed = 1 + 3 * random.random()
         time = random.randint(45, 90)
         dist = speed * time
-        entities["particles"].append(Fun.RandomParticle2(
+        entities["particles"].append(Particles.RandomParticle2(
             Fun.move_with_vel_angle(self.pos, dist, angle), Fun.DARK_RED, speed, time, angle - 180,
             size=Fun.get_random_element_from_list([3, 4 ,6])))
     # TODO: Add sound
@@ -785,7 +785,7 @@ def curtis_kick(self, skill, entities, level):
                 for x in range(5):
                     pos = Fun.random_point_in_circle(e.pos, 16)
                     entities["particles"].append(
-                        Fun.RandomParticle1(pos, Fun.LIGHT_BLUE, 2, round(10 + 10 * random.random()), size=(4, 2))
+                        Particles.RandomParticle1(pos, Fun.LIGHT_BLUE, 2, round(10 + 10 * random.random()), size=(4, 2))
                     )
 
     if extra_effects:
@@ -795,7 +795,7 @@ def curtis_kick(self, skill, entities, level):
     for y in range(3):
         for x in range(7):
             angle = self.aim_angle - 5 * 3 + 5 * x + random.uniform(-30, 30)
-            entities["particles"].append(Fun.RandomParticle2(
+            entities["particles"].append(Particles.RandomParticle2(
                 Fun.move_with_vel_angle(self.pos, 6, angle),
                 Fun.WHITE, 4, 15, angle, size=3))
 
@@ -812,7 +812,7 @@ def curtis_fool(self, skill, entities, level):
             b.duration = 1200
             sound_allowed = True
             for particles_to_add in range(360 // 36):
-                entities["particles"].append(Fun.RandomParticle2(
+                entities["particles"].append(Particles.RandomParticle2(
                     [b.pos[0] - 30 * math.cos(particles_to_add * 36 * math.pi / 180),
                      b.pos[1] - 30 * math.sin(particles_to_add * 36 * math.pi / 180)],
                     Fun.LIGHT_BLUE, -2, 15, particles_to_add * 36, size=3))
@@ -822,7 +822,7 @@ def curtis_fool(self, skill, entities, level):
         b.duration = round(b.og_info[1] * 2)
         b.angle = Fun.angle_between(self.mouse_pos, b.pos)
         for x in range(3):
-            entities["particles"].append(Fun.RandomParticle2(
+            entities["particles"].append(Particles.RandomParticle2(
                 [b.pos[0], b.pos[1]],
                 Fun.AMBER, b.speed // 2, 14,
                                    b.angle + 180 + random.uniform(-4, 4)))
@@ -904,7 +904,7 @@ def mark_target_locator(self, skill, entities, level):
         if e.team == self.team:
             continue
         if Fun.check_point_in_cone(self.targeting_range, self.pos[0], self.pos[1], e.pos[0], e.pos[1], self.angle, self.targeting_angle):
-            entities["particles"].append(Fun.GrowingCircle(e.pos, Fun.DARK_GREEN, 0, 1, 18, 2))
+            entities["particles"].append(Particles.GrowingCircle(e.pos, Fun.DARK_GREEN, 0, 1, 18, 2))
 
 
 def mark_smoke_grenade(self, skill, entities, level):
@@ -948,7 +948,7 @@ def sand_buggy_drift(self, skill, entities, level):
         smoke_colour_pool = [Fun.ORANGE, Fun.ORANGE, Fun.LIGHT_GRAY]
     if level["mission number"] > 10:
         smoke_colour_pool = [Fun.WHITE, Fun.GRAY, Fun.LIGHT_GRAY]
-    entities["background particles"].append(Fun.Smoke(Fun.random_point_in_circle(
+    entities["background particles"].append(Particles.Smoke(Fun.random_point_in_circle(
         Fun.move_with_vel_angle(self.pos, 12, self.free_var["Move angle"] -180), 16),
         colour=smoke_colour_pool[random.randint(0, 2)]
                                            ))

@@ -1,10 +1,10 @@
 import pygame as pg
 import sys
 import random
-import numpy
 
 import Bullets
 import Items
+import Particles
 import Fun
 
 
@@ -46,7 +46,7 @@ def weather_handler(self, entities, bullets, level, time_passed, screen, CLOCK):
     player = entities["players"][0]
     if not level["free var"]["Is inside"]:
         if level["free var"]["Weather"] == "Rainy":
-            Fun.rain_fall(entities, player.pos, 630)
+            Particles.rain_fall(entities, player.pos, 630)
         elif level["free var"]["Weather"] == "Windy":
             if len(entities["particles"]) <= 5000 and random.randint(0, 1) == 0:
                 true_pos = Fun.random_point_in_circle(player.pos, 630)
@@ -54,13 +54,13 @@ def weather_handler(self, entities, bullets, level, time_passed, screen, CLOCK):
                 duration = random.randint(60, 120)
 
                 if time_passed % 500 > 425:
-                    entities["particles"].append(Fun.Leaf([true_pos[0], true_pos[1] - 100],
+                    entities["particles"].append(Particles.Leaf([true_pos[0], true_pos[1] - 100],
                                                           x_speed=random.uniform(0.25, 3)))
                 elif random.random() < 0.125:
-                    entities["particles"].append(Fun.RandomParticle2(true_pos, Fun.ORANGE, random.uniform(2, 6),
+                    entities["particles"].append(Particles.RandomParticle2(true_pos, Fun.ORANGE, random.uniform(2, 6),
                                                                      duration, 180, size=random.randint(2, 5)))
                 else:
-                    entities["particles"].append(Fun.RandomParticle3(true_pos, Fun.WHITE, random.uniform(2, 6),
+                    entities["particles"].append(Particles.RandomParticle3(true_pos, Fun.WHITE, random.uniform(2, 6),
                                                                      duration, 180, (-120 + duration) * 0.0125,
                                                                      size=2))
 
@@ -69,7 +69,7 @@ def weather_handler(self, entities, bullets, level, time_passed, screen, CLOCK):
                 true_pos = Fun.random_point_in_circle(player.pos, 630 * 0.75)
                 duration = random.randint(60, 120)
 
-                entities["particles"].append(Fun.RandomParticle2(true_pos, Fun.ORANGE, random.uniform(2, 6),
+                entities["particles"].append(Particles.RandomParticle2(true_pos, Fun.ORANGE, random.uniform(2, 6),
                                                                  duration, 180, size=random.randint(2, 5)))
 
                 if time_passed % 4500 > 4000:
@@ -77,18 +77,18 @@ def weather_handler(self, entities, bullets, level, time_passed, screen, CLOCK):
                         true_pos = Fun.random_point_in_circle(player.pos, 630 * 0.5)
                         true_pos[0] -= screen.get_size()[0] * 0.5
                         duration = random.randint(60, 120) * 3
-                        entities["particles"].append(Fun.RandomParticle2(true_pos, Fun.ORANGE, random.uniform(2, 6),
+                        entities["particles"].append(Particles.RandomParticle2(true_pos, Fun.ORANGE, random.uniform(2, 6),
                                                                          duration, 180, size=random.randint(2, 5)))
 
 
 def radio_handler(entities, transmission):
     # This is just way better
     for x in entities["UI particles"]:
-        if type(x) == Fun.RadioTransmission:
+        if type(x) == Particles.RadioTransmission:
             for t in transmission:
                 x.extra_parts.append(t)
             return
-    entities["UI particles"].append(Fun.RadioTransmission(Fun.SPRITE_RADIO_VIVIANNE[4], [], Fun.WHITE, 0,
+    entities["UI particles"].append(Particles.RadioTransmission(Fun.SPRITE_RADIO_VIVIANNE[4], [], Fun.WHITE, 0,
                                                           extra_parts=transmission))
 
 
@@ -323,7 +323,7 @@ def mission_start(self, entities, bullets, level, time_passed, screen, CLOCK):
             ])
         return
     # BossIntro
-    entities["UI particles"].append(Fun.BossIntro(boss_name="HOVER TANK"))
+    entities["UI particles"].append(Particles.BossIntro(boss_name="HOVER TANK"))
     # level["scrolling target"]
     level["events"].append(
         MissionEvent("Finishing", trigger_on_for, False, [change_scrolling_target], free_var={"Timer": 60 * 5}))
@@ -533,14 +533,14 @@ def capture_zone(self, entities, bullets, level, time_passed, screen, CLOCK):
         if dist > 512:
             if not point["Captured"]:
                 pos = Fun.move_with_vel_angle(centroid, 128, Fun.angle_between(point["Pos"], centroid))
-                entities["UI particles"].append(Fun.GrowingCircle(pos, colour, 0, 1, 4, 0))
+                entities["UI particles"].append(Particles.GrowingCircle(pos, colour, 0, 1, 4, 0))
         else:
-            entities["background particles"].append(Fun.GrowingCircle(point["Pos"], colour, 0, 1, radius, 3))
+            entities["background particles"].append(Particles.GrowingCircle(point["Pos"], colour, 0, 1, radius, 3))
         if not point["Captured"]:
             rect_left, rect_top = point["Pos"][0]-50, point["Pos"][1]-5
-            entities["background particles"].append(Fun.GrowingSquare(
+            entities["background particles"].append(Particles.GrowingSquare(
                 [rect_left, rect_top, 100, 10], Fun.UI_COLOUR_NEW_BACKGROUND, [0, 0], 1))
-            entities["background particles"].append(Fun.GrowingSquare(
+            entities["background particles"].append(Particles.GrowingSquare(
                 [rect_left, rect_top, point["Cap gauge"], 10], colour, [0, 0], 1))
         # If Cap gauge over 0
 
@@ -595,7 +595,7 @@ def sandstorm(self, entities, bullets, level, time_passed, screen, CLOCK):
         duration = random.randint(60, 120)
 
         for x in range(2):
-            entities["particles"].append(Fun.RandomParticle2(true_pos, Fun.ORANGE, random.uniform(2, 6),
+            entities["particles"].append(Particles.RandomParticle2(true_pos, Fun.ORANGE, random.uniform(2, 6),
                                                              duration, 180, size=random.randint(2, 5)))
 
 

@@ -117,7 +117,7 @@ pg.mixer.set_num_channels(32)
 
 
 import Fun  # General use functions
-import Items
+import Items   # Everything crashes if I remove that
 import Event
 import Render
 import Entity

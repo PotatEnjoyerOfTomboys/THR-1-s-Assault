@@ -1,7 +1,6 @@
 from math import radians
 
 import pygame as pg
-import random
 import math
 
 import Fun

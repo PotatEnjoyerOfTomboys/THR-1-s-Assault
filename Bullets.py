@@ -3,8 +3,7 @@ import pygame as pg
 import random
 import Fun
 import Items
-from Fun import distance_between
-
+import Particles
 
 def spawn_bullet(owner, entities, bullet_class, pos, angle, bullet_info):
     entities["bullets"].append(bullet_class(pos, angle, bullet_info, owner))
@@ -47,13 +46,13 @@ class BasicBullet:
         for on_hit_effect in self.on_hit:
             on_hit_effect(self, collision, entities, level)
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
-            pg.draw.circle(WIN, self.colour, [self.pos[0] + scrolling[0],
+            pg.draw.circle(win, self.colour, [self.pos[0] + scrolling[0],
                                               self.pos[1] + scrolling[1]], self.radius)
             # Highlight effect
             # highlight_radius = self.radius * 3
-            # Fun.draw_transparent_circle(WIN, [self.pos[0] + scrolling[0] - highlight_radius / 2,
+            # Fun.draw_transparent_circle(win, [self.pos[0] + scrolling[0] - highlight_radius / 2,
             #                                   self.pos[1] + scrolling[1] - highlight_radius / 2,  highlight_radius],
             #                             (255 - self.colour[0], 255 - self.colour[1], 255 - self.colour[2]),
             #                             # (255, 255, 255),
@@ -165,7 +164,7 @@ class BlueBall(BasicBullet):
                 if self.target_pos:
 
                     if self.duration % random.randint(5, 8) == 0:
-                        entities["particles"].append(Fun.Smoke([self.pos[0], self.pos[1]], colour=Fun.DARK_BLUE))
+                        entities["particles"].append(Particles.Smoke([self.pos[0], self.pos[1]], colour=Fun.DARK_BLUE))
                     self.angle = Fun.angle_between(self.target_pos, self.pos)
 
                     invert_aim = 1
@@ -256,7 +255,7 @@ def base_grenade_act(self, entities):
 
 
 fire_ran_spread = [0, []]
-for x in range(100):
+for fire_randomizer in range(100):
     fire_ran_spread[1].append(random.uniform(-2, 2))
 
 
@@ -285,9 +284,9 @@ def normal_bullet_wall_hit(self, level, entities):
             entities["sounds"].append(  # [pos, duration, radius]
                 Fun.Sound(self.pos, Fun.sounds_dict["Bullet hitting wall 1"]["Sound"].get_length() * 60, 500 * 0.5 + 50)
             )
-            Fun.sparks(entities, self.pos, [self.duration, self.radius, self.speed], self.angle)
+            Particles.sparks(entities, self.pos, [self.duration, self.radius, self.speed], self.angle)
             if wall.left < self.pos[0] < wall.right and self.pos[1] > wall.bottom - 8:
-                entities["background particles"].append(Fun.BulletHole([self.pos[0], wall.bottom - 8]))
+                entities["background particles"].append(Particles.BulletHole([self.pos[0], wall.bottom - 8]))
 
 
 def fire_bullet_wall_hit(self, level, entities):
@@ -297,7 +296,7 @@ def fire_bullet_wall_hit(self, level, entities):
                                      self.radius):
             # Give effects when the bullets hit walls, mostly visual
             self.duration = 0
-            Fun.flame_burst(entities, self.pos,
+            Particles.flame_burst(entities, self.pos,
                             [self.duration,
                              self.radius,
                              self.speed], self.angle, self.colour)
@@ -432,7 +431,7 @@ def basic_visual(self, entities):
         size = self.damage / 3 * random.random() + 1
         if size > 16:
             size = 16
-        entities["particles"].append(Fun.RandomParticle2(
+        entities["particles"].append(Particles.RandomParticle2(
             self.pos.copy(), self.colour, self.speed * (0.25 + 0.5 * random.random()),
             random.randint(8, 32), self.angle + random.uniform(-7.5, 7.5), size=size))
 
@@ -440,7 +439,7 @@ def basic_visual(self, entities):
 def fire_visual(self, entities):
     for x in range(2):
         size = self.damage / 3 * random.random()
-        entities["particles"].append(Fun.RandomParticle1(
+        entities["particles"].append(Particles.RandomParticle1(
             [self.pos[0] + random.randint(-3, 3), self.pos[1]], self.colour,
             self.speed * (0.25 + 0.5 * random.random()) * -1,
             random.randint(8, 32), size=[size, size]))
@@ -451,7 +450,7 @@ def boom_visual(self, entities):
         size = self.damage / 3 * random.random()
         if size > 16:
             size = 16
-        entities["particles"].append(Fun.RandomParticle2(
+        entities["particles"].append(Particles.RandomParticle2(
             self.pos.copy(), self.colour, self.speed * (1 + random.random()),
             random.randint(8, 32), self.angle + random.uniform(-7.5, 7.5), size=size))
 
@@ -462,7 +461,7 @@ def melee_visual(self, entities):
 
 def laser_visual(self, entities, pos):
     for x in range(8):
-        entities["particles"].append(Fun.LineParticle(
+        entities["particles"].append(Particles.LineParticle(
             pos.copy(),
             self.colour,
             random.randint(8, 32),
@@ -476,7 +475,7 @@ def electric_visual(self, entities):
 
 
 def countered_visual(self, entities):
-    Fun.random_particle_2_circle(entities, self.pos, random.uniform(1.5, 3), 20, 36,
+    Particles.random_particle_2_circle(entities, self.pos, random.uniform(1.5, 3), 20, 36,
                                  colour=Fun.PARRIED_COLOUR, size=4, angle_mod=self.angle)
 
 
@@ -499,13 +498,13 @@ def on_hit_stun_baton(self, collision, entities, level):
         if collision.damage_taken and collision.status["No damage"] == 8:
 
             collision.status["Stunned"] += 15
-            Fun.random_particle_2_circle(entities, collision.pos, 3, 25, 16, colour=Fun.YELLOW, size=3, angle_mod=180 * random.random())
+            Particles.random_particle_2_circle(entities, collision.pos, 3, 25, 16, colour=Fun.YELLOW, size=3, angle_mod=180 * random.random())
 
 
 def on_hit_marked(self, collision, entities, level):
     if collision.status["Visible"] <= 60:
         collision.status["Visible"] = 60
-    entities["particles"].append(Fun.GrowingCircle(collision.pos, Fun.DARK_GREEN, 0, 60, collision.thiccness, 2))
+    entities["particles"].append(Particles.GrowingCircle(collision.pos, Fun.DARK_GREEN, 0, 60, collision.thiccness, 2))
 
 
 def on_hit_scavenge(self, collision, entities, level):
@@ -521,7 +520,7 @@ def on_hit_intimidation(self, collision, entities, level):
         for x in range(5):
             pos = Fun.random_point_in_circle(collision.pos, 16)
             entities["particles"].append(
-                Fun.RandomParticle1(pos, Fun.GRAY, 2, round(10 + 10 * random.random()),
+                Particles.RandomParticle1(pos, Fun.GRAY, 2, round(10 + 10 * random.random()),
                                     size=(2, 4))
         )
 
@@ -534,7 +533,7 @@ def on_hit_fear(self, collision, entities, level):
         for x in range(5):
             pos = Fun.random_point_in_circle(collision.pos, 16)
             entities["particles"].append(
-                Fun.RandomParticle1(pos, Fun.LIGHT_BLUE, 2, round(10 + 10 * random.random()),
+                Particles.RandomParticle1(pos, Fun.LIGHT_BLUE, 2, round(10 + 10 * random.random()),
                                     size=(2, 4))
         )
 
@@ -565,7 +564,7 @@ def on_hit_cremation(self, collision, entities, level):
         collision.status["Visible"] = 45
 
 def on_hit_big_iron(self, collision, entities, level):
-    Fun.random_particle_2_circle(entities, self.owner.pos, 3, 25, 36, colour=Fun.YELLOW, size=3, angle_mod=180 * random.random())
+    Particles.random_particle_2_circle(entities, self.owner.pos, 3, 25, 36, colour=Fun.YELLOW, size=3, angle_mod=180 * random.random())
     self.owner.skills[0].recharge += self.owner.skills[0].recharge_max * 0.75
     if self.owner.skills[0].recharge > self.owner.skills[0].recharge_max:
         self.owner.skills[0].recharge = self.owner.skills[0].recharge_max
@@ -574,7 +573,7 @@ def on_hit_big_iron(self, collision, entities, level):
 def on_hit_3rd_degree(self, collision, entities, level):
     if collision.status["Burning"] <= 60:
         collision.status["Burning"] += 60
-    Fun.random_particle_2_circle(entities, collision.pos, 3, 25, 16, colour=Fun.FIRE, size=6, angle_mod=180 * random.random())
+    Particles.random_particle_2_circle(entities, collision.pos, 3, 25, 16, colour=Fun.FIRE, size=6, angle_mod=180 * random.random())
 
 
 def on_hit_shrapnel(self, collision, entities, level):
@@ -598,7 +597,7 @@ def on_hit_stun_strike(self, collision, entities, level):
         mod = 100
     if collision.status["Stunned"] <= mod:
         collision.status["Stunned"] = mod
-    Fun.random_particle_2_circle(entities, self.pos, 3, 25, 16, colour=Fun.YELLOW, size=6, angle_mod=180 * random.random())
+    Particles.random_particle_2_circle(entities, self.pos, 3, 25, 16, colour=Fun.YELLOW, size=6, angle_mod=180 * random.random())
 
     if "Concussion" in self.owner.free_var:
         self.owner.agro -= 1
@@ -617,7 +616,7 @@ def on_hit_poison_strike(self, collision, entities, level):
             for x in range(3):
                 pos = Fun.random_point_in_circle(collision.pos, 16)
                 entities["particles"].append(
-                    Fun.RandomParticle1(pos, Fun.GRAY, 2, round(10 + 10 * random.random()), size=(2, 4)))
+                    Particles.RandomParticle1(pos, Fun.GRAY, 2, round(10 + 10 * random.random()), size=(2, 4)))
     if "Neurotoxin" in self.owner.free_var:
         if collision.did_agro_raise == 0:
             collision.agro += 30
@@ -625,10 +624,10 @@ def on_hit_poison_strike(self, collision, entities, level):
             for x in range(3):
                 pos = Fun.random_point_in_circle(collision.pos, 16)
                 entities["particles"].append(
-                    Fun.RandomParticle1(pos, Fun.DARK_RED, -2, round(10 + 10 * random.random()), size=(2, 4)))
+                    Particles.RandomParticle1(pos, Fun.DARK_RED, -2, round(10 + 10 * random.random()), size=(2, 4)))
 
         # "Infection": {"Neurotoxin"
-    Fun.random_particle_2_circle(entities, self.pos, 3, 25, 16, colour=Fun.DARK_TEAL, size=6, angle_mod=180 * random.random())
+    Particles.random_particle_2_circle(entities, self.pos, 3, 25, 16, colour=Fun.DARK_TEAL, size=6, angle_mod=180 * random.random())
     print("Poison")
 
 
@@ -645,7 +644,7 @@ def on_hit_sun(self, collision, entities, level):
     mod = 60
     if collision.status["Stunned"] <= mod:
         collision.status["Stunned"] = mod
-    Fun.random_particle_2_circle(entities, self.pos, 3, 25, 16, colour=Fun.YELLOW, size=6, angle_mod=180 * random.random())
+    Particles.random_particle_2_circle(entities, self.pos, 3, 25, 16, colour=Fun.YELLOW, size=6, angle_mod=180 * random.random())
 
 
 def on_hit_temperance(self, collision, entities, level):
@@ -701,7 +700,7 @@ class Bullet(BasicBullet):
 
             # Visual effect for bullets that go fast
             if self.smoke_effect and self.duration % random.randint(3, 5) == 0:
-                entities["particles"].append(Fun.Smoke([self.pos[0], self.pos[1]]))
+                entities["particles"].append(Particles.Smoke([self.pos[0], self.pos[1]]))
 
             # Check for collisions
             for collision in entities["entities"]:
@@ -720,7 +719,7 @@ class Bullet(BasicBullet):
 
             self.duration -= 1
 
-        # pg.draw.circle(WIN, (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)),
+        # pg.draw.circle(win, (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)),
         # [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]], self.radius)
 
 
@@ -769,7 +768,7 @@ class BulletSlowing(BasicBullet):
 
             # Visual effect for bullets that go fast
             if self.smoke_effect and self.duration % random.randint(3, 5) == 0:
-                entities["particles"].append(Fun.Smoke([self.pos[0], self.pos[1]]))
+                entities["particles"].append(Particles.Smoke([self.pos[0], self.pos[1]]))
 
 
 class BulletDanmaku(BasicBullet):
@@ -1104,9 +1103,9 @@ class LaserDanmaku2(BasicBullet):
 
             self.duration -= 1
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
-            pg.draw.line(WIN, self.colour,
+            pg.draw.line(win, self.colour,
                          [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
                          Fun.move_with_vel_angle([self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
                                                  self.radius, self.angle), width=3)
@@ -1139,7 +1138,7 @@ class Fire(BasicBullet):
     def act(self, entities, level):
         if self.duration > 0:
             if self.particle_allow and self.duration % 2 == 0:
-                entities["particles"].append(Fun.FireParticle([self.pos[0], self.pos[1]], colour=self.colour))
+                entities["particles"].append(Particles.FireParticle([self.pos[0], self.pos[1]], colour=self.colour))
 
             fire_randomize_pos(self)
 
@@ -1161,10 +1160,10 @@ class Fire(BasicBullet):
 
             self.duration -= 1
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
             # Highlight effect
-            Fun.draw_transparent_circle(WIN, [self.pos[0] + scrolling[0] - self.radius / 2,
+            Fun.draw_transparent_circle(win, [self.pos[0] + scrolling[0] - self.radius / 2,
                                               self.pos[1] + scrolling[1] - self.radius / 2,  self.radius],
                                         self.colour,
                                         # (255, 255, 255),
@@ -1198,7 +1197,7 @@ class Napalm(BasicBullet):
     def act(self, entities, level):
         if self.duration > 0:
             if self.particle_allow and self.duration % 2 == 0:
-                entities["particles"].append(Fun.FireParticle([self.pos[0], self.pos[1]], colour=self.colour))
+                entities["particles"].append(Particles.FireParticle([self.pos[0], self.pos[1]], colour=self.colour))
             # Make the bullet move based on the angle
             fire_randomize_pos(self)
 
@@ -1219,10 +1218,10 @@ class Napalm(BasicBullet):
 
             self.duration -= 1
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
             # Highlight effect
-            Fun.draw_transparent_circle(WIN, [self.pos[0] + scrolling[0] - self.radius / 2,
+            Fun.draw_transparent_circle(win, [self.pos[0] + scrolling[0] - self.radius / 2,
                                               self.pos[1] + scrolling[1] - self.radius / 2,  self.radius],
                                         self.colour,
                                         # (255, 255, 255),
@@ -1255,7 +1254,7 @@ class Flare(BasicBullet):
     def act(self, entities, level):
         if self.duration > 0:
             if self.particle_allow and self.duration % 2 == 0:
-                entities["particles"].append(Fun.FireParticle([self.pos[0], self.pos[1]], colour=self.colour))
+                entities["particles"].append(Particles.FireParticle([self.pos[0], self.pos[1]], colour=self.colour))
 
             # Make the bullet move based on the angle
             fire_randomize_pos(self)
@@ -1432,7 +1431,7 @@ class Missile(BasicBullet):
             if self.target_pos:
 
                 if self.duration % random.randint(5, 8) == 0:
-                    entities["particles"].append(Fun.Smoke([self.pos[0], self.pos[1]], colour=[
+                    entities["particles"].append(Particles.Smoke([self.pos[0], self.pos[1]], colour=[
                         Fun.WHITE, Fun.GRAY, Fun.LIGHT_GRAY
                     ][random.randint(0, 2)]
                                                            ))
@@ -1486,12 +1485,12 @@ class Missile(BasicBullet):
             if self.duration == 0:
                 self.payload(None, entities, level)
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
             # missile
-            pg.draw.circle(WIN, self.colour, [self.pos[0] + scrolling[0],
+            pg.draw.circle(win, self.colour, [self.pos[0] + scrolling[0],
                                               self.pos[1] + scrolling[1]], self.radius)
-            Fun.blitRotate2(WIN, missile,
+            Fun.blitRotate2(win, missile,
                             [self.pos[0] - missile.get_width() // 2 + scrolling[0],
                              self.pos[1] - missile.get_height() // 2 + scrolling[1]],
                             180 - self.angle)
@@ -1499,11 +1498,11 @@ class Missile(BasicBullet):
             if self.target_pos:
                 center = self.target_pos
 
-                pg.draw.rect(WIN, Fun.GREEN, [center[0] - 14 + scrolling[0],
+                pg.draw.rect(win, Fun.GREEN, [center[0] - 14 + scrolling[0],
                                               center[1] - 14 + scrolling[1],
                                               28,
                                               28], 2)
-                pg.draw.lines(WIN, Fun.GREEN, True, (
+                pg.draw.lines(win, Fun.GREEN, True, (
                     [center[0] - 14 + scrolling[0], center[1] + scrolling[1]],
                     [center[0] + scrolling[0], center[1] - 14 + scrolling[1]],
                     [center[0] + 14 + scrolling[0], center[1] + scrolling[1]],
@@ -1553,7 +1552,7 @@ class GrenadeType0(BasicBullet):
             # Explode here
             self.duration -= 1
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         pass
 
 
@@ -1586,11 +1585,11 @@ class GrenadeType1(BasicBullet):
                                                                    self.radius,
                                                                    self.damage, self.secondary_explosion], self.owner))
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
-            pg.draw.circle(WIN, self.colour, [self.pos[0] + scrolling[0],
+            pg.draw.circle(win, self.colour, [self.pos[0] + scrolling[0],
                                               self.pos[1] + scrolling[1]], self.radius)
-            Fun.blitRotate2(WIN, grenade_1,
+            Fun.blitRotate2(win, grenade_1,
                             [self.pos[0] - grenade_1.get_width() // 2 + scrolling[0],
                              self.pos[1] - grenade_1.get_height() // 2 + scrolling[1]],
                             180 - self.angle + self.duration * self.speed)
@@ -1633,11 +1632,11 @@ class GrenadeType2(BasicBullet):
                      self.secondary_explosion["Damage"],
                      self.secondary_explosion["Fire property"]], self.owner))
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
-            pg.draw.circle(WIN, self.colour, [self.pos[0] + scrolling[0],
+            pg.draw.circle(win, self.colour, [self.pos[0] + scrolling[0],
                                               self.pos[1] + scrolling[1]], self.radius)
-            Fun.blitRotate2(WIN, grenade_2,
+            Fun.blitRotate2(win, grenade_2,
                             [self.pos[0] - grenade_2.get_width() // 2 + scrolling[0],
                              self.pos[1] - grenade_2.get_height() // 2 + scrolling[1]],
                             180 - self.angle + self.duration * self.speed)
@@ -1670,7 +1669,7 @@ class GrenadeType3(BasicBullet):
             # Explode here
             Fun.play_sound("Grenade 3", "SFX")
             for p in range(self.secondary_explosion["Radius"] * 2):
-                entities["particles"].append(Fun.Smoke(
+                entities["particles"].append(Particles.Smoke(
                     Fun.random_point_in_circle(self.pos, self.secondary_explosion["Radius"]),
                     duration=(self.secondary_explosion["Duration"] - 50, self.secondary_explosion["Duration"])
                 ))
@@ -1688,11 +1687,11 @@ class GrenadeType3(BasicBullet):
                 }},
                                                 self.pos))
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
-            pg.draw.circle(WIN, self.colour, [self.pos[0] + scrolling[0],
+            pg.draw.circle(win, self.colour, [self.pos[0] + scrolling[0],
                                               self.pos[1] + scrolling[1]], self.radius)
-            Fun.blitRotate2(WIN, grenade_3,
+            Fun.blitRotate2(win, grenade_3,
                             [self.pos[0] - grenade_3.get_width() // 2 + scrolling[0],
                              self.pos[1] - grenade_3.get_height() // 2 + scrolling[1]],
                             180 - self.angle + self.duration * self.speed)
@@ -1725,11 +1724,11 @@ class GrenadeType4(BasicBullet):
         if self.duration == 0:
             # Explode here
             radius = self.secondary_explosion["Radius"]
-            entities["particles"].append(Fun.GrowingCircleTransparent(
+            entities["particles"].append(Particles.GrowingCircleTransparent(
                 self.pos, Fun.WHITE, 0, 4, radius, 0, alpha=62))
-            entities["particles"].append(Fun.GrowingCircleTransparent(
+            entities["particles"].append(Particles.GrowingCircleTransparent(
                 self.pos, Fun.WHITE, 0, 6, radius*0.7, 0, alpha=62))
-            entities["particles"].append(Fun.GrowingCircleTransparent(
+            entities["particles"].append(Particles.GrowingCircleTransparent(
                 self.pos, Fun.WHITE, 0, 9, radius*0.5, 0, alpha=62))
             for t in ["players", "enemies"]:
                 for e in entities[t]:
@@ -1742,14 +1741,14 @@ class GrenadeType4(BasicBullet):
                             dist = round(350 - dist)
                             if dist < 0:
                                 dist = 0
-                            entities["UI particles"].append(Fun.Flashbang(duration=dist))
+                            entities["UI particles"].append(Particles.Flashbang(duration=dist))
                             Fun.play_sound("flashbang", "SFX", fadeout=dist / 350)
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
-            pg.draw.circle(WIN, self.colour, [self.pos[0] + scrolling[0],
+            pg.draw.circle(win, self.colour, [self.pos[0] + scrolling[0],
                                               self.pos[1] + scrolling[1]], self.radius)
-            Fun.blitRotate2(WIN, grenade_4,
+            Fun.blitRotate2(win, grenade_4,
                             [self.pos[0] - grenade_4.get_width() // 2 + scrolling[0],
                              self.pos[1] - grenade_4.get_height() // 2 + scrolling[1]],
                             180 - self.angle + self.duration * self.speed)
@@ -1792,11 +1791,11 @@ class GrenadeType5(BasicBullet):
                      self.secondary_explosion["Damage"],
                      self.secondary_explosion["Bullet property"]], self.owner))
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
-            pg.draw.circle(WIN, self.colour, [self.pos[0] + scrolling[0],
+            pg.draw.circle(win, self.colour, [self.pos[0] + scrolling[0],
                                               self.pos[1] + scrolling[1]], self.radius)
-            Fun.blitRotate2(WIN, grenade_5,
+            Fun.blitRotate2(win, grenade_5,
                             [self.pos[0] - grenade_5.get_width() // 2 + scrolling[0],
                              self.pos[1] - grenade_5.get_height() // 2 + scrolling[1]],
                             180 - self.angle + self.duration * self.speed)
@@ -1839,11 +1838,11 @@ class GrenadeType6(BasicBullet):
                                                                    self.radius,
                                                                    self.damage, self.secondary_explosion], self.owner))
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
-            pg.draw.circle(WIN, self.colour, [self.pos[0] + scrolling[0],
+            pg.draw.circle(win, self.colour, [self.pos[0] + scrolling[0],
                                               self.pos[1] + scrolling[1]], self.radius)
-            Fun.blitRotate2(WIN, grenade_6,
+            Fun.blitRotate2(win, grenade_6,
                             [self.pos[0] - grenade_6.get_width() // 2 + scrolling[0],
                              self.pos[1] - grenade_6.get_height() // 2 + scrolling[1]],
                             180 - self.angle + self.duration * self.speed)
@@ -1869,7 +1868,7 @@ class GrenadeType7(BasicBullet):
         if self.duration > 0:
             base_grenade_act(self, entities)
         if self.duration == 0:
-            entities["particles"].append(Fun.GrowingCircle(self.pos, Fun.GREEN, self.expl_radius / 10, 10, 0, 6))
+            entities["particles"].append(Particles.GrowingCircle(self.pos, Fun.GREEN, self.expl_radius / 10, 10, 0, 6))
             # Explode here
             self.duration -= 1
             # Give healing around
@@ -1888,11 +1887,11 @@ class GrenadeType7(BasicBullet):
                 if Fun.distance_between(e.pos, self.pos) <= self.expl_radius:
                     Fun.damage_calculation(e, self.damage, "Healing", death_message="Was an undead")
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
-            pg.draw.circle(WIN, self.colour, [self.pos[0] + scrolling[0],
+            pg.draw.circle(win, self.colour, [self.pos[0] + scrolling[0],
                                               self.pos[1] + scrolling[1]], self.radius)
-            Fun.blitRotate2(WIN, grenade_1,
+            Fun.blitRotate2(win, grenade_1,
                             [self.pos[0] - grenade_1.get_width() // 2 + scrolling[0],
                              self.pos[1] - grenade_1.get_height() // 2 + scrolling[1]],
                             180 - self.angle + self.duration * self.speed)
@@ -1937,11 +1936,11 @@ class C4(BasicBullet):
                                                                    self.radius,
                                                                    self.damage, self.secondary_explosion], self.owner))
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
-            pg.draw.circle(WIN, self.colour, [self.pos[0] + scrolling[0],
+            pg.draw.circle(win, self.colour, [self.pos[0] + scrolling[0],
                                               self.pos[1] + scrolling[1]], self.radius)
-            Fun.blitRotate2(WIN, grenade_c4,
+            Fun.blitRotate2(win, grenade_c4,
                             [self.pos[0] - grenade_c4.get_width() // 2 + scrolling[0],
                              self.pos[1] - grenade_c4.get_height() // 2 + scrolling[1]],
                             180 - self.angle + self.duration * self.speed)
@@ -1974,12 +1973,12 @@ class ExplosionSecondary(BasicBullet):
     def act(self, entities, level):
         if self.duration == self.starting_duration:
             # Cool explosion stuff
-            entities["particles"].append(Fun.NewExplosionEffect([self.pos[0], self.pos[1]],
+            entities["particles"].append(Particles.NewExplosionEffect([self.pos[0], self.pos[1]],
                                                                 duration=round(self.duration * 4.5),
                                                                 particles=3 + self.radius // 4,
                                                                 radius=self.radius * 2,
                                                                 particle_growth=self.growth))
-            entities["particles"].append(Fun.GrowingCircle([self.pos[0], self.pos[1]], Fun.WHITE,
+            entities["particles"].append(Particles.GrowingCircle([self.pos[0], self.pos[1]], Fun.WHITE,
                                                            self.growth, self.duration, self.radius, 3))
             Fun.play_sound("Explosion", "SFX")
         if self.duration > 0:
@@ -2006,7 +2005,7 @@ class ExplosionSecondary(BasicBullet):
 
             self.duration -= 1
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         pass
 
     def hit_wall(self, entities, level):
@@ -2052,13 +2051,13 @@ class Artillery(BasicBullet):
                 [0, self.secondary_explosion["Duration"], self.radius/self.secondary_explosion["Duration"], self.damage,
                  {"Damage type": self.damage_type, "Growth": self.radius/self.secondary_explosion["Duration"]}])
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
             Fun.draw_transparent_circle(
-                WIN, [self.pos[0] + scrolling[0] - self.radius , self.pos[1] + scrolling[1] - self.radius, self.radius * 2],
+                win, [self.pos[0] + scrolling[0] - self.radius , self.pos[1] + scrolling[1] - self.radius, self.radius * 2],
                                         self.colour, 64)
             radius_2 = self.radius * (1 - self.duration / self.og_info[1])
-            Fun.draw_transparent_circle(WIN, [self.pos[0] + scrolling[0] - radius_2, self.pos[1] + scrolling[1] - radius_2 ,
+            Fun.draw_transparent_circle(win, [self.pos[0] + scrolling[0] - radius_2, self.pos[1] + scrolling[1] - radius_2 ,
                                               radius_2 * 2],
                                         self.colour, 64)
 
@@ -2079,11 +2078,11 @@ class ArtilleryFlare(Artillery):
             if self.duration == 0:
                 # Explode here
                 radius = self.secondary_explosion["Radius"]
-                entities["particles"].append(Fun.GrowingCircleTransparent(
+                entities["particles"].append(Particles.GrowingCircleTransparent(
                     self.pos, Fun.WHITE, 0, 4, radius, 0, alpha=62))
-                entities["particles"].append(Fun.GrowingCircleTransparent(
+                entities["particles"].append(Particles.GrowingCircleTransparent(
                     self.pos, Fun.WHITE, 0, 6, radius * 0.7, 0, alpha=62))
-                entities["particles"].append(Fun.GrowingCircleTransparent(
+                entities["particles"].append(Particles.GrowingCircleTransparent(
                     self.pos, Fun.WHITE, 0, 9, radius * 0.5, 0, alpha=62))
                 for e in entities["entities"]:
                     if e.team == self.team:
@@ -2170,9 +2169,9 @@ class Laser(BasicBullet):
                     self.on_hit_handler(collision, entities, level)
             self.duration -= 1
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
-            pg.draw.line(WIN, self.colour,
+            pg.draw.line(win, self.colour,
                          [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
                          Fun.move_with_vel_angle([self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
                                                  self.radius, self.angle), width=3)
@@ -2224,9 +2223,9 @@ class Flechette(BasicBullet):
 
             self.duration -= 1
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
-            pg.draw.line(WIN, self.colour,
+            pg.draw.line(win, self.colour,
                          [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
                          Fun.move_with_vel_angle([self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
                                                  self.radius, self.angle), width=2)
@@ -2276,9 +2275,9 @@ class LaserWithCollision(BasicBullet):
 
             self.duration -= 1
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
-            pg.draw.line(WIN, self.colour,
+            pg.draw.line(win, self.colour,
                          [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
                          Fun.move_with_vel_angle([self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
                                                  self.radius, self.angle), width=3)
@@ -2349,9 +2348,9 @@ class Melee(BasicBullet):
 
             self.duration -= 1
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
-            pg.draw.circle(WIN, (255, 207, 0), [self.pos[0] + scrolling[0],
+            pg.draw.circle(win, (255, 207, 0), [self.pos[0] + scrolling[0],
                                                 self.pos[1] + scrolling[1]], self.radius, 1)
 
 
@@ -2395,9 +2394,9 @@ class Melee2(BasicBullet):  # Loses speed like a grenade
 
             self.duration -= 1
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
-            pg.draw.circle(WIN, (255, 207, 0), [self.pos[0] + scrolling[0],
+            pg.draw.circle(win, (255, 207, 0), [self.pos[0] + scrolling[0],
                                                 self.pos[1] + scrolling[1]], self.radius, 1)
 
 
@@ -2446,9 +2445,9 @@ class Melee3(BasicBullet):  # Loses speed like a grenade
 
             self.duration -= 1
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
-            pg.draw.circle(WIN, self.colour, [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]], self.radius, 2)
+            pg.draw.circle(win, self.colour, [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]], self.radius, 2)
 
 
 # The electric projectile is a small segment.
@@ -2525,9 +2524,9 @@ class Electric(BasicBullet):
             # Lower duration
             self.duration -= 1
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
-            pg.draw.line(WIN, self.colour,
+            pg.draw.line(win, self.colour,
                          [self.pos[0] + scrolling[0],
                           self.pos[1] + scrolling[1]],
                          [self.end_point[0] + scrolling[0],
@@ -2598,9 +2597,9 @@ class HomingElectric(BasicBullet):
             # Lower duration
             self.duration -= 1
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
-            pg.draw.line(WIN, self.colour,
+            pg.draw.line(win, self.colour,
                          [self.pos[0] + scrolling[0],
                           self.pos[1] + scrolling[1]],
                          [self.end_point[0] + scrolling[0],
@@ -2679,9 +2678,9 @@ class SplittingElectric(BasicBullet):
             # Lower duration
             self.duration -= 1
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
-            pg.draw.line(WIN, self.colour,
+            pg.draw.line(win, self.colour,
                          [self.pos[0] + scrolling[0],
                           self.pos[1] + scrolling[1]],
                          [self.end_point[0] + scrolling[0],
@@ -2748,11 +2747,11 @@ class Sword(BasicBullet):
             # Lower duration
             self.duration -= 1
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
             # Draw the blade of the sword
             middle_point = Fun.midpoint_between(self.pos, self.end_point)
-            pg.draw.polygon(WIN, self.colour,
+            pg.draw.polygon(win, self.colour,
                             [
                                 [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
                                 [middle_point[0] - 1 * math.cos((self.sword_angle + 90) * math.pi / 180) + scrolling[0],
@@ -2768,7 +2767,7 @@ class Sword(BasicBullet):
             # Draw the guard of the sword
             guard_pos = [self.pos[0] - (self.radius / 4) * math.cos(self.sword_angle * math.pi / 180),
                          self.pos[1] - (self.radius / 4) * math.sin(self.sword_angle * math.pi / 180)]
-            pg.draw.line(WIN, self.colour,
+            pg.draw.line(win, self.colour,
                          [guard_pos[0] - 5 * math.cos((self.sword_angle - 90) * math.pi / 180) + scrolling[0],
                           guard_pos[1] - 5 * math.sin((self.sword_angle - 90) * math.pi / 180) + scrolling[1]],
                          [guard_pos[0] - 5 * math.cos((self.sword_angle + 90) * math.pi / 180) + scrolling[0],
@@ -2850,11 +2849,11 @@ class HomingSword(BasicBullet):
 
             self.duration -= 1
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
             # Draw the blade of the sword
             middle_point = Fun.midpoint_between(self.pos, self.end_point)
-            pg.draw.polygon(WIN, self.colour,
+            pg.draw.polygon(win, self.colour,
                             [
                                 [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
                                 [middle_point[0] - 1 * math.cos((self.sword_angle + 90) * math.pi / 180) + scrolling[0],
@@ -2870,7 +2869,7 @@ class HomingSword(BasicBullet):
             # Draw the guard of the sword
             guard_pos = [self.pos[0] - (self.radius / 4) * math.cos(self.sword_angle * math.pi / 180),
                          self.pos[1] - (self.radius / 4) * math.sin(self.sword_angle * math.pi / 180)]
-            pg.draw.line(WIN, self.colour,
+            pg.draw.line(win, self.colour,
                          [guard_pos[0] - self.radius / 5 * math.cos((self.sword_angle - 90) * math.pi / 180) +
                           scrolling[0],
                           guard_pos[1] - self.radius / 5 * math.sin((self.sword_angle - 90) * math.pi / 180) +
@@ -2934,17 +2933,17 @@ class RazorWind(BasicBullet):
             # Lower duration
             self.duration -= 1
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
             for p in self.end_points:
-                pg.draw.line(WIN, self.colour,
+                pg.draw.line(win, self.colour,
                              [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
                              [p[0] + scrolling[0], p[1] + scrolling[1]], width=4)
 
-            # pg.draw.circle(WIN, (255, 0, 255),
+            # pg.draw.circle(win, (255, 0, 255),
             #                [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
             #                5)
-            # pg.draw.arc(WIN, self.colour,
+            # pg.draw.arc(win, self.colour,
             #             [self.pos[0] + scrolling[0]- self.width//2, self.pos[1] + scrolling[1] -  self.height//2,
             #              self.width, self.height],
             #             math.radians(self.angle*-1 - self.angle_modifier + 180),
@@ -3023,9 +3022,9 @@ class Gas(BasicBullet):
 
             self.duration -= 1
 
-    def draw(self, WIN, scrolling):
+    def draw(self, win, scrolling):
         if self.duration > 0:
-            Fun.draw_transparent_circle(WIN, (self.pos[0] + scrolling[0],
+            Fun.draw_transparent_circle(win, (self.pos[0] + scrolling[0],
                                               self.pos[1] + scrolling[1], self.radius), self.colour, 128)
 
 

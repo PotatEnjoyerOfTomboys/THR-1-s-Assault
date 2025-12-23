@@ -6,6 +6,7 @@ import sys
 import Fun
 import Bullets
 import Skills
+import Particles
 import Weapons
 
 from Fun import none
@@ -300,9 +301,9 @@ def draw_aim_line(self, entities):
     for i in colour_index:
         fg_colour[i] = 255 * mod
 
-    entities["background particles"].append(Fun.LineParticle(drawing_pos, bg_colour, 1, length, angle, 1, 0))
+    entities["background particles"].append(Particles.LineParticle(drawing_pos, bg_colour, 1, length, angle, 1, 0))
 
-    entities["background particles"].append(Fun.LineParticle(
+    entities["background particles"].append(Particles.LineParticle(
         drawing_pos, fg_colour, 1, length * mod, angle, 3,
         0))
 
@@ -331,7 +332,7 @@ def player_act(self, entities, level):
     # Fun.movement_entity(self)
 
     # |GunPlay|-----------------------------------------------------------------------------------------------------
-    entities["UI particles"].append(Fun.AimPoint(self.mouse_pos))
+    entities["UI particles"].append(Particles.AimPoint(self.mouse_pos))
     # if self.weapon.ammo == 0 and self.weapon.ammo_cost > 0:
     #     entities["UI particles"].append(
     #         Fun.FloatingTextType2([self.mouse_pos[0], self.mouse_pos[1] - 12],
@@ -380,7 +381,7 @@ def player_act(self, entities, level):
     # Make the player move
     Fun.movement_output(self, level)
     if self.draw_aim_line or self.weapon.laser_sight:
-        entities["background particles"].append(Fun.LineParticle(
+        entities["background particles"].append(Particles.LineParticle(
             Fun.move_with_vel_angle(self.pos, 20, self.aim_angle), Fun.BLUE, 1, self.weapon.range-20, self.aim_angle, 2, 0))
     # Give orders
     if self.order_builder["Cooldown"] <= 0:
@@ -389,7 +390,7 @@ def player_act(self, entities, level):
             # Write
             mod = 10
             pos = [self.pos[0] + 16, self.pos[1] - 48]
-            entities["particles"].append(Fun.FloatingTextType3(pos.copy(), 18, self.order_builder["Current order"], Fun.AMBER, 1))
+            entities["particles"].append(Particles.FloatingTextType3(pos.copy(), 18, self.order_builder["Current order"], Fun.AMBER, 1))
             pos[1] += mod
             for x in [
                 f"{Fun.write_control(self, "Order Hold")}All Teammate",
@@ -397,10 +398,10 @@ def player_act(self, entities, level):
                 f"{Fun.write_control(self, "Order Attack")}Teammate 2",
                 f"{Fun.write_control(self, "Order Act Free")}Teammate 3"]:
                 pos[1] += mod
-                entities["particles"].append(Fun.FloatingTextType3(pos.copy(), 18, x, Fun.AMBER, 1))
+                entities["particles"].append(Particles.FloatingTextType3(pos.copy(), 18, x, Fun.AMBER, 1))
             pos[1] += mod
-            entities["particles"].append(Fun.GrowingSquare([pos[0], pos[1], 120, 8], Fun.UI_COLOUR_NEW_BACKDROP, [0, 0], 1))
-            entities["particles"].append(Fun.GrowingSquare([pos[0], pos[1], self.order_builder["Time limit"]//3, 8], Fun.AMBER_LIGHT, [0, 0], 1))
+            entities["particles"].append(Particles.GrowingSquare([pos[0], pos[1], 120, 8], Fun.UI_COLOUR_NEW_BACKDROP, [0, 0], 1))
+            entities["particles"].append(Particles.GrowingSquare([pos[0], pos[1], self.order_builder["Time limit"]//3, 8], Fun.AMBER_LIGHT, [0, 0], 1))
 
             # Choose who to give the order to
             if self.order_builder["Allow input"]:
@@ -449,7 +450,7 @@ def player_act(self, entities, level):
         self.armour_break = False
         number_of_particle = 18
         for particles_to_add in range(360 // number_of_particle):
-            entities["background particles"].append(Fun.RandomParticle2(
+            entities["background particles"].append(Particles.RandomParticle2(
                 [self.pos[0], self.pos[1]], Fun.GREEN, 2 * random.random(), random.randint(15, 45),
                                                         particles_to_add * number_of_particle,
                 size=Fun.get_random_element_from_list([3, 4, 6])))
@@ -518,7 +519,7 @@ def fortress_act(self, entities, level):
         for x in range(4):
             angle = dash_angle - 15 - 3.25 * 2 + x * 7.5 * 2
             entities["particles"].append(
-                Fun.RandomParticle2(
+                Particles.RandomParticle2(
                     Fun.move_with_vel_angle([self.pos[0], self.pos[1]], -4, angle),
                     Fun.WHITE, 1.5 + random.uniform(0, 2), 24, angle))
 
@@ -532,9 +533,9 @@ def fortress_act(self, entities, level):
     length = self.weapon.range + 20
 
     # Draw the lines
-    entities["background particles"].append(Fun.LineParticle(drawing_pos, Fun.RED, 1, length, angle, 1, 0))
+    entities["background particles"].append(Particles.LineParticle(drawing_pos, Fun.RED, 1, length, angle, 1, 0))
 
-    entities["UI particles"].append(Fun.AimPoint(self.mouse_pos))
+    entities["UI particles"].append(Particles.AimPoint(self.mouse_pos))
     self.weapon.passive(self, entities, level)
     if self.no_shoot_state == 0:
         # Reset variables
@@ -585,7 +586,7 @@ def fortress_act(self, entities, level):
                 Fun.damage_calculation(e, round(abs(self.vel[0]) + abs(self.vel[1])) * 5, "Melee", death_message="Ran over")
             pass
     if self.draw_aim_line or self.weapon.laser_sight:
-        entities["background particles"].append(Fun.LineParticle(
+        entities["background particles"].append(Particles.LineParticle(
             Fun.move_with_vel_angle(self.pos, 20, self.aim_angle), Fun.BLUE, 1, self.weapon.range-20, self.aim_angle, 2, 0))
     # Give orders
     if self.order_builder["Cooldown"] <= 0:
@@ -594,7 +595,7 @@ def fortress_act(self, entities, level):
             # Write
             mod = 10
             pos = [self.pos[0] + 16, self.pos[1] - 48]
-            entities["particles"].append(Fun.FloatingTextType3(pos.copy(), 18, self.order_builder["Current order"], Fun.AMBER, 1))
+            entities["particles"].append(Particles.FloatingTextType3(pos.copy(), 18, self.order_builder["Current order"], Fun.AMBER, 1))
             pos[1] += mod
             for x in [
                 f"{Fun.write_control(self, "Order Hold")}All Teammate",
@@ -602,10 +603,10 @@ def fortress_act(self, entities, level):
                 f"{Fun.write_control(self, "Order Attack")}Teammate 2",
                 f"{Fun.write_control(self, "Order Act Free")}Teammate 3"]:
                 pos[1] += mod
-                entities["particles"].append(Fun.FloatingTextType3(pos.copy(), 18, x, Fun.AMBER, 1))
+                entities["particles"].append(Particles.FloatingTextType3(pos.copy(), 18, x, Fun.AMBER, 1))
             pos[1] += mod
-            entities["particles"].append(Fun.GrowingSquare([pos[0], pos[1], 120, 8], Fun.UI_COLOUR_NEW_BACKDROP, [0, 0], 1))
-            entities["particles"].append(Fun.GrowingSquare([pos[0], pos[1], self.order_builder["Time limit"]//3, 8], Fun.AMBER_LIGHT, [0, 0], 1))
+            entities["particles"].append(Particles.GrowingSquare([pos[0], pos[1], 120, 8], Fun.UI_COLOUR_NEW_BACKDROP, [0, 0], 1))
+            entities["particles"].append(Particles.GrowingSquare([pos[0], pos[1], self.order_builder["Time limit"]//3, 8], Fun.AMBER_LIGHT, [0, 0], 1))
 
             # Choose who to give the order to
             if self.order_builder["Allow input"]:
@@ -654,7 +655,7 @@ def fortress_act(self, entities, level):
         self.armour_break = False
         number_of_particle = 18
         for particles_to_add in range(360 // number_of_particle):
-            entities["background particles"].append(Fun.RandomParticle2(
+            entities["background particles"].append(Particles.RandomParticle2(
                 [self.pos[0], self.pos[1]], Fun.GREEN, 2 * random.random(), random.randint(15, 45),
                                                         particles_to_add * number_of_particle,
                 size=Fun.get_random_element_from_list([3, 4, 6])))
@@ -734,7 +735,7 @@ def buggy_act(self, entities, level):
         for x in range(4):
             angle = dash_angle - 15 - 3.25 * 2 + x * 7.5 * 2
             entities["particles"].append(
-                Fun.RandomParticle2(
+                Particles.RandomParticle2(
                     Fun.move_with_vel_angle([self.pos[0], self.pos[1]], -4, angle),
                     Fun.WHITE, 1.5 + random.uniform(0, 2), 24, angle))
 
@@ -746,9 +747,9 @@ def buggy_act(self, entities, level):
     length = self.weapon.range + 20
 
     # Draw the lines
-    entities["background particles"].append(Fun.LineParticle(self.pos, Fun.RED, 1, length, self.free_var["Move angle"], 1, 0))
+    entities["background particles"].append(Particles.LineParticle(self.pos, Fun.RED, 1, length, self.free_var["Move angle"], 1, 0))
 
-    entities["UI particles"].append(Fun.AimPoint(self.mouse_pos))
+    entities["UI particles"].append(Particles.AimPoint(self.mouse_pos))
     self.weapon.passive(self, entities, level)
     if self.no_shoot_state == 0:
         # Reset variables
@@ -800,7 +801,7 @@ def buggy_act(self, entities, level):
             pass
     if self.draw_aim_line or self.weapon.laser_sight:
         pos = Fun.move_with_vel_angle(self.pos, -24, self.free_var["Move angle"])
-        entities["background particles"].append(Fun.LineParticle(
+        entities["background particles"].append(Particles.LineParticle(
             [pos[0], pos[1]-14], Fun.BLUE, 1, self.weapon.range-20,
             self.aim_angle, 2, 0))
     # Give orders
@@ -810,7 +811,7 @@ def buggy_act(self, entities, level):
             # Write
             mod = 10
             pos = [self.pos[0] + 16, self.pos[1] - 48]
-            entities["particles"].append(Fun.FloatingTextType3(pos.copy(), 18, self.order_builder["Current order"], Fun.AMBER, 1))
+            entities["particles"].append(Particles.FloatingTextType3(pos.copy(), 18, self.order_builder["Current order"], Fun.AMBER, 1))
             pos[1] += mod
             for x in [
                 f"{Fun.write_control(self, "Order Hold")}All Teammate",
@@ -818,10 +819,10 @@ def buggy_act(self, entities, level):
                 f"{Fun.write_control(self, "Order Attack")}Teammate 2",
                 f"{Fun.write_control(self, "Order Act Free")}Teammate 3"]:
                 pos[1] += mod
-                entities["particles"].append(Fun.FloatingTextType3(pos.copy(), 18, x, Fun.AMBER, 1))
+                entities["particles"].append(Particles.FloatingTextType3(pos.copy(), 18, x, Fun.AMBER, 1))
             pos[1] += mod
-            entities["particles"].append(Fun.GrowingSquare([pos[0], pos[1], 120, 8], Fun.UI_COLOUR_NEW_BACKDROP, [0, 0], 1))
-            entities["particles"].append(Fun.GrowingSquare([pos[0], pos[1], self.order_builder["Time limit"]//3, 8], Fun.AMBER_LIGHT, [0, 0], 1))
+            entities["particles"].append(Particles.GrowingSquare([pos[0], pos[1], 120, 8], Fun.UI_COLOUR_NEW_BACKDROP, [0, 0], 1))
+            entities["particles"].append(Particles.GrowingSquare([pos[0], pos[1], self.order_builder["Time limit"]//3, 8], Fun.AMBER_LIGHT, [0, 0], 1))
 
             # Choose who to give the order to
             if self.order_builder["Allow input"]:
@@ -870,7 +871,7 @@ def buggy_act(self, entities, level):
         self.armour_break = False
         number_of_particle = 18
         for particles_to_add in range(360 // number_of_particle):
-            entities["background particles"].append(Fun.RandomParticle2(
+            entities["background particles"].append(Particles.RandomParticle2(
                 [self.pos[0], self.pos[1]], Fun.GREEN, 2 * random.random(), random.randint(15, 45),
                                                         particles_to_add * number_of_particle,
                 size=Fun.get_random_element_from_list([3, 4, 6])))
@@ -2461,7 +2462,7 @@ def condor_on_death(self, entities, level):
 
         number_of_particle = 18
         for particles_to_add in range(360 // number_of_particle):
-            entities["particles"].append(Fun.RandomParticle2(
+            entities["particles"].append(Particles.RandomParticle2(
                 [self.pos[0], self.pos[1]], Fun.DARK_RED, 1 + 3 * random.random(), random.randint(45, 90),
                                                         particles_to_add * number_of_particle,
                 size=Fun.get_random_element_from_list([3, 4, 6])))
@@ -3230,7 +3231,7 @@ def hover_tank_act(self, entities, level):
         for x in range(4):
             angle = dash_angle - 15 - 3.25 * 2 + x * 7.5 * 2
             entities["particles"].append(
-                Fun.RandomParticle2(
+                Particles.RandomParticle2(
                     Fun.move_with_vel_angle([self.pos[0], self.pos[1]], -4, angle),
                     Fun.WHITE, 1.5 + random.uniform(0, 2), 24, angle))
 
@@ -3334,7 +3335,7 @@ def hover_tank_act(self, entities, level):
                 Fun.damage_calculation(e, damage, "Melee", death_message="Ran over")
             pass
     if self.draw_aim_line or self.weapon.laser_sight:
-        entities["background particles"].append(Fun.LineParticle(
+        entities["background particles"].append(Particles.LineParticle(
             Fun.move_with_vel_angle(self.pos, 20, self.aim_angle), Fun.BLUE, 1, self.weapon.range-20, self.aim_angle, 2, 0))
 
 

@@ -1,13 +1,12 @@
 import pygame as pg
 import random
-import math
-import os
 
 import Bullets
 import Fun
+import Particles
 import copy
 
-from Bullets import Bullet
+# from Bullets import Bullet
 
 
 def spawn_item(entities, item_name, pos, self=False):
@@ -138,7 +137,7 @@ def riot_shield(self, entities, level):
                                      self.thiccness, self.thiccness,
                                      b.pos[0], b.pos[1], b.radius):
             b.duration = 0
-            Fun.sparks_2(entities, self.pos, b.angle + 180,
+            Particles.sparks_2(entities, self.pos, b.angle + 180,
                          colour=b.colour, angle_deviation=6, duration_range=(4, 13), size=2)
 
 
@@ -157,7 +156,7 @@ def smoke_grenade(self, entities, level):
         # if self.status % 12 == 0:
     if self.time % 16 == 0:
         for p in range(round(self.free_var["Radius"] * 0.25)):
-            entities["particles"].append(Fun.Smoke(
+            entities["particles"].append(Particles.Smoke(
                 Fun.random_point_in_circle(self.pos, self.free_var["Radius"]),
                 duration=(self.time // 4, self.time // 3)
             ))
@@ -257,7 +256,7 @@ def jeanne_cover_act(self, entities, level):
                 self.free_var["IFrames"] = 8
             number_of_particle = 18
             for particles_to_add in range(360 // number_of_particle):
-                entities["particles"].append(Fun.RandomParticle2(
+                entities["particles"].append(Particles.RandomParticle2(
                     [self.pos[0], self.pos[1]], Fun.DARK_RED, 1 + 2 * random.random(), random.randint(15, 60),
                                                             particles_to_add * number_of_particle,
                     size=Fun.get_random_element_from_list([1, 2, 4])))
@@ -284,7 +283,7 @@ def jeanne_cover_act(self, entities, level):
             for x in range(5):
                 pos = Fun.random_point_in_circle(e.pos, 16)
                 entities["particles"].append(
-                    Fun.RandomParticle1(pos, Fun.RED, -2, round(10 + 10 * random.random()),
+                    Particles.RandomParticle1(pos, Fun.RED, -2, round(10 + 10 * random.random()),
                                         size=(2, 4))
                 )
             magazine_ammo_back = round(e.weapon.max_ammo * 0.5)
@@ -318,7 +317,7 @@ def jeanne_demolition_charge_act(self, entities, level):
         if self.time_is_ticking():
             # Show timer
             entities["particles"].append(
-                Fun.FloatingTextType2([self.pos[0], self.pos[1] - 16], 18,
+                Particles.FloatingTextType2([self.pos[0], self.pos[1] - 16], 18,
                                       f'{Fun.write_time(self.life_time)}',
                                       Fun.WHITE, 1))
         else:
@@ -377,7 +376,7 @@ def landmine(self, entities, level):
             # 181 - 240     0
             num = 3 - self.free_var["Time"] // 15
             entities["UI particles"].append(
-                Fun.FloatingTextType2([self.pos[0], self.pos[1] - 8], 18,
+                Particles.FloatingTextType2([self.pos[0], self.pos[1] - 8], 18,
                                       f"{num}", [Fun.RED, Fun.ORANGE, Fun.YELLOW, Fun.WHITE][num], 1))
             if self.free_var["Time"] >= 60:
                 self.alive = False

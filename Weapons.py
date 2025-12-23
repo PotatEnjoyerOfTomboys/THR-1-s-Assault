@@ -3,13 +3,12 @@ import math
 import pygame as pg
 import random
 import sys
-import os
 
-from numpy.ma.core import angle
 
 import Bullets
 import Skills
 import Items
+import Particles
 import Fun
 from Fun import none
 # Pan Piano
@@ -180,7 +179,7 @@ def melee_system(self, entities, level, basic_attacks=(Fun.none, Fun.none), char
         elif self.free_var[weapon_free_var]["Press time"] > real_basic_threshold // threshold_mod:
             colour = Fun.AMBER_LIGHT
 
-        entities["particles"].append(Fun.LineParticle([self.pos[0] - self.thiccness, self.pos[1] + 15], colour, 1,
+        entities["particles"].append(Particles.LineParticle([self.pos[0] - self.thiccness, self.pos[1] + 15], colour, 1,
                                                       self.free_var[weapon_free_var]["Press time"] / 2, 90))
     elif self.free_var[weapon_free_var]["Press time"] > 0:
         key_released = True
@@ -264,7 +263,7 @@ def missile_launcher_passive(self, entities, level):
                 continue
             if Fun.distance_between(e.pos, self.pos) <= self.weapon.range:
                 if not Fun.wall_between(e.pos, self.pos, level):
-                    entities["UI particles"].append(Fun.MissileLockOn(
+                    entities["UI particles"].append(Particles.MissileLockOn(
                         e.pos, 1, locked=e.pos == center, colour=[Fun.DARK_GREEN, Fun.GREEN][int(e.pos == center)])
                     )
 
@@ -303,7 +302,7 @@ def gunblade(self, entities, level):
         pos = Fun.move_with_vel_angle(self.pos, 20, self.angle)
 
         angle = self.angle
-        entities["particles"].append(Fun.LineParticle(pos, Fun.GREEN, 1, 7 * 30, angle))
+        entities["particles"].append(Particles.LineParticle(pos, Fun.GREEN, 1, 7 * 30, angle))
 
 
         if self.status["Perfect Aim"] in (1, 0):
@@ -493,7 +492,7 @@ def laser_cutter_passive(self, entities, level):
             for x in range(self.weapon.free_var["Charged shot"]//6):
                 pos = Fun.random_point_in_circle(Fun.move_with_vel_angle(self.pos, 20, self.aim_angle), 4)
                 entities["particles"].append(
-                    Fun.RandomParticle2(
+                    Particles.RandomParticle2(
                         pos,
                         [(128, 255, 255), (125, 200, 220), (85, 220, 160)][x % 3],
                         1.5 + random.uniform(0, 2),
@@ -552,7 +551,7 @@ def radio_passive(self, entities, level):
             self.weapon.free_var["Switch cooldown"] = 30
         # UI
 
-        entities["UI particles"].append(Fun.CrippleLaddieUI(self))
+        entities["UI particles"].append(Particles.CrippleLaddieUI(self))
         # Add some more UI elements to indicate which shell type is getting used
         # Used to make Crippled Laddie shoot various shell types (Smoke, Illumination, Anti-Pers)
 
@@ -647,7 +646,7 @@ def flare_mortar_passive(self, entities, level):
     if self.input["Shoot"] and self.no_shoot_state == 0 and self.shot_allowed and self.weapon.ammo > 0:
 
         # UI
-        entities["UI particles"].append(Fun.GrowingCircleTransparent(
+        entities["UI particles"].append(Particles.GrowingCircleTransparent(
                         self.mouse_pos, (55, 11, 72), 1, 1, 64, 0, alpha=125))
 
 
@@ -754,20 +753,20 @@ def ax_chain_passive(self, entities, level):
             chain_axe.free_var["Press time"] = 0
 
     #
-    entities["background particles"].append(Fun.LineParticleAlt(
+    entities["background particles"].append(Particles.LineParticleAlt(
         # [base_pos[0] - chain_axe.sprite.get_width() // 2, base_pos[1] - chain_axe.sprite.get_height() // 2],
         Fun.move_with_vel_angle(self.pos, 6 + self.weapon_draw_dist, self.aim_angle),
         [axe_pos[0] - Fun.SPRITE_DUKE_AXE.get_width() // 2, axe_pos[1] - Fun.SPRITE_DUKE_AXE.get_height() // 2],
         Fun.GRAY, 1, width=1))
 
-    entities["particles"].append(Fun.AfterImageRotated(
+    entities["particles"].append(Particles.AfterImageRotated(
         axe_pos, pg.transform.flip(Fun.SPRITE_DUKE_AXE, True, -90 < axe_angle < 90), 1, axe_angle))
 
 
 def hook_sword(self, entities, level):
     if self.no_shoot_state > 0:
         entities["particles"].append(
-            Fun.SecondPistolParticle(
+            Particles.SecondPistolParticle(
                 Fun.move_with_vel_angle(self.pos, 6 + self.weapon_draw_dist, self.aim_angle),
                 pg.transform.flip(self.weapon.sprite, False, True), self.reloading,
                 self.weapon.reload_time, self.no_shoot_state, self.aim_angle)
@@ -828,7 +827,7 @@ def hook_sword(self, entities, level):
         self.weapon.free_var["Second sword dist"] += 2
     # print(self.weapon_draw_dist)
     entities["particles"].append(
-        Fun.SecondPistolParticle(
+        Particles.SecondPistolParticle(
             Fun.move_with_vel_angle(self.pos, 6 + self.weapon.free_var["Second sword dist"], self.aim_angle),
             pg.transform.flip(self.weapon.sprite, False, True), self.reloading,
             self.weapon.reload_time, self.no_shoot_state, hook_angle + 8)
@@ -870,7 +869,7 @@ def hook_sword_combo_3(self, entities, level):
 
 def hook_sword_charged(self, entities, level):
     for x in range(32):
-        entities["particles"].append(Fun.Smoke(Fun.random_point_in_cone(self.pos, 15, self.angle, 110)))
+        entities["particles"].append(Particles.Smoke(Fun.random_point_in_cone(self.pos, 15, self.angle, 110)))
 
     # Lowers agro to a -10
     self.did_agro_raise = 0
@@ -888,11 +887,11 @@ def knife_pistol_alt(self, entities, level):
         for x in range(9):
             pos = Fun.random_point_in_circle(self.pos, 16)
             entities["particles"].append(
-                Fun.RandomParticle1(pos, Fun.DARK_RED, -2, round(10 + 10 * random.random()), size=(2, 4))
+                Particles.RandomParticle1(pos, Fun.DARK_RED, -2, round(10 + 10 * random.random()), size=(2, 4))
             )
         # Visual effect
     if self.weapon.free_var["Charge time"] > 45:
-        entities["background particles"].append(Fun.LineParticle(
+        entities["background particles"].append(Particles.LineParticle(
             Fun.move_with_vel_angle(self.pos, 25, self.weapon.free_var["Knife Angle"]),
             Fun.BLUE, 1, 6*35, self.weapon.free_var["Knife Angle"], 1, 0))
     #
@@ -936,7 +935,7 @@ def knife_pistol_passive(self, entities, level):
 
     angle = self.weapon.free_var["Knife Angle"]
     entities["particles"].append(
-        Fun.SecondPistolParticle(
+        Particles.SecondPistolParticle(
             Fun.move_with_vel_angle(self.pos, 6 + self.weapon_draw_dist, angle),
             ZANDER_KNIFE, self.reloading,
             self.weapon.reload_time, self.no_shoot_state, angle)
@@ -1003,7 +1002,7 @@ def shield_generator_passive(self, entities, level):
                 for x in range(3):
                     pos = Fun.random_point_in_circle(b.pos, 4)
                     entities["particles"].append(
-                        Fun.RandomParticle1(pos, [(128, 255, 255), (125, 200, 220), (85, 220, 160)][x], [2, -2, 2][x], round(10 + 10 * random.random()),
+                        Particles.RandomParticle1(pos, [(128, 255, 255), (125, 200, 220), (85, 220, 160)][x], [2, -2, 2][x], round(10 + 10 * random.random()),
                                             size=(1, 2))
                     )
         colour = [(128, 255, 255), (125, 200, 220), (85, 220, 160)][(self.time//6) % 3]
@@ -1015,13 +1014,13 @@ def shield_generator_passive(self, entities, level):
         if self.weapon.ammo > self.weapon.max_ammo:
             self.weapon.ammo = self.weapon.max_ammo
 
-    entities[dest].append(Fun.LineParticleAlt(pos_1, pos_2, colour, duration, width=width))
+    entities[dest].append(Particles.LineParticleAlt(pos_1, pos_2, colour, duration, width=width))
 
 
 # |Condor|--------------------------------------------------------------------------------------------------------------
 def condor_dual_smg_passive(self, entities, level):
     entities["particles"].append(
-        Fun.SecondPistolParticle(self.pos, self.weapon.sprite,
+        Particles.SecondPistolParticle(self.pos, self.weapon.sprite,
                                  self.reloading, self.weapon.reload_time,
                                  self.no_shoot_state, self.aim_angle))
 
@@ -1031,7 +1030,7 @@ def riot_shotgun_passive(self, entities, level):
         # Get the direction
         player_direction = Fun.get_entity_direction(self.angle + 180)
 
-        entities["particles"].append(Fun.AfterImage(
+        entities["particles"].append(Particles.AfterImage(
             Fun.move_with_vel_angle(self.pos, -16, self.angle), Fun.SPRITES_RIOT_SHIELD[player_direction], 1))
     variable_handling_rate(self, entities, level, rate=12, min_handle=0.75)
     if self.weapon.free_var["Charge cooldown"] > 0:
@@ -1164,7 +1163,7 @@ def war_and_peace_alt(self, entities, level):
 def war_and_peace_passive(self, entities, level):
     angle = self.weapon.free_var["War angle"]
     entities["particles"].append(
-        Fun.SecondPistolParticle(
+        Particles.SecondPistolParticle(
             Fun.move_with_vel_angle(self.pos, 6 + self.weapon_draw_dist, angle),
             Fun.SPRITE_CURTIS_WAR, self.reloading,
             self.weapon.reload_time, self.no_shoot_state, angle)
@@ -1340,9 +1339,9 @@ def cutlass_flintlock(self, entities, level):
         pos = Fun.move_with_vel_angle(self.pos, 20, self.angle)
 
         angle = self.angle
-        entities["particles"].append(Fun.LineParticle(pos, Fun.GREEN, 1, 6 * 80, angle))
+        entities["particles"].append(Particles.LineParticle(pos, Fun.GREEN, 1, 6 * 80, angle))
 
-        entities["particles"].append(Fun.AfterImageRotated(
+        entities["particles"].append(Particles.AfterImageRotated(
             Fun.move_with_vel_angle(self.pos, 15, angle),
             pg.transform.flip(LAWRENCE_FLINTLOCK, True, -90 < angle < 90),
             1, angle))
@@ -1363,7 +1362,7 @@ def cutlass_flintlock(self, entities, level):
         return
     # Draw flintlock
     angle = self.angle + 45
-    entities["particles"].append(Fun.AfterImageRotated(
+    entities["particles"].append(Particles.AfterImageRotated(
         Fun.move_with_vel_angle(self.pos, 15, angle),
         pg.transform.flip(LAWRENCE_FLINTLOCK, True, -90 < angle < 90),
         1, angle))
@@ -1587,9 +1586,9 @@ def axe_blunderbuss(self, entities, level):
         pos = Fun.move_with_vel_angle(self.pos, 20, self.angle)
 
         angle = self.angle
-        entities["particles"].append(Fun.LineParticle(pos, Fun.GREEN, 1, 6 * 80, angle))
+        entities["particles"].append(Particles.LineParticle(pos, Fun.GREEN, 1, 6 * 80, angle))
 
-        entities["particles"].append(Fun.AfterImageRotated(
+        entities["particles"].append(Particles.AfterImageRotated(
             Fun.move_with_vel_angle(self.pos, 15, angle),
             pg.transform.flip(LAWRENCE_BLUNDERBUSS, True, -90 < angle < 90),
             1, angle))
@@ -1609,7 +1608,7 @@ def axe_blunderbuss(self, entities, level):
         return
     # Draw flintlock
     angle = self.angle + 45
-    entities["particles"].append(Fun.AfterImageRotated(
+    entities["particles"].append(Particles.AfterImageRotated(
         Fun.move_with_vel_angle(self.pos, 15, angle),
         pg.transform.flip(LAWRENCE_BLUNDERBUSS, True, -90 < angle < 90),
         1, angle))
@@ -1806,7 +1805,7 @@ def musket_360(self, entities, level):
         pos = Fun.move_with_vel_angle(self.pos, 20, self.aim_angle)
 
         angle = self.aim_angle
-        entities["particles"].append(Fun.LineParticle(pos, Fun.GREEN, 1, 6 * 80, angle))
+        entities["particles"].append(Particles.LineParticle(pos, Fun.GREEN, 1, 6 * 80, angle))
 
         if self.input["Shoot"]:
             Bullets.spawn_bullet(
@@ -1965,23 +1964,23 @@ def vivianne_rifle(self, entities, bullets):
     for x in range(3):
         angle = 120 * x
         pos = Fun.move_with_vel_angle(self.pos, 20, angle)
-        entities["particles"].append(Fun.LineParticle(pos, Fun.WHITE, 1, 25, angle, width=2))
+        entities["particles"].append(Particles.LineParticle(pos, Fun.WHITE, 1, 25, angle, width=2))
 
         pos = Fun.move_with_vel_angle(self.pos, 40, angle - 60)
-        entities["particles"].append(Fun.GrowingSquare((pos[0] - 4, pos[1] - 4, 8, 8), Fun.DARK, [0, 0], 1))
+        entities["particles"].append(Particles.GrowingSquare((pos[0] - 4, pos[1] - 4, 8, 8), Fun.DARK, [0, 0], 1))
 
     pos = Fun.move_with_vel_angle(self.pos, 40, 180)
     # Napalm rounds
-    entities["particles"].append(Fun.GrowingSquare((pos[0] - 2, pos[1] - 3, 4, 6), Fun.RED, [0, 0], 1))
+    entities["particles"].append(Particles.GrowingSquare((pos[0] - 2, pos[1] - 3, 4, 6), Fun.RED, [0, 0], 1))
 
     pos = Fun.move_with_vel_angle(self.pos, 40, 60)
-    entities["particles"].append(Fun.GrowingSquare((pos[0] - 2, pos[1] - 3, 4, 6), Fun.ORANGE, [0, 0], 1))
+    entities["particles"].append(Particles.GrowingSquare((pos[0] - 2, pos[1] - 3, 4, 6), Fun.ORANGE, [0, 0], 1))
 
     pos = Fun.move_with_vel_angle(self.pos, 40, -60)
-    entities["particles"].append(Fun.GrowingSquare((pos[0] - 2, pos[1] - 3, 4, 6), Fun.AMBER, [0, 0], 1))
+    entities["particles"].append(Particles.GrowingSquare((pos[0] - 2, pos[1] - 3, 4, 6), Fun.AMBER, [0, 0], 1))
 
     entities["particles"].append(
-        Fun.FloatingTextType2([self.pos[0], self.pos[1] - 48], 18,
+        Particles.FloatingTextType2([self.pos[0], self.pos[1] - 48], 18,
                               f'{Fun.write_control(self, "Reload")} {Fun.write_textline("Vivianne guns instruction")}',
                               Fun.UI_COLOUR_TUTORIAL, 1))
 
@@ -2033,27 +2032,27 @@ def vivianne_shotgun(self, entities, bullets):
     for x in range(3):
         angle = 120 * x
         pos = Fun.move_with_vel_angle(self.pos, 20, angle)
-        entities["particles"].append(Fun.LineParticle(pos, Fun.WHITE, 1, 25, angle, width=2))
+        entities["particles"].append(Particles.LineParticle(pos, Fun.WHITE, 1, 25, angle, width=2))
 
         pos = Fun.move_with_vel_angle(self.pos, 40, angle - 60)
-        entities["particles"].append(Fun.GrowingSquare((pos[0] - 4, pos[1] - 4, 8, 8), Fun.DARK, [0, 0], 1))
+        entities["particles"].append(Particles.GrowingSquare((pos[0] - 4, pos[1] - 4, 8, 8), Fun.DARK, [0, 0], 1))
 
     pos = Fun.move_with_vel_angle(self.pos, 40, 180)
     # Napalm rounds
-    entities["particles"].append(Fun.GrowingSquare((pos[0] - 2, pos[1] - 3, 4, 6), Fun.RED, [0, 0], 1))
+    entities["particles"].append(Particles.GrowingSquare((pos[0] - 2, pos[1] - 3, 4, 6), Fun.RED, [0, 0], 1))
 
     pos = Fun.move_with_vel_angle(self.pos, 40, 60)
     # Normal
-    entities["particles"].append(Fun.GrowingSquare((pos[0] - 1, pos[1] - 3, 2, 2), Fun.AMBER, [0, 0], 1))
-    entities["particles"].append(Fun.GrowingSquare((pos[0] - 3, pos[1], 2, 2), Fun.AMBER, [0, 0], 1))
-    entities["particles"].append(Fun.GrowingSquare((pos[0] + 1, pos[1], 2, 2), Fun.AMBER, [0, 0], 1))
+    entities["particles"].append(Particles.GrowingSquare((pos[0] - 1, pos[1] - 3, 2, 2), Fun.AMBER, [0, 0], 1))
+    entities["particles"].append(Particles.GrowingSquare((pos[0] - 3, pos[1], 2, 2), Fun.AMBER, [0, 0], 1))
+    entities["particles"].append(Particles.GrowingSquare((pos[0] + 1, pos[1], 2, 2), Fun.AMBER, [0, 0], 1))
 
     pos = Fun.move_with_vel_angle(self.pos, 40, -60)
     # Slug
-    entities["particles"].append(Fun.GrowingSquare((pos[0] - 2, pos[1] - 3, 4, 6), Fun.GREEN, [0, 0], 1))
+    entities["particles"].append(Particles.GrowingSquare((pos[0] - 2, pos[1] - 3, 4, 6), Fun.GREEN, [0, 0], 1))
 
     entities["particles"].append(
-        Fun.FloatingTextType2([self.pos[0], self.pos[1] - 48], 18,
+        Particles.FloatingTextType2([self.pos[0], self.pos[1] - 48], 18,
                               f'{Fun.write_control(self, "Reload")} {Fun.write_textline("Vivianne guns instruction")}',
                               Fun.UI_COLOUR_TUTORIAL, 1))
 
@@ -2117,7 +2116,7 @@ def vivianne_leg_combo_1(self, entities, bullets):
     for y in range(2):
         for x in range(7):
             angle = self.aim_angle - 5 * 3 + 5 * x + random.uniform(-30, 30)
-            entities["particles"].append(Fun.RandomParticle2(
+            entities["particles"].append(Particles.RandomParticle2(
                 Fun.move_with_vel_angle(self.pos, 6, angle),
                 Fun.WHITE, 4, 15, angle, size=3))
 
@@ -2146,7 +2145,7 @@ def vivianne_leg_combo_2(self, entities, bullets):
     for y in range(2):
         for x in range(7):
             angle = self.aim_angle - 5 * 3 + 5 * x + random.uniform(-30, 30)
-            entities["particles"].append(Fun.RandomParticle2(
+            entities["particles"].append(Particles.RandomParticle2(
                 Fun.move_with_vel_angle(self.pos, 6, angle),
                 Fun.WHITE, 4, 15, angle, size=3))
 
@@ -2175,7 +2174,7 @@ def vivianne_leg_charged(self, entities, bullets):
     for y in range(6):
         for x in range(7):
             angle = self.aim_angle - 5 * 3 + 5 * x + random.uniform(-30, 30)
-            entities["particles"].append(Fun.RandomParticle2(
+            entities["particles"].append(Particles.RandomParticle2(
                 Fun.move_with_vel_angle(self.pos, 6, angle),
                 Fun.WHITE, 4, 15, angle, size=3))
 
@@ -2216,7 +2215,7 @@ def radar_passive(self, entities, level):
         b.slowdown_rate = 0.2
 
         for p in range(2):
-            entities["particles"].append(Fun.Smoke(
+            entities["particles"].append(Particles.Smoke(
                 Fun.random_point_in_circle(b.pos, 8)))
     # Give visual effect to indicate who benefits
 
@@ -2339,7 +2338,7 @@ def hover_tank_cannon_passive(self, entities, level):
         Fun.play_sound("Hitting 3", "SFX")
         for b in [150, -150]:
             for c in range(1):
-                entities["particles"].append(Fun.Smoke(
+                entities["particles"].append(Particles.Smoke(
                         Fun.move_with_vel_angle(self.pos, 28 + 32 * random.random(),
                                                 self.free_var["Move angle"] + random.uniform(-16, 16) + b),
 
