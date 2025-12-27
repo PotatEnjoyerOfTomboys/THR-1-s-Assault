@@ -13,7 +13,7 @@ from Fun import none
 from Event import MissionEvent, loss_of_apc, trigger_constant
 
 class Entity:
-    __slots__=['agro', 'agro_decrease_rate', 'ai_state', 'aim_angle', 'angle', 'animation_counter', 'is_target', 'armour', 'armour_break', 'bullets_shot', 'collision_box', 'control', 'controller_angle', 'controller_control', 'crit', 'cutscene_mode', 'damage_taken', 'dash_allowed', 'dash_charge_time', 'dash_cooldown', 'dash_iframes', 'dash_speed', 'did_agro_raise', 'direction_angle', 'draw_aim_line', 'draw_angle', 'draw_rotated_dist', 'draw_targeting_range', 'driving', 'force_draw', 'free_var', 'friction', 'func_act', 'func_draw', 'func_input', 'health', 'input', 'input_mode', 'is_ally', 'is_boss', 'is_player', 'is_targeted', 'is_targeting', 'max_armour', 'max_health', 'mouse_control', 'mouse_pos', 'name', 'no_shoot_state', 'og_info', 'on_death', 'order_builder', 'pathfinding_old_positions', 'pos', 'reloading', 'resistances', 'running', 'shooting', 'shot_allowed', 'skills', 'sound_mod', 'speed', 'sprites', 'standing_still', 'status', 'stealth_counter', 'stealth_mod', 'target', 'targeting_angle', 'targeting_range', 'team', 'thiccness', 'time', 'upgrades', 'vel', 'vel_max', 'walking', 'wall_hack', 'weapon', 'weapon_draw_dist']
+    __slots__=['agro', 'agro_decrease_rate', 'ai_state', 'aim_angle', 'angle', 'animation_counter', 'is_target', 'armour', 'armour_break', 'bullets_shot', 'collision_box', 'control', 'controller_angle', 'controller_control', 'crit', 'cutscene_mode', 'damage_taken', 'dash_allowed', 'dash_charge_time', 'dash_cooldown', 'dash_iframes', 'dash_speed', 'did_agro_raise', 'direction_angle', 'draw_aim_line', 'draw_angle', 'draw_rotated_dist', 'draw_targeting_range', 'driving', 'force_draw', 'free_var', 'friction', 'func_act', 'func_draw', 'func_input', 'health', 'input', 'input_mode', 'is_ally', 'is_boss', 'is_player', 'is_targeted', 'is_targeting', 'max_armour', 'max_health', 'mouse_control', 'mouse_pos', 'name', 'no_shoot_state', 'og_info', 'on_death', 'order_builder', 'pathfinding_old_positions', 'pos', 'reloading', 'resistances', 'running', 'shooting', 'shot_allowed', 'skills', 'sound_mod', 'speed', 'sprites', 'standing_still', 'status', 'stealth_counter', 'stealth_mod', 'target', 'targeting_angle', 'targeting_range', 'team', 'thiccness', 'time', 'upgrades', 'vel', 'vel_max', 'walking', 'wall_hack', 'weapon', 'weapon_draw_dist', 'owner']
     def __init__(self, info, team="Players", pos=[0, 0], start_angle=0):
         info = info.copy()
         self.og_info = info.copy()
@@ -23,6 +23,7 @@ class Entity:
         self.is_player = False
         self.is_boss = False
         self.crit = False
+        self.owner = False
 
         # |Health and armour|-------------------------------------------------------------------------------------------
         self.max_health = info["health"]
@@ -275,7 +276,6 @@ class Entity:
 # print([p for p in dir(Entity)])
 
 
-
 def draw_aim_line(self, entities):
     if not self.draw_aim_line:
         return
@@ -454,6 +454,87 @@ def player_act(self, entities, level):
                 [self.pos[0], self.pos[1]], Fun.GREEN, 2 * random.random(), random.randint(15, 45),
                                                         particles_to_add * number_of_particle,
                 size=Fun.get_random_element_from_list([3, 4, 6])))
+
+
+def vivianne_act(self, entities, level):
+    player_act(self, entities, level)
+    # Summon mechanic
+    # "Summon cooldown time": 360, "Summon cooldown": 0, "Summon limit": 1, "Summon pool": [], "Active summons": []
+    if self.free_var["Summon pool"]:
+        if self.free_var["Summon cooldown"] == 0:
+            if self.input["Interact"]:
+                if len(self.free_var["Active summons"]) < self.free_var["Summon limit"]:
+                    # Select summon to spawn
+                    valid_pool = []
+                    for summon in self.free_var["Summon pool"]:
+                        if summon not in self.free_var["Active summons"]:
+                            valid_pool.append(summon)
+                    if valid_pool:
+                        Particles.random_particle_2_circle(entities, self.pos, 2.3333333333333333333333333333333, 15, 18,
+                                                     colour=Fun.YELLOW, size=5)
+                        selected_summon = player_repertory[Fun.get_random_element_from_list(valid_pool)]
+                        entities["entities"].append(
+                            Entity(
+                                selected_summon,
+                                pos=self.pos.copy(),
+                                start_angle=self.aim_angle
+                            ))
+                        self.free_var["Active summons"].append(selected_summon)
+                        self.free_var["Summon cooldown"] = self.free_var["Summon cooldown time"]
+                        entities["entities"][-1].owner = self
+        else:
+            self.free_var["Summon cooldown"] -= 1
+
+
+def vivianne_summons_act(self, entities, level):
+    # |Aim system|------------------------------------------------------------------------------------------------------
+    Fun.aim_system(self, self.weapon)
+    # |Movement Input|--------------------------------------------------------------------------------------------------
+    Fun.movement_player(self, entities)
+
+    # |GunPlay|---------------------------------------------------------------------------------------------------------
+    self.weapon.passive(self, entities, level)
+    if self.no_shoot_state == 0:
+        # Reset variables
+        self.reloading = False
+
+        # Alternative fire
+        if self.input["Alt fire"]:
+            self.weapon.alt_fire(self, entities, level)
+
+        # |Main fire|---------------------------------------------------------------------------------------------------
+        if self.input["Shoot"]:
+            if self.weapon.ammo != 0 and self.shot_allowed:
+                # |Main fire|-------------------------------------------------------------------------------------------
+                self.shoot_bullet(entities, level)
+                # tell if the trigger was pressed
+                if not self.weapon.full_auto:
+                    self.shot_allowed = False
+            # if the trigger is not pressed and the weapon is not a full auto, allow to shoot for the next trigger press
+            elif self.weapon.ammo == 0 and self.shot_allowed:
+                Fun.play_sound(self.weapon.jamming_sound, "SFX")
+                self.shot_allowed = False
+        else:
+            self.shot_allowed = True
+
+        # |Reload|------------------------------------------------------------------------------------------------------
+        if self.input["Reload"] and self.weapon.ammo_pool > 0:
+            self.no_shoot_state, self.reloading = self.weapon.reload()
+    else:
+        self.no_shoot_state -= 1
+
+    # |Status effects|--------------------------------------------------------------------------------------------------
+    Fun.status_manager(self, entities)
+    # |Movement Output|-------------------------------------------------------------------------------------------------
+    # Make the player move
+    Fun.movement_output(self, level)
+    if self.draw_aim_line or self.weapon.laser_sight:
+        entities["background particles"].append(Particles.LineParticle(
+            Fun.move_with_vel_angle(self.pos, 20, self.aim_angle), Fun.BLUE, 1, self.weapon.range-20, self.aim_angle, 2, 0))
+
+    self.force_draw = True
+    if self.free_var["Life Limit"] == self.time:
+        self.health = 0
 
 
 def fortress_act(self, entities, level):
@@ -2253,7 +2334,6 @@ def vehicle_escort(self, level):
                 APC_MOVE_TO_POINT[self.free_var["IS AN APC"]](self, move_target, 8)
 
 
-
 def fortress_input(self, entities, level):
     self.input = Fun.get_default_inputs()
     # If it doesn't act like a normal ally
@@ -2270,6 +2350,7 @@ APC_MOVE_TO_POINT = { # Add something to choose between weapons later
     "Fortress": fortress_move_toward_point,
     "Sand Buggy": buggy_move_toward_point
 }
+
 
 def fortress_sub_input_follow(self, entities, level):
     self.input = Fun.get_default_inputs()
@@ -2358,6 +2439,31 @@ def fortress_sub_input_attack(self, entities, level):
     return target, target_angle
 
 
+def vivianne_summons_input(self, entities, level):
+    # Input functions are the IA for an enemy
+    # better targeting system
+    target, target_angle, wall_in = entity_target_detection(self, entities, level)
+
+    if target:
+        aim_target = self.target.pos.copy()
+        # move_target = target.copy()
+        self.mouse_pos = aim_target.copy()
+        self.angle = Fun.angle_between(aim_target, self.pos)
+
+        ALLY_FIRE_CONTROL["Vivianne"][self.weapon.name](self, entities, level, target, wall_in)
+        entity_dash_when_targeted(self)
+        entity_move_toward_point(self, aim_target, self.weapon.range * 0.8)
+
+    elif self.weapon.ammo < self.weapon.max_ammo and self.weapon.ammo_pool > 0:
+            self.input["Reload"] = True
+
+    # entity_spread_apart(self, entities)
+    entity_dodge_bullets(self, entities, 32)
+
+    # Stunned status manager
+    Fun.stunned_manager(self)
+    return target, target_angle
+
 # |Ally Draw|-----------------------------------------------------------------------------------------------------------
 def player_draw(self, WIN, scrolling):
     # Draw the colision box
@@ -2398,8 +2504,7 @@ def buggy_draw(self, WIN, scrolling):
     angle = Fun.angle_value_limiter(self.free_var["Move angle"] + 90)
 
     # t_angle = Fun.angle_value_limiter(self.free_var["Target Move angle"] + 90)
-    t_angle = Fun.pg.math.clamp(self.free_var["Target Move angle"] + 90,
-                                      angle - 25, angle + 25)
+    t_angle = Fun.pg.math.clamp(self.free_var["Target Move angle"] + 90, angle - 25, angle + 25)
     # t_angle = self.free_var["Target Move angle"] + 90
     # smaller_angle = angle - 30
     # bigger_angle = angle + 30
@@ -2477,6 +2582,13 @@ def condor_on_death(self, entities, level):
 
 def fortress_on_death(self, entities, level):
     level["events"].append(MissionEvent("", trigger_constant, True, [loss_of_apc]))
+
+
+def vivianne_summons_on_death(self, entities, level):
+    for count, active in enumerate(self.owner.free_var["Active summons"]):
+        if active == self.name:
+            self.owner.free_var["Active summons"].pop(count)
+            break
 
 
 # |Enemy Input|---------------------------------------------------------------------------------------------------------
@@ -3901,7 +4013,7 @@ player_repertory = {
         "skills": ["Rat Shot", "Reaper Rounds"],
         # AI
         "func input": test_ally_input,
-        "func act": player_act,
+        "func act": vivianne_act,
         "func draw": player_draw,
         "on death": "none",
         "targeting range": 750,
@@ -3931,6 +4043,190 @@ player_repertory = {
         "driving": DRIVE_HO,
         "free var": {"Ally waypoint": [0, 0], "Move angle": 0, "Target Move angle": 0, "Move vel": 0, "IS AN APC": "Sand Buggy"}
     },
+
+    # Vivianne summons
+    # Birna & Sardine
+    "Birna & Sardine": {
+        "name": "Birna & Sardine",
+        "health": 250, "armour": 0, "damage resistances": VI_RESIT,
+        "sprites": "Sprites/Player/Tomboy/Birna.png",
+
+        "thickness": 15,
+        "vel max": 4.4,
+        "speed": 2.2,
+        "friction": 1.5,
+        "dash": {"speed": 8, "i-frames": 12, "charge": 35},
+
+        # Weapons
+        "weapon": "Vivianne's Rifle",
+        "skills": [],
+
+        # AI
+        "func input": vivianne_summons_input,
+        "func act": vivianne_summons_act,
+        "func draw": player_draw,
+        "on death": "vivianne_summons_on_death",
+        "targeting range": 750,
+        "targeting angle": 33,
+        "wall hack": False,
+        "free var": {"Life Limit": 360}
+    },
+    # Elektra
+    "Elektra": {
+        "name": "Elecktra",
+        "health": 250, "armour": 0, "damage resistances": VI_RESIT,
+        "sprites": "Sprites/Player/Tomboy/Elektra.png",
+
+        "thickness": 15,
+        "vel max": 0,
+        "speed": 0,
+        "friction": 2.5,
+        "dash": {"speed": 8, "i-frames": 12, "charge": 35},
+
+        # Weapons
+        "weapon": "Vivianne's Rifle",
+        "skills": [],
+
+        # AI
+        "func input": vivianne_summons_input,
+        "func act": vivianne_summons_act,
+        "func draw": player_draw,
+        "on death": "vivianne_summons_on_death",
+        "targeting range": 750,
+        "targeting angle": 33,
+        "wall hack": False,
+        "free var": {"Life Limit": 360}
+    },
+    # Agatha
+    "Agatha": {
+        "name": "Agatha",
+        "health": 250, "armour": 0, "damage resistances": VI_RESIT,
+        "sprites": "Sprites/Player/Tomboy/Agatha.png",
+
+        "thickness": 15,
+        "vel max": 4.4,
+        "speed": 2.2,
+        "friction": 1.5,
+        "dash": {"speed": 8, "i-frames": 12, "charge": 35},
+
+        # Weapons
+        "weapon": "Vivianne's Rifle",
+        "skills": [],
+
+        # AI
+        "func input": vivianne_summons_input,
+        "func act": vivianne_summons_act,
+        "func draw": player_draw,
+        "on death": "vivianne_summons_on_death",
+        "targeting range": 750,
+        "targeting angle": 33,
+        "wall hack": False,
+        "free var": {"Life Limit": 360}
+    },
+    # Azura
+    "Azura": {
+        "name": "Azura",
+        "health": 250, "armour": 0, "damage resistances": VI_RESIT,
+        "sprites": "Sprites/Player/Tomboy/Azura.png",
+
+        "thickness": 15,
+        "vel max": 4.4,
+        "speed": 2.2,
+        "friction": 1.5,
+        "dash": {"speed": 8, "i-frames": 12, "charge": 35},
+
+        # Weapons
+        "weapon": "Vivianne's Rifle",
+        "skills": [],
+
+        # AI
+        "func input": vivianne_summons_input,
+        "func act": vivianne_summons_act,
+        "func draw": player_draw,
+        "on death": "vivianne_summons_on_death",
+        "targeting range": 750,
+        "targeting angle": 33,
+        "wall hack": False,
+        "free var": {"Life Limit": 360}
+    },
+    # M (Marisa)
+    "M (Marisa)": {
+        "name": "M (Marisa)",
+        "health": 250, "armour": 0, "damage resistances": VI_RESIT,
+        "sprites": "Sprites/Player/Tomboy/M.png",
+
+        "thickness": 15,
+        "vel max": 4.4,
+        "speed": 2.2,
+        "friction": 1.5,
+        "dash": {"speed": 8, "i-frames": 12, "charge": 35},
+
+        # Weapons
+        "weapon": "Vivianne's Rifle",
+        "skills": [],
+
+        # AI
+        "func input": vivianne_summons_input,
+        "func act": vivianne_summons_act,
+        "func draw": player_draw,
+        "on death": "vivianne_summons_on_death",
+        "targeting range": 750,
+        "targeting angle": 33,
+        "wall hack": False,
+        "free var": {"Life Limit": 360}
+    },
+    # Sierra
+    "Sierra": {
+        "name": "Sierra",
+        "health": 250, "armour": 0, "damage resistances": VI_RESIT,
+        "sprites": "Sprites/Player/Tomboy/Sierra.png",
+
+        "thickness": 15,
+        "vel max": 4.4,
+        "speed": 2.2,
+        "friction": 1.5,
+        "dash": {"speed": 8, "i-frames": 12, "charge": 35},
+
+        # Weapons
+        "weapon": "Vivianne's Rifle",
+        "skills": [],
+
+        # AI
+        "func input": vivianne_summons_input,
+        "func act": vivianne_summons_act,
+        "func draw": player_draw,
+        "on death": "vivianne_summons_on_death",
+        "targeting range": 750,
+        "targeting angle": 33,
+        "wall hack": False,
+        "free var": {"Life Limit": 360}
+    },
+    # Makoto
+    "Makoto": {
+        "name": "Makoto",
+        "health": 250, "armour": 0, "damage resistances": VI_RESIT,
+        "sprites": "Sprites/Player/Tomboy/Makoto.png",
+
+        "thickness": 15,
+        "vel max": 4.4,
+        "speed": 2.2,
+        "friction": 1.5,
+        "dash": {"speed": 8, "i-frames": 12, "charge": 35},
+
+        # Weapons
+        "weapon": "Vivianne's Rifle",
+        "skills": [],
+
+        # AI
+        "func input": vivianne_summons_input,
+        "func act": vivianne_summons_act,
+        "func draw": player_draw,
+        "on death": "vivianne_summons_on_death",
+        "targeting range": 750,
+        "targeting angle": 33,
+        "wall hack": False,
+        "free var": {"Life Limit": 360}
+    }
 }
 
 # Resistances   set to 1 mean no resistance
@@ -3945,7 +4241,7 @@ F2_RESIT_H = {"Physical": 1,    "Fire": 1,    "Explosion": 1,    "Energy": 1,   
 F3_RESIT_L = {"Physical": 1,    "Fire": 1,    "Explosion": 0.66, "Energy": 1,       "Melee": 1,     "Healing": 0}
 F3_RESIT_M = {"Physical": 0.75, "Fire": 1,    "Explosion": 0.5,  "Energy": 1,       "Melee": 1,     "Healing": 0}
 F3_RESIT_H = {"Physical": 0.5,  "Fire": 0.25, "Explosion": 0.33, "Energy": 0.4,     "Melee": 1,     "Healing": 0}
-# 410 of health           820           1640               1242            1025
+
 NO_RESIT_L = {"Physical": 1,    "Fire": 1,    "Explosion": 1,    "Energy": 1,       "Melee": 1,     "Healing": 0}
 
 enemy_repertory = {
@@ -4348,7 +4644,110 @@ enemy_repertory = {
                      "IS BOSS": True, "Grenade Shakedown": 600, "Grenade Shakedown angle": 0, "Run people over": 250,
                      "Startup lag": 0, "Startup time": 240}
     },
+    # AA Site
+    # AA laser            Targets last position of a player. Infinite range
+    "AA Laser": {
+        "name": "AA Laser", "faction": "FAC-2",
+        "health": H_HO * 20, "armour": 0, "damage resistances": FO_RESIT,
+        "sprites": "Sprites/Player/THR-1/Condor.png",
+
+        "thickness": 60, "vel max": 0, "speed": 0, "friction": 0.7,
+        "dash": {"speed": 0, "i-frames": 0, "charge": 0},
+        # Weapons
+        "weapon": "Hover Tank Cannon",
+        # AI
+        "func input": "hover_tank_input", "func act": "hover_tank_act", "func draw": "hover_tank_draw",
+        "on death": "none",
+        "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
+        "wall hack": False,
+        "free var": {"IS BOSS": True, "Startup lag": 0, "Startup time": 240, "Pos history": []}
+    },
+    # Drone builder       Launches drones
+    "Drone builder": {
+        "name": "Drone builder", "faction": "FAC-2",
+        "health": H_HO * 20, "armour": 0, "damage resistances": FO_RESIT,
+        "sprites": "Sprites/Player/THR-1/Condor.png",
+
+        "thickness": 60, "vel max": 0, "speed": 0, "friction": 0.7,
+        "dash": {"speed": 0, "i-frames": 0, "charge": 0},
+        # Weapons
+        "weapon": "Hover Tank Cannon",
+        # AI
+        "func input": "hover_tank_input", "func act": "hover_tank_act", "func draw": "hover_tank_draw",
+        "on death": "none",
+        "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
+        "wall hack": False,
+        "free var": {"IS BOSS": True, "Startup lag": 0, "Startup time": 240, "Pos history": []}
+    },
+    # Missile Battery     Launches missiles, they have low speed and high manoeuvrability
+    "Missile Battery": {
+        "name": "Missile Battery", "faction": "FAC-2",
+        "health": H_HO * 20, "armour": 0, "damage resistances": FO_RESIT,
+        "sprites": "Sprites/Player/THR-1/Condor.png",
+
+        "thickness": 60, "vel max": 0, "speed": 0, "friction": 0.7,
+        "dash": {"speed": 0, "i-frames": 0, "charge": 0},
+        # Weapons
+        "weapon": "Hover Tank Cannon",
+        # AI
+        "func input": "hover_tank_input", "func act": "hover_tank_act", "func draw": "hover_tank_draw",
+        "on death": "none",
+        "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
+        "wall hack": False,
+        "free var": {"IS BOSS": True, "Startup lag": 0, "Startup time": 240, "Pos history": []}
+    },
+    # Shield Generator    Give other building a shield. If the shield takes too much damage they get disabled for a time
+    "Shield Generator": {
+        "name": "Shield Generator", "faction": "FAC-2",
+        "health": H_HO * 20, "armour": 0, "damage resistances": FO_RESIT,
+        "sprites": "Sprites/Player/THR-1/Condor.png",
+
+        "thickness": 60, "vel max": 0, "speed": 0, "friction": 0.7,
+        "dash": {"speed": 0, "i-frames": 0, "charge": 0},
+        # Weapons
+        "weapon": "Hover Tank Cannon",
+        # AI
+        "func input": "hover_tank_input", "func act": "hover_tank_act", "func draw": "hover_tank_draw",
+        "on death": "none",
+        "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
+        "wall hack": False,
+        "free var": {"IS BOSS": True, "Startup lag": 0, "Startup time": 240, "Pos history": []}
+    },
+    # Energy Generator    If destroyed, kills the boss. Highest amount of health
+    "Energy Generator": {
+        "name": "Energy Generator", "faction": "FAC-2",
+        "health": H_HO * 20, "armour": 0, "damage resistances": FO_RESIT,
+        "sprites": "Sprites/Player/THR-1/Condor.png",
+
+        "thickness": 60, "vel max": 0, "speed": 0, "friction": 0.7,
+        "dash": {"speed": 0, "i-frames": 0, "charge": 0},
+        # Weapons
+        "weapon": "Hover Tank Cannon",
+        # AI
+        "func input": "hover_tank_input", "func act": "hover_tank_act", "func draw": "hover_tank_draw",
+        "on death": "none",
+        "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
+        "wall hack": False,
+        "free var": {"IS BOSS": True, "Startup lag": 0, "Startup time": 240, "Pos history": []}
+    },
+
     # Fire Support Mech
+    "Super Bulwark":
+        {"name": "Super Bulwark",
+         "faction": "FAC-3",
+         "type": "Elite",
+         "targeting range": R_MO, "targeting angle": D_HO, "stealth mod": S_LO, "stealth counter": C_MO,
+         "wall hack": False, "health": H_HO, "armour": round(A_HO * 1.5), "damage resistances": F3_RESIT_H,
+         "thickness": T_HO,
+         "vel max": V_LO * 0.8, "speed": V_LO * 0.8, "friction": V_LO * 0.8,
+         "weapon": "Bulwark Minigun",
+
+         "func input": "enemy_input_faction_3_bulwark",
+         "func act": "enemy_act_type_1",
+         "func draw": "enemy_draw_bulwark",
+         "sprites": "Sprites/Enemies/Bulwark.png", "on death": "none",
+         "free var": {"IS BOSS": True}
+         },
     # Attack Helicopter
     "Attack Helicopter": {
         "name": "Attack Helicopter", "faction": "FAC-3",

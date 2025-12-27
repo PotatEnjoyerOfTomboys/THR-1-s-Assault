@@ -258,13 +258,15 @@ def effect_anti_laser_coating(self, entities, level):
 
 
 def effect_skill_solution(self, entities, level):
-    self.owner.skills.recharge_rate *= 1.75
+    self.owner.skills[0].recharge_rate *= 1.75
+    self.owner.skills[1].recharge_rate *= 1.75
     self.owner.vel_max *= 0.9
     self.owner.targeting_angle *= 0.9
 
 
 def effect_skill_issue(self, entities, level):
-    self.owner.skills.recharge_rate *= 0.75
+    self.owner.skills[0].recharge_rate *= 0.75
+    self.owner.skills[1].recharge_rate *= 0.75
     self.owner.vel_max *= 1.3
     self.owner.targeting_angle *= 1.3
 

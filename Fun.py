@@ -7,7 +7,6 @@ import math
 import random
 import os
 import json
-import copy
 import time
 import datetime
 import sys
@@ -25,8 +24,9 @@ DEBUG_MODE =  False             # Use that to have access to debug functions
 APOSTROPHE = "'"
 DEFAULT_KEY_PRESSED, DEFAULT_KEY_COOLDOWN = 10, 7  # Could make these 2 a setting
 pg.display.set_caption(f"THR-1's Assault - {VERSION}")
-
+DECODING = locale.getpreferredencoding()
 SPOOKY_DAY = start_october <= current_date <= start_november
+
 
 # |Testing|-------------------------------------------------------------------------------------------------------------
 def print_to_error_stream(*a):
@@ -525,7 +525,6 @@ WATER_WASTE = (70, 123, 91)
 FIRE = (255, 50, 0)
 FIRE_GREEN = (50, 255, 0)
 
-
 # UI colours
 UI_COLOUR_FONT, UI_COLOUR_HIGHLIGHT, UI_COLOUR_BACKDROP, UI_COLOUR_BACKGROUND = WHITE, GRAY, DARK, (12, 12, 12)
 UI_COLOUR_TUTORIAL = AMBER_LIGHT
@@ -887,8 +886,6 @@ class ShadowRect(ShadowBasic):
                       self.dimensions[0], self.dimensions[1]))
 
 
-# Make some effects for when enemies spawn
-# dict_to_json("Controller binds.json", DEFAULT_CONTROLLER_BINDS)
 str_to_list = lambda s: [c for c in s]
 # |Various screens for game stuff|--------------------------------------------------------------------------------------
 class PseudoPlayer:
@@ -3791,9 +3788,9 @@ UPGRADE_INFO = {
 "Birna & Sardine": {
     'Tier': 1, 'Cost': 1000, 'Owner': 'Vivianne', 'Icon': UPGRADE_SHEET.subsurface(0, 400, 40, 40),
     'name': "Birna & Sardine", 'effect': 'effect_add_summon', 'trigger': 'trigger_when_loaded'},
-"Elecktra": {
+"Elektra": {
     'Tier': 1, 'Cost': 1000, 'Owner': 'Vivianne', 'Icon': UPGRADE_SHEET.subsurface(40, 400, 40, 40),
-    'name': "Elecktra", 'effect': 'effect_add_summon', 'trigger': 'trigger_when_loaded'},
+    'name': "Elektra", 'effect': 'effect_add_summon', 'trigger': 'trigger_when_loaded'},
 "Agatha": {
     'Tier': 1, 'Cost': 1000, 'Owner': 'Vivianne', 'Icon': UPGRADE_SHEET.subsurface(80, 400, 40, 40),
     'name': "Agatha", 'effect': 'effect_add_summon', 'trigger': 'trigger_when_loaded'},
@@ -3819,20 +3816,40 @@ UPGRADE_INFO = {
     'Tier': 2, 'Cost': 1000, 'Owner': 'Vivianne', 'Icon': UPGRADE_SHEET.subsurface(360, 400, 40, 40),
     'name': "Blue Ballin", 'effect': 'effect_none', 'trigger': 'trigger_when_loaded'},
 }
-# print(len(UPGRADE_INFO))
-# dd = 84
-# print(dd/len(UPGRADE_INFO))
-# for up in UPGRADE_INFO:
-#     print(f'"Upgrade-Desc-{up}": "",')
 
 
 def update_available_upgrades(run_info):
+    invalid_upgrades = []
+    for upgrade in run_info["Upgrade pool"]:
+        if "Condition" in UPGRADE_INFO[upgrade] and "Breaking Limits" not in run_info["Upgrades"]:
+            condition = UPGRADE_INFO[upgrade]["Condition"]
+
+            if "No" in condition:
+                if type(condition["No"]) != list:
+                    condition["No"] = [condition["No"]]
+
+                for ass_cheeks in condition["No"]:
+                    if ass_cheeks in run_info["Upgrades"]:
+                        invalid_upgrades.append(upgrade)
+                        break
+
+            if "Require" in condition:
+                allow = False
+                for requirement in condition["Require"]:
+                    if requirement in run_info["Upgrades"]:
+                        allow = True
+                        break
+                if not allow:
+                    continue
     num = 8
-    if len(run_info["Upgrade pool"]) < 8:
-        num = len(run_info["Upgrade pool"])
+    num_invalids = len(invalid_upgrades)
+
+    if len(run_info["Upgrade pool"]) - num_invalids < 8:
+        num = len(run_info["Upgrade pool"]) - num_invalids
     while len(run_info["Available upgrades"]) < num:
         tested_upgrade = get_random_element_from_list(run_info["Upgrade pool"])
-        if tested_upgrade not in run_info["Available upgrades"]:
+        # Might be able to fix the upgrade condition issue here
+        if tested_upgrade not in run_info["Available upgrades"] and tested_upgrade not in invalid_upgrades:
             run_info["Available upgrades"].append(tested_upgrade)
 
 
@@ -3884,7 +3901,7 @@ def update_upgrade_pool(run_info, party_info):
                         if type(condition["No"]) != list:
                             condition["No"] = [condition["No"]]
 
-                        for ass_cheeks in condition:
+                        for ass_cheeks in condition["No"]:
                             if ass_cheeks in run_info["Upgrades"]:
                                 remove_available_upgrade(run_info, upgrade)
                                 break
@@ -4151,7 +4168,11 @@ def shop_menu(WIN, CLOCK, party_info, run_info):
             info_zero = [8, 8]
             details_display.blit(temp_ui_font.render(f"PARTY FUNDS: {run_info['Funds']}", True, AMBER), (info_zero[0], info_zero[1]))
 
-            current_option = menu_logic.options[menu_logic.selected_option]
+            try:
+                current_option = menu_logic.options[menu_logic.selected_option]
+            except IndexError:
+                current_option = menu_logic.options[len(menu_logic.options)-1]
+
             if current_option["Value"] not in ["Other services", "Quit"]:
                 details_display.blit(temp_ui_font.render(f"NAME: {current_option['Value']}", True, AMBER), (info_zero[0], info_zero[1]+14+8))
                 details_display.blit(temp_ui_font.render(f"COST: {UPGRADE_INFO[current_option['Value']]['Cost']}", True, AMBER), (info_zero[0], info_zero[1]+28+8))
@@ -4794,6 +4815,7 @@ def find_scrolling_target(scrolling_target_entities):
     update_render_zoom(num)
     return mid
 
+
 # |Stuff between 2 points|----------------------------------------------------------------------------------------------
 def angle_between(p1, p2):
     return math.degrees(math.atan2(p2[1] - p1[1], p2[0] - p1[0]))
@@ -4917,6 +4939,7 @@ def collision_circle_circle(pos_1, radius_1, pos_2, radius_2):
 
 def collision_rect_laser(rect, laser_pos, laser_angle, laser_length):
     return rect.clipline(laser_pos, move_with_vel_angle(laser_pos, laser_length, laser_angle))
+
 
 def find_triangle_area(p_1, p_2, p_3):
     a, b, c = distance_between(p_1, p_2), distance_between(p_2, p_3), distance_between(p_3, p_1)
@@ -5340,6 +5363,7 @@ def move_angle(real_angle, current_angle, rate):
             current_angle = real_angle
     return current_angle
 
+
 def angle_value_limiter(real_angle):
     # Value Limiter
     if real_angle > 180:
@@ -5347,48 +5371,6 @@ def angle_value_limiter(real_angle):
     if real_angle < -180:
         real_angle = 180 - (real_angle + 180)
     return real_angle
-
-
-def convert_extra_info(extra_info):
-    # make dictionaries into other dictionaries but not the same one
-    new_extra_info = {}
-    for x in extra_info:
-        data_to_add = extra_info[x]
-        if data_to_add == dict:
-            convert_extra_info(data_to_add)
-        elif data_to_add == list:
-            convert_list_for_extra_info(data_to_add)
-        new_extra_info.update({x: data_to_add})
-    return new_extra_info
-
-
-def convert_list_for_extra_info(data_of_list):
-    temp = data_of_list
-    data_of_list = []
-    for x in temp:
-        if x == list:
-            x = convert_list_for_extra_info(data_of_list)
-        data_of_list.append(x)
-    return data_of_list
-
-
-def make_full_copy_of_dict(dict_to_copy):
-    # make dictionaries into other dictionaries but not the same one
-    new_dict = {}
-    for x in dict_to_copy:
-        data_to_add = dict_to_copy[x]
-        if type(data_to_add) == list:
-            data_to_add = dict_to_copy[x][slice(len(dict_to_copy[x]))]
-        elif data_to_add == dict:
-            make_full_copy_of_dict(dict_to_copy)
-        else:
-            data_to_add = copy.copy(data_to_add)
-        new_dict.update({x: data_to_add})
-    return new_dict
-
-
-def voice_lines_handler(self, entities):
-    pass
 
 
 # |Wall colisions and level geometry|-----------------------------------------------------------------------------------
@@ -5816,16 +5798,7 @@ def movement_output(self, level):
     self.pos[1] += self.vel[1]
     self.collision_box = pg.Rect(self.pos[0] - self.thiccness / 2, self.pos[1] - self.thiccness / 2,
                                  self.thiccness, self.thiccness)
-    # Check collisions
-    # if DEBUG_MODE:
-    #     keys = pg.key.get_pressed()
-        # It's surprisingly convenient to have these 2 here
-    #     if self.is_player and keys[pg.K_BACKSPACE]:
-    #         return
-    #     if self.is_player and keys[pg.K_EQUALS]:
-    #         level["level_finished"] = True
-        # if self.is_player and keys[pg.K_MINUS]:
-        #     print([round(self.pos[0] / 32) * 32, round(self.pos[1] / 32) * 32])
+
     # |Friction handling|-----------------------------------------------------------------------------------------------
     friction_strength = self.friction
     if self.status["Forced Slide"]:  # Some enemies will slide
@@ -6029,9 +6002,6 @@ def write_time(time):
     minute = second // 60
     second -= minute * 60
     return f'{minute}:{second}.{round(100 / 60 * microsecond)}'
-
-
-DECODING = locale.getpreferredencoding()
 
 
 @functools.lru_cache(typed=False)
@@ -6560,7 +6530,7 @@ ENEMY_TYPE_TO_FACTION_UNIT = [
      "Specialist 2": "Marksman",
      "Elite": "Enforcer",
      "Boss 1": "Hover Tank",
-     "Boss 2": "Attack Helicopter"
+     "Boss 2": "Energy Generator"
      },
     {"VIP": "Sculptor",
      "Grunt": "Skirmisher",
@@ -6579,7 +6549,7 @@ ENEMY_TYPE_TO_FACTION_UNIT = [
      "Specialist 1": "Artilleryman",
      "Specialist 2": "Grenadier",
      "Elite": "Bulwark",
-     "Boss 1": "Hover Tank",
+     "Boss 1": "Super Bulwark",
      "Boss 2": "Attack Helicopter"
      },
 ]

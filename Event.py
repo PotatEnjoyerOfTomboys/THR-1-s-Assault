@@ -105,7 +105,7 @@ def spawn_enemy(entities, enemy: str, pos: [int, int], angle: float, team="Enemi
     #             You can use any number between -180 and 180, if you use any other the game might crash
     # temp_repertory = Fun.get_from_json('Game asset.json', )
     if type(enemy) != str:
-        Fun.print_to_error_stream(f"Error I need a list brother")
+        Fun.print_to_error_stream(f"Error, I need a string brother")
         Fun.print_to_error_stream(f"You gave me this: {enemy}")
         return
     if enemy in Entity.enemy_repertory:
@@ -136,7 +136,7 @@ def spawn_ally(entities, ally: str, pos: [int, int], angle: int):
     #             You can use any number between -180 and 180, if you use any other the game might crash
 
     if ally in Entity.player_repertory:
-        entities["players"].append(Entity.Entity(Entity.player_repertory[ally], pos=pos, start_angle=angle))
+        entities["entities"].append(Entity.Entity(Entity.player_repertory[ally], pos=pos, start_angle=angle))
         # info, team="Players", pos=[0, 0], start_angle=0
         return
     print(f"Error {ally} does not exist")

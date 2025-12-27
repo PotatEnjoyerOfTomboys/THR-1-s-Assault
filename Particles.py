@@ -4,17 +4,8 @@ import random
 import pygame as pg
 import math
 
+
 # |Particles classes|---------------------------------------------------------------------------------------------------
-class ExplosionEffect:
-    def __init__(self, pos, duration=15, particles=10, radius=10, particle_growth=5, radius_growth=1):
-        # Used to be the explosion effect, removed it cause it was cringe
-        self.survive_wipe = False
-        self.duration = 0
-
-    def draw(self, WIN, scrolling):
-        pass
-
-
 class NewExplosionEffect:
     def __init__(self, pos, duration=75, particles=7, radius=40, particle_growth=4):
         particles = round(particles)
