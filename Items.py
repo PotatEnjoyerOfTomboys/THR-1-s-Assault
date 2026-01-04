@@ -52,6 +52,7 @@ class ItemGen2:
             self.life_time = info["life time"]
         self.alive = True
         self.free_var = copy.deepcopy(info["free var"])
+        self.bullets_shot = []
 
     def time_is_ticking(self):
         self.life_time -= self.alive
@@ -415,9 +416,86 @@ def dropped_weapon_draw(self, WIN, scrolling):
     )
 
 
+def mark(self, entities, level):
+    self.alive = self.free_var["Victim"].health > 0
+    for b in entities["bullets"]:
+        if b.team != self.team:
+            continue
+        if b.laser_based:
+            continue
+        thick = self.thiccness
+        if Fun.collision_rect_circle(self.pos[0] - thick // 2, self.pos[1] - thick // 2, thick, thick,
+                                         b.pos[0], b.pos[1], b.radius):
+            self.alive = False
+            b.duration = 0
+            number_of_particle = 18
+            for particles_to_add in range(360 // number_of_particle):
+                entities["particles"].append(Particles.RandomParticle2(
+                    [self.pos[0], self.pos[1]], self.free_var["Colour"],
+                    1 + 2 * random.random(), random.randint(15, 60),
+                    particles_to_add * number_of_particle,
+                    size=Fun.get_random_element_from_list([1, 2, 4])))
+            self.free_var["Payload"](self.free_var["Victim"])
+            if "Marked Blue Balls" in self.owner.free_var:
+                pos = self.free_var["Victim"].pos
+                for x in range(4):
+                    angle = self.owner.angle + 90 * x
+                    Bullets.spawn_blue_balls(self.owner, entities, Fun.move_with_vel_angle(pos, 80, angle -180), angle,
+                                             [7, 60, 4, 20, {"Colour": Fun.DARK_BLUE}])
+
+    # Add particles
+    pos = self.free_var["Victim"].pos
+    for p in range(6):
+        entities["particles"].append(Particles.FireParticle(Fun.move_with_vel_angle(pos, self.thiccness * 1.25, 360 * random.random()), self.free_var["Colour"]))
+
+# 	Slow mark          -|- Disable weapon mark 	---	-|-	Stun Mark
+# 	Burning mark       -|-	Helping mark	---	---	-|-
+def payload_slow(self):
+    if "IS BOSS" not in self.free_var:
+        self.vel = [0, 0]
+    self.status["Slowness"] += 80
+    self.status["High friction"] += 40
+
+
+def payload_burning(self):
+    self.status["Burning"] += 40
+
+
+def payload_disable(self):
+    if "IS BOSS" in self.free_var:
+        return
+    if "Startup lag" in self.free_var:
+        self.free_var["Startup lag"] = 0
+    self.weapon.ammo = 0
+    self.no_shoot_state = 80
+
+
+def payload_helping(self):
+    self.thiccness *= 1.3
+
+
+def payload_stun(self):
+    self.status["Stunned"] += 90
+    if "Startup lag" in self.free_var:
+        self.free_var["Startup lag"] = 0
+
+
 item_repertory = {
     # |Cover|-----------------------------------------------------------------------------------------------------------
     # |Skill|-----------------------------------------------------------------------------------------------------------
+    "Mark": {
+        "name": "Mark",
+        "friction": 0, "thickness": 0,
+        "act": mark,
+        "draw": Fun.none,
+        "sprites": [],
+        "life time": -1,
+        "free var": {   # Modify everything here to change effects
+            "Victim": None,
+            "Colour": Fun.WHITE,
+            "Payload": Fun.none
+        }
+    },
     "Riot Shield": {
         "name": "Riot Shield",
         "friction": 10,

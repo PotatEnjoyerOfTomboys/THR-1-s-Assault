@@ -509,6 +509,7 @@ DARK_ORANGE = (115, 70, 0)
 BROWN = (165, 104, 42)
 MAGENTA, PURPLE = (255, 0, 255), (230, 0, 175)
 LIGHT_BLUE, BLUE, DARK_BLUE, DARKER_BLUE = (125, 200, 220), (0, 0, 255), (0, 0, 125), (0, 0, 62)
+BLUISH_GRAY = (102, 102, 142)
 
 LIGHT_TEAL, TEAL, DARK_TEAL, DARKER_TEAL = (128, 255, 255), (0, 255, 255), (0, 128, 128), (0, 62, 62)
 OUTLINE_TEAL = (0, 160, 160)
@@ -692,6 +693,10 @@ SPRITE_BULWARKS = [
     get_sprite_stack_list(BULWARK_BASE.subsurface(48, 0, 16, 464), 16),
     get_sprite_stack_list(BULWARK_BASE.subsurface(64, 0, 16, 464), 16)
 ]
+SPRITE_CARDBOARD_BOX = get_sprite_stack_list(get_image('Sprites/Vehicles/Corrine Cardboard Box.png'), 24)
+SPRITE_BULLET_HOLES = get_image('Sprites/Effect/Bullet hole.png')
+
+# Bosses
 SPRITE_HOVER_TANK_CHASSIS = get_sprite_stack_list(get_image('Sprites/Vehicles/Hover Tank - Chassis.png'), 160)
 SPRITE_HOVER_TANK_TURRET = get_sprite_stack_list(get_image('Sprites/Vehicles/Hover Tank - Turret.png'), 160)
 SPRITE_HOVER_TANK_GUN = get_sprite_stack_list(get_image('Sprites/Vehicles/Hover Tank - Machine Gun.png'), 160)
@@ -699,8 +704,9 @@ SPRITE_HOVER_TANK_GUN = get_sprite_stack_list(get_image('Sprites/Vehicles/Hover 
 SPRITE_ATTACK_HELICOPTER = get_sprite_stack_list(get_image('Sprites/Vehicles/Attack helicopter.png'), 128)
 SPRITE_ATTACK_HELICOPTER_BLADE= get_sprite_stack_list(get_image('Sprites/Vehicles/Attack helicopter - Blade.png'), 118)
 
-SPRITE_CARDBOARD_BOX = get_sprite_stack_list(get_image('Sprites/Vehicles/Corrine Cardboard Box.png'), 24)
-SPRITE_BULLET_HOLES = get_image('Sprites/Effect/Bullet hole.png')
+SPRITE_AA_SITE_MISSILE = get_sprite_stack_list(get_image('Sprites/Vehicles/AA Site - Missile.png'), 50)
+SPRITE_AA_SITE_GENERATOR = get_sprite_stack_list(get_image('Sprites/Vehicles/AA Site - Energy Generator.png'), 50)
+SPRITE_AA_SITE_SHIELD = get_sprite_stack_list(get_image('Sprites/Vehicles/AA Site - Shield Generator.png'), 30)
 
 
 # |Radio transmission sprites|-----------------------------------------------------------------------------------------
@@ -856,7 +862,7 @@ SPRITE_STUNNED = [pg.image.load(os.path.join("Sprites/Effect/Stunned 1.png")).co
                   pg.image.load(os.path.join("Sprites/Effect/Stunned 2.png")).convert_alpha()]
 
 
-def none(self, entities, bullets):
+def none(arg1=1, arg2=2, arg3=3):
     # It does jack shit and is the single most used function in the whole damn game
     pass
 
@@ -3364,7 +3370,7 @@ def versus_end_menu(WIN, CLOCK, party_info, status):
 UPGRADE_SHEET = get_image('Sprites/UI/Upgrades Sheet.png')
 
 BLUE_BALL_UPGRADES = ["Dashing Blue Balls", "Kicking Blue Balls", "Busting Blue Balls", "Brittle Blue Balls", "Kicking Blue Balls", "Tail & Blue Balls", "Unbreaking Blue Balls",
-                      "Burning Blue Balls", "Blue Ballin"]
+                      "Burning Blue Balls", "Blue Ballin", "Marked Blue Balls"]
 COST_Z, COST_L, COST_LM, COST_M, COST_MH, COST_H  = 0, 200, 500, 1000, 1500, 2000
 UPGRADE_INFO = {
 # "Friendly Fire On": {'Tier': 1, 'Cost': 0, 'Owner': 'Party', 'name': 'Friendly Fire On', 'effect': 'effect_none', 'trigger': 'trigger_standing_still'},
@@ -3750,7 +3756,7 @@ UPGRADE_INFO = {
     'name': "Hellfire", 'effect': 'effect_none', 'trigger': 'trigger_standing_still'},
 "Burning Blue Balls": {
     'Tier': 2, 'Cost': 1000, 'Owner': 'Lawrence', 'Icon': UPGRADE_SHEET.subsurface(360, 320, 40, 40),
-    'name': "Burning Blue Balls", 'effect': 'effect_none', 'trigger': 'trigger_on_hit_effect'},
+    'name': "Burning Blue Balls", 'effect': 'effect_burning_blue_balls', 'trigger': 'trigger_on_hit_effect'},
 
 # Mark
 "Low Pressure Reloader": {
@@ -3761,10 +3767,10 @@ UPGRADE_INFO = {
     'name': "Like a Shadow", 'effect': 'effect_like_a_shadow', 'trigger': 'trigger_when_loaded'},
 "Slow mark": {
     'Tier': 1, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(40, 360, 40, 40),
-    'name': "Slow mark", 'effect': 'effect_none', 'trigger': 'trigger_reloading'},
+    'name': "Slow mark", 'effect': 'effect_slow_mark', 'trigger': 'trigger_reloading'},
 "Burning mark": {
     'Tier': 1, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(80, 360, 40, 40),
-    'name': "Burning mark", 'effect': 'effect_none', 'trigger': 'trigger_on_hit_effect'},
+    'name': "Burning mark", 'effect': 'effect_burning_mark', 'trigger': 'trigger_on_hit_effect'},
 "Mark tier 2 2": {
     'Tier': 2, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(0, 360, 40, 40),
     'name': "Mark tier 2 2", 'effect': 'effect_none', 'trigger': 'trigger_standing_still'},
@@ -3776,7 +3782,7 @@ UPGRADE_INFO = {
     'name': "Helping mark", 'effect': 'effect_skill_activate', 'trigger': 'trigger_when_loaded'},
 "Stun mark": {
     'Tier': 3, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(320, 360, 40, 40),
-    'name': "Stun mark", 'effect': 'effect_none', 'trigger': 'trigger_on_hit_effect'},
+    'name': "Stun mark", 'effect': 'effect_stun_mark', 'trigger': 'trigger_on_hit_effect'},
 "Mark Tier 3": {
     'Tier': 3, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(320, 360, 40, 40),
     'name': "Mark Tier 3", 'effect': 'effect_none', 'trigger': 'trigger_standing_still'},

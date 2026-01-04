@@ -5,8 +5,10 @@ import Fun
 import Items
 import Particles
 
+
 def spawn_bullet(owner, entities, bullet_class, pos, angle, bullet_info):
     entities["bullets"].append(bullet_class(pos, angle, bullet_info, owner))
+    owner.bullets_shot.append(entities["bullets"][-1])
 
 
 class BasicBullet:
@@ -206,8 +208,7 @@ class BlueBall(BasicBullet):
                     self.visual_effect(self, entities)
 
                     if not self.piercing:
-                        self.duration = 0
-
+                        self.duration = 1
             self.duration -= 1
         if self.duration == 0:
             if self.secondary_explosion:
@@ -409,8 +410,8 @@ def condor_ricochet_wall_hit(self, level, entities):
             angle = Fun.angle_value_limiter(self.angle + random.randint(-15, 15))
             spawn_bullet(self.owner, entities, type(self), Fun.move_with_vel_angle(self.pos, 20, angle),
                          angle, new_bullet_info)
-            if entities["bullets"][-1] not in self.owner.bullets_shot:
-                self.owner.bullets_shot.append(entities["bullets"][-1])
+            # if entities["bullets"][-1] not in self.owner.bullets_shot:
+            #     self.owner.bullets_shot.append(entities["bullets"][-1])
             # Funny line
             # self.speed *= 2
 
@@ -667,7 +668,36 @@ def on_hit_death(self, collision, entities, level):
 
 def on_hit_burning_blue_balls(self, collision, entities, level):
     if collision.status["Burning"] > 0:
-        pass
+        for x in range(2):
+            spawn_blue_balls(
+                self.owner, entities,
+                Fun.random_point_in_donut(self.owner.pos, [16, 32]),
+                self.angle + random.randint(-66, 66),
+                [5, 100, 3, 10, {"Colour": Fun.DARK_BLUE}])
+
+
+def on_hit_burning_mark(self, collision, entities, level):
+    if random.random() <= 0.25 and "Has Burning Mark" not in collision.free_var:
+        collision.free_var.update({"Has Burning Mark": True})
+        self.duration = 0
+        Items.spawn_item(entities, "Mark", collision.pos, self.owner)
+        entities["items"][-1].free_var["Victim"] = collision
+        entities["items"][-1].free_var["Colour"] = Fun.ORANGE
+        entities["items"][-1].thiccness = collision.thiccness * 1.2
+        entities["items"][-1].free_var["Payload"] = Items.payload_burning
+        for count, e in enumerate(self.on_hit):
+            if e == on_hit_burning_mark:
+                self.on_hit.pop(count)
+                break
+
+
+def on_hit_stun_mark(self, collision, entities, level):
+    if self.owner.weapon.ammo == 0:
+        Items.spawn_item(entities, "Mark", collision.pos, self.owner)
+        entities["items"][-1].free_var["Victim"] = collision
+        entities["items"][-1].free_var["Colour"] = Fun.YELLOW
+        entities["items"][-1].thiccness = collision.thiccness * 1.2
+        entities["items"][-1].free_var["Payload"] = Items.payload_stun
 
 
 # |The simplest projectile|---------------------------------------------------------------------------------------------

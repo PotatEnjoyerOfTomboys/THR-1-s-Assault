@@ -225,7 +225,6 @@ class Entity:
             Fun.crit_manager(self, entities, self.weapon, guarantee_crit)
             # |Status effects management|-------------------------------------------------------------------
             Fun.bullet_status_manager(self, entities)
-            self.bullets_shot.append(entities["bullets"][-1])
         sound = self.weapon.gunshot_sound
         if self.crit:
             sound = "Crit Shoot"
@@ -3708,6 +3707,13 @@ def attack_helicopter_draw(self, WIN, scrolling):
         [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1] - 37 * h_mod], 20, self.aim_angle),
                          self.time * 13.5, height_diff=h_mod)
 
+
+# AA Site
+def aa_site_draw_energy_generator(self, WIN, scrolling):
+    h_mod = 0.75
+    Fun.draw_spritestack(WIN, Fun.SPRITE_HOVER_TANK_CHASSIS,
+                            [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
+                             self.free_var["Move angle"] + 90, height_diff=h_mod)
 
 ACT_FREELY_DICT = {
          "Lord": ally_sub_input_roam,

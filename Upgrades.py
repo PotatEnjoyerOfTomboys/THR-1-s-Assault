@@ -208,7 +208,7 @@ def effect_lucky_shot(self, entities, level):
         "Captain's Axe & Blunderbuss": 0.1,
         "Musket .360": 0.1,
 
-        "Mark's Rifle": 0.1,
+        "Mark's Real Rifle": 0.1,
         "Type 30 Rifle": 0.1,
         "C4": 0.1,
 
@@ -662,7 +662,6 @@ def effect_chariot(self, entities, level):
             "Targeting range": 256,
             "Targeting time": 30
         }])
-    self.owner.bullets_shot.append(entities["bullets"][-1])
 
 
 def effect_lovers(self, entities, level):
@@ -761,14 +760,44 @@ def effect_like_a_shadow(self, entities, level):
 
 # L/M	Slow mark
 # 		When reloading, place a mark on a randomly chosen enemy in sight
+def effect_slow_mark(self, entities, level):
+    potential_victims = []
+    target_check = self.owner.targeting_range
+    for p in entities["entities"]:
+        if p.team == self.owner.team:
+            continue
+        if Fun.check_point_in_cone(target_check,
+                                   self.owner.pos[0], self.owner.pos[1], p.pos[0], p.pos[1],
+                                   self.owner.angle, self.owner.targeting_angle * 3) or \
+                Fun.check_point_in_cone(target_check,
+                                        self.owner.pos[0], self.owner.pos[1], p.pos[0], p.pos[1],
+                                        self.owner.angle, self.owner.targeting_angle) \
+                or Fun.check_point_in_circle(target_check // 10, self.owner.pos[0], self.owner.pos[1], p.pos[0], p.pos[1]):
+            potential_victims.append(p)
+    if potential_victims:
+        victim = Fun.get_random_element_from_list(potential_victims)
+        # Add a mark item
+        Items.spawn_item(entities, "Mark", victim.pos, self.owner)
+        entities["items"][-1].free_var["Victim"] = victim
+        entities["items"][-1].free_var["Colour"] = Fun.BLUISH_GRAY
+        entities["items"][-1].thiccness = victim.thiccness * 1.2
+        entities["items"][-1].free_var["Payload"] = Items.payload_slow
+
 # M	Burning mark
 # 		When hitting enemies 25% chance to place a mark which cause burn on hit
+def effect_burning_mark(self, entities, level):
+    for b in self.owner.bullets_shot:
+        b.on_hit.append(Bullets.on_hit_burning_mark)
+
 # M	Disable weapon mark
 # 		When using Smoke Grenade. Multiple random enemies receives a mark which make them lose all ammo in magazine. Bosses are immune. Cancel attacks with startup lag
 # M/H	Helping mark
 # 		When spotting an enemy with Target Locator. Place a mark that give them a bigger hitbox
 # H	Stun mark
 # 		When hitting enemies with no bullet remaining in the magazine at the time of hitting. Place a mark that stuns them on hit.
+def effect_stun_mark(self, entities, level):
+    for b in self.owner.bullets_shot:
+        b.on_hit.append(Bullets.on_hit_stun_mark)
 # ?	.
 # 		.
 # ?	.

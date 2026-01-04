@@ -905,6 +905,14 @@ def mark_target_locator(self, skill, entities, level):
             continue
         if Fun.check_point_in_cone(self.targeting_range, self.pos[0], self.pos[1], e.pos[0], e.pos[1], self.angle, self.targeting_angle):
             entities["particles"].append(Particles.GrowingCircle(e.pos, Fun.DARK_GREEN, 0, 1, 18, 2))
+            if "Helping mark" in self.free_var:
+                if "Mark's helping mark" not in e.free_var:
+                    Items.spawn_item(entities, "Mark", e.pos, self.owner)
+                    e.free_var.update({"Mark's helping mark": True})
+                    entities["items"][-1].free_var["Victim"] = e
+                    entities["items"][-1].free_var["Colour"] = Fun.GREEN
+                    entities["items"][-1].thiccness = e.thiccness * 1.2
+                    entities["items"][-1].free_var["Payload"] = Items.payload_helping
 
 
 def mark_smoke_grenade(self, skill, entities, level):
@@ -915,6 +923,13 @@ def mark_smoke_grenade(self, skill, entities, level):
     for e in entities["entities"]:
         if e.target == self:
             e.target = []
+        if "Disable weapon mark" in self.free_var:
+            if random.random() < 0.33:
+                Items.spawn_item(entities, "Mark", e.pos, self.owner)
+                entities["items"][-1].free_var["Victim"] = e
+                entities["items"][-1].free_var["Colour"] = Fun.DARK_GREEN_ALT
+                entities["items"][-1].thiccness = e.thiccness * 1.2
+                entities["items"][-1].free_var["Payload"] = Items.payload_disable
 
 
 # |Vivianne|------------------------------------------------------------------------------------------------------------

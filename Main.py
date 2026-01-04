@@ -2,9 +2,6 @@ import pygame as pg
 import os
 import random
 
-# Gay Voodoo Zombies
-#   The virus spreads like an STD
-#   It was made by Witch Doctors who wanted to make money
 
 # Do a web version with pybag
 
@@ -46,35 +43,19 @@ import random
 #       Solar War           Unlocked by default (journalistic reports)
 #       Events of NNTSS     Unlocked by default (presented in the form of rapports made by the Nest)
 
-# Version 0.2 - Hotfix
-# - Fixed an issue with escort mission generation which crashed the game
-
-# Version 0.3 - Progression, mission modifiers and bosses
-# + Unlock/save system
-# + Upgrades (expect Zoar Colonists)
-# + Shop
-# + Second and third weapon options
-# + Fix AI
-# + Helicopter
-# + Halloween outfits
-
-# Next version has all bosses
-# + Mission Modifiers       (Skip mission Works but cancelled for now)
-
 # TODO: fix enemy spawn in defense
 # Version 1.0 - Final version
 #   Upgrades
 #       Colonist
-#           Curtis
-#           Lawrence
-#           Mark
-#           Vivianne
+#           Curtis      1
+#           Lawrence    3
+#           Mark        2
+#           Vivianne    8   (Need to code all tomboys)
 #       Vehicle
 
 #   Bosses
 #       Armed Shield Generator  Laser, Missiles, Electric. Tries to run you over too.
 #       Fire Support Mech       Fire, Artillery, Bullets
-
 #       AA Site                 Made of a few installations
 #           AA laser            Targets last position of a player. Infinite range
 #           Drone builder       Launches drones
@@ -83,26 +64,23 @@ import random
 #                                If the shield takes too much damage they get disabled for a time
 #           Energy Generator    If destroyed, kills the boss. Highest amount of health
 
-#       Gilgamesh               Uses a massive sword,
+#       Gilgamesh               Uses a massive sword
 #       Rigel   (Final boss)
+
 # 	Mission Modifiers
-#       Unknown Forces
-#       Boss rush
-
+#       Unknown Forces  (Opposite player team spawn, no padraig)
+#       Boss rush       (Might cancel that one)
 #   Versus mode
-#       Balance changes
-
+#       Balance changes (small ones)
 #   Character conversations
-
-# 	Padraig?
 #   Secret stage
 #       Gonna be like L4D2. Small anomalies just rushing you
-
 #   Encyclopedia
 #   Animated weapons. Mostly for the pile bunker
 #   Animated radio transmission portraits
 
 
+# 	Padraig?        (cancelled)
 #   Web version? https://pygame-web.github.io/wiki/pygbag/
 pg.mixer.pre_init()
 pg.init()
