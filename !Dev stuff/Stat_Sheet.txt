@@ -115,7 +115,7 @@ Old West Firearms & Replicas		Far west, WW weapons. Has a reputation of selling 
 	Never forget the classics.
 Socrates				Do the scifi weapons. Viewed as snobish				Name weapons after Schools of Philisophy
 	Advanced weapons for advanced minds.
-Factory Munition Ballistics		Make the heavier weapons and massed produced ones		<Weapon type>-<Model number>-<Variation>		Better known as FMB (Fucking Massive Balls or Fuck My Bitch (Thanks Grant))
+Factory Munition Ballistics		Make the heavier weapons and massed produced ones		<Weapon type>-<Model number><Variation>		Better known as FMB (Fucking Massive Balls or Fuck My Bitch (Thanks Grant))
 Novak & Boyko				Do the soviet block weapons act. Very wide price range.		Type <Model number> <Weapon type>			Founders are Croatian and Ukrainian
 Toolkit Manifacturing			Construction equipement.					Mk <Model number> <Name and purpose of the tool>
 	The right tools for any job.

@@ -4186,21 +4186,6 @@ for e in weapon_repertory:
     print(f'"{e}"')
 
 # Encyclopedia notes
-# Grenade Launcher
-#   Manufacturer: FMB
-#   Caliber: 40mm grenades
-#   Production dates: June 2087 - January 2089
-#   The fruit if a cancelled army contract. FMB ended up having truck loads of the thing but no one to sell it too. Many attempts were made to sell them. Very few succeed. One of the more notable attempts was as t shirt canon for sporting events. One stadium got one right before the start of the Solar War. After the Solar War, many were sold to an unknown group.
-
-# Big Iron
-#   Manufacturer: Old West Firearms & Replicas
-#   Caliber: .700 Nitro Express
-#   Production dates: December 2093 - Present (custom order only)
-#   Considered to be the "most impractical handgun ever produced". The "Big Iron" has gained the reputation to shatter foreheads and break wrists.
-
-#   A popular choice with the reckless overconfident mercenaries.
-#   Leopold "LORD" Storch uses HE rounds with his.
-
 # GunBlade
 # St-Maurice Youth model
 #   Manufacturer: Compagnie d'Fusils Chasses d'3 Rivières
@@ -4219,7 +4204,7 @@ for e in weapon_repertory:
 # St-Laurent Gen 1
 #   Manufacturer: Compagnie d'Fusils Chasses d'3 Rivières
 #   Caliber: .50 BMG
-#   Production dates: December 2099 - Present (end of production announced for January 2106)
+#   Production dates: December 2099 - end of production announced for January 2106
 #   There's no way to go around it, this is an anti-material rifle disguised as a big game hunting rifle. And no one can
 #   argue that it doesn't get the job done. The model was finished just in time for it to get used during the Solar War.
 #
@@ -4231,29 +4216,12 @@ for e in weapon_repertory:
 #   She's not a brawler, so she shouldn't be using them in the first place? Also based on what Vincent is saying, she
 #   has big hands for a girl her age. Are you still transcrib END OF TRANSCRIPTION
 
-# Epicurean Medic Rifle
-#   Manufacturer: Socrates, Medical Division & Weapons Division
-#   One of the more unique offering of Socrates. This "weapon" concept came in existence when engineers from the Medical
-#   Division were wondering how to deliver a new healing agent. A Weapons Division engineer passed by and proposed to
-#   use a modified grenade launcher. In true Socrates fashion, it took a long march through bureaucracy to of both
-#   divisions to get the project started, finished, marketed and sold.
-
 # Type 23 Shotgun
-#   Manufacturer: Novak & Boyko||Caliber: 4 Gauge Shells
+#   Manufacturer: Novak & Boyko||Caliber: 4 Gauge Shells||Production dates:
 #   A
 #   Slugs for the weapon almost went into production. They were cancelled due to low demand for the model.
-
-
 # Standard Shotgun
 # Cowboy's Repeater
-# War and Peace
-
-# Lawrence's Cutlass & Flintlock
-#   Manufacturer: Old West Firearms & Replicas? Old English Armoury?
-#   Both the cutlass and flintlock appear to have been made by hand and do not have any markings to identify the
-#   manufacturer. Vivianne claims she has serviced the flintlock a few times and thinks it could have been made by
-#   Old English Armoury but Old West Firearms is more likely. More importantly, WHO USES A FLINTLOCK IN 2106?
-
 # Mark's Rifle
 # Vivianne's Rifle
 # Vivianne's Shotgun
@@ -4264,5 +4232,51 @@ for e in weapon_repertory:
 # Missile Pod
 # Marker Laser
 # ARWS
+# Manufacturer: Unknown||Caliber: ||||
 
+
+#   "Weapon-Rifle-Corrine's Old Rifle": "",
+# 	"Weapon-Rifle-St-Maurice": "",
+# 	"Weapon-Rifle-St-Laurent Gen 1": "",
+# 	"Weapon-Rifle-Cowboy's Repeater": "",
+# 	"Weapon-Rifle-Mark's Rifle": "",
+# 	"Weapon-Rifle-Type 30 Rifle": "",
+# 	"Weapon-Rifle-Vivianne's Rifle": "",
+# 	"Weapon-Rifle-Combat Rifle": "",
+# 	"Weapon-Shotgun-Type 23 Shotgun": "",
+# 	"Weapon-Shotgun-Standard Shotgun": "",
+# 	"Weapon-Shotgun-Vivianne's Shotgun": "",
+# 	"Weapon-Shotgun-Desert Shotgun": "",
+# 	"Weapon-Energy-Laser Carbine": "",
+# 	"Weapon-Energy-Laser Rifle": "",
+# 	"Weapon-Energy-Heavy Laser": "",
+# 	"Weapon-Energy-Marker Laser": "",
+# 	"Weapon-Energy-Plasma Spray": "",
+# 	"Weapon-Energy-Plasma Rifle": "",
+# 	"Weapon-Energy-Laser Shotgun": "",
+# 	"Weapon-Melee-Oversized stun baton": "",
+# 	"Weapon-Melee-Unarmed": "",
+# 	"Weapon-Melee-Hook Swords": "",
+# 	"Weapon-Melee-Hunk of Steel": "",
+# 	"Weapon-Melee-Gun Hammer": "",
+# 	"Weapon-Melee-Pile Bunker": "",
+# 	"Weapon-Combo-Gun and Ballistic Knife": "Manufacturer: Novak & Boyko||",
+# 	"Weapon-Combo-Captain's Axe & Blunderbuss": "",
+# 	"Weapon-Heavy-Musket .360": "",
+# 	"Weapon-Heavy-Buggy Gun": "",
+# 	"Weapon-Heavy-Missile Pod": "",
+# 	"Weapon-Heavy-ARWS": "",
+# 	"Weapon-Heavy-Flamethrower": "",
+# 	"Weapon-Heavy-Napalm Grenade Launcher": "",
+# 	"Weapon-Heavy-Bulwark Minigun": "",
+#
+# 	"Weapon-Gear-Crippled Laddie FCS Radio": "",
+# 	"Weapon-Gear-Mk16 Flare Mortar": "",
+# 	"Weapon-Gear-Epicurean Medic Rifle": "Manufacturer: Socrates, Medical Division & Weapons Division||||One of the more unique offering of Socrates. This weapon concept came in existence when engineers from the Medical Division were wondering how to deliver a new healing agent. A Weapons Division engineer passed by and proposed to use a modified grenade launcher. In true Socrates fashion, it took a long march through bureaucracy of both divisions to get the project started, finished, marketed and sold.",
+# 	"Weapon-Gear-Nihilist Stretcher": "",
+# 	"Weapon-Gear-Stoic Shield generator": "",
+# 	"Weapon-Gear-Binoculars": "",
+# 	"Weapon-Gear-Radar": "",
+# 	"Weapon-Gear-Smoke Dispenser": "",
+# 	"Weapon-Gear-Artillery Radio": "",
 # print([p for p in dir(BasicWeapon(weapon_repertory["Bulwark Minigun"]))])

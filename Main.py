@@ -51,7 +51,6 @@ import random
 #           Lawrence    3
 #           Mark        2
 #           Vivianne    8   (Need to code all tomboys)
-#       Vehicle
 
 #   Bosses
 #       Armed Shield Generator  Laser, Missiles, Electric. Tries to run you over too.
@@ -63,13 +62,10 @@ import random
 #           Shield Generator    Give other building a shield.
 #                                If the shield takes too much damage they get disabled for a time
 #           Energy Generator    If destroyed, kills the boss. Highest amount of health
-
 #       Gilgamesh               Uses a massive sword
 #       Rigel   (Final boss)
-
 # 	Mission Modifiers
 #       Unknown Forces  (Opposite player team spawn, no padraig)
-#       Boss rush       (Might cancel that one)
 #   Versus mode
 #       Balance changes (small ones)
 #   Character conversations

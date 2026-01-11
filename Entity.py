@@ -3224,6 +3224,20 @@ def enforcer_on_death(self, entities, level):
 
 
 # |Bosses|--------------------------------------------------------------------------------------------------------------
+# Armoured Shield Generator
+#   Laser cannon
+#   Shield destroys projectiles
+#   Side launched missiles
+
+# AA Site
+def aa_site_draw_energy_generator(self, WIN, scrolling):
+    h_mod = 0.75
+    Fun.draw_spritestack(WIN, Fun.SPRITE_HOVER_TANK_CHASSIS,
+                            [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
+                             self.free_var["Move angle"] + 90, height_diff=h_mod)
+
+
+# Hover Tank
 def hover_tank_input(self, entities, level):
     # Input functions are the IA for an enemy
     # better targeting system
@@ -3460,6 +3474,20 @@ def hover_tank_draw(self, WIN, scrolling):
                          self.free_var["Machine Gun Angle"] + 90, height_diff=h_mod)
 
 
+# Gilgamesh
+#       Sword slash dash
+#       Pattern 1
+#       Pattern 2
+
+
+# Fire Support Mech
+#       Quick Boost             Cardinal directions or rotate
+#       Napalm sword            Generates a wave of napalm
+#       Cannon
+#       Minigun
+
+
+# Attack Helicopter
 def attack_helicopter_input(self, entities, level):
     # Input functions are the IA for an enemy
     # better targeting system
@@ -3708,12 +3736,17 @@ def attack_helicopter_draw(self, WIN, scrolling):
                          self.time * 13.5, height_diff=h_mod)
 
 
-# AA Site
-def aa_site_draw_energy_generator(self, WIN, scrolling):
-    h_mod = 0.75
-    Fun.draw_spritestack(WIN, Fun.SPRITE_HOVER_TANK_CHASSIS,
-                            [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
-                             self.free_var["Move angle"] + 90, height_diff=h_mod)
+# Rigel
+# Attacks
+#       Shoulder Bash           Charge forwards, hit box on whole body
+#           Lance Swipe         Large swipe with lance
+#               Giga Thrust     Charge with lance, disjointed attack
+#       Laser barrage
+#       Quick Turn
+#       Plasma
+#       Missile Circus          Spawn a large amount of missiles
+#       Raining hell            Shoots artillery around the boss
+
 
 ACT_FREELY_DICT = {
          "Lord": ally_sub_input_roam,

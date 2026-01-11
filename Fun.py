@@ -3375,9 +3375,9 @@ COST_Z, COST_L, COST_LM, COST_M, COST_MH, COST_H  = 0, 200, 500, 1000, 1500, 200
 UPGRADE_INFO = {
 # "Friendly Fire On": {'Tier': 1, 'Cost': 0, 'Owner': 'Party', 'name': 'Friendly Fire On', 'effect': 'effect_none', 'trigger': 'trigger_standing_still'},
 # "Free Healthcare": {'Tier': 3, 'Cost': 20000, 'Owner': 'Party', 'Condition': {'Require': ['Friendly Fire On']}, 'name': 'Free Healthcare', 'effect': 'effect_none', 'trigger': 'trigger_standing_still'},
-"Driving License": {
-    'Tier': 1, 'Cost': 1, 'Owner': 'Party', 'Icon': UPGRADE_SHEET.subsurface(80, 560, 40, 40),
-    'name': 'Driving License', 'effect': 'effect_none', 'trigger': 'trigger_when_loaded'},
+# "Driving License": {
+#     'Tier': 1, 'Cost': 1, 'Owner': 'Party', 'Icon': UPGRADE_SHEET.subsurface(80, 560, 40, 40),
+#     'name': 'Driving License', 'effect': 'effect_none', 'trigger': 'trigger_when_loaded'},
 "Awareness": {
     'Tier': 1, 'Cost': COST_LM, 'Owner': 'Party', 'Icon': UPGRADE_SHEET.subsurface(0, 480, 40, 40),
     'name': 'Awareness', 'effect': 'effect_awareness', 'trigger': 'trigger_when_loaded'},
