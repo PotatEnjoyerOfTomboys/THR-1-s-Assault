@@ -101,7 +101,7 @@ import Main_Loop
 
 def main_game(party_info):
     big_game_loop = True
-    current_mission = 1
+    current_mission = 10
     run_info = {
         "Player party": player_party,
         "Missions completed": 0,

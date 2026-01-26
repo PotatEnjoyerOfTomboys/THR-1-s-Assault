@@ -43,7 +43,10 @@ class Entity:
                 self.sprites = self.sprites.split(".")[0]
                 self.sprites += " - Halloween.png"
             sprite = Fun.get_image(self.sprites)
-            self.sprites = Fun.desheetator(sprite)
+            sprite_height = 32
+            if "Sprite Height" in info:
+                sprite_height = info["Sprite Height"]
+            self.sprites = Fun.desheetator(sprite, thiccness=sprite_height)
             if "Outline" in info["free var"]:
                 colour = info["free var"]["Outline"]
                 if "Is VIP" in info["free var"]:
@@ -3478,6 +3481,260 @@ def hover_tank_draw(self, WIN, scrolling):
 #       Sword slash dash
 #       Pattern 1
 #       Pattern 2
+def gilgamesh_input(self, entities, level):
+    # Input functions are the IA for an enemy
+    # better targeting system
+    target, target_angle, wall_in = entity_target_detection(self, entities, level)
+
+    self.input = Fun.get_default_inputs()
+    if target:
+        aim_target, move_target, og_dist = entity_get_aim_move_target(self, target)
+        dist = 420
+        if self.no_shoot_state != 0:
+            dist = 64
+        entity_maintain_weapon_range(self, og_dist, move_target, dist, get_away=64)
+
+    # Stunned status manager
+    Fun.stunned_manager(self)
+
+    # TODO: Give dodge
+    return target, target_angle
+
+
+def gilgamesh_act(self, entities, level):
+    # |Movement Input|----------------------------------------------------------------------------------------------
+
+    Fun.movement_entity(self)
+
+    # |Status effects|----------------------------------------------------------------------------------------------
+    # ha ha, Fun go brr
+    Fun.status_manager(self, entities)
+    if self.no_shoot_state == 0:
+        # Attack logic
+        {
+            "Divorce Spiral": gilgamesh_divorce_spiral,
+            "Reverse Divorce Spiral": gilgamesh_reverse_divorce_spiral,
+            "Wall": gilgamesh_wall,
+            "Desert flower": gilgamesh_desert_flower,
+            "Desert dune": gilgamesh_desert_dune,
+        }[self.free_var["Current attack"]](self, entities, level)
+
+    else:
+        self.no_shoot_state -= 1
+    {
+        "Trishot": gilgamesh_attack_1,
+        "Dual shot": gilgamesh_attack_2,
+        "Hose": gilgamesh_attack_3,
+    }[self.free_var["Current sword attack"]](self, entities, level)
+
+    # |Movement Output|---------------------------------------------------------------------------------------------
+    # Make the player move
+    Fun.movement_output(self, level)
+    damage = round(abs(self.vel[0]) + abs(self.vel[1])) * 2
+    if damage > 40:
+        damage = 40
+    for e in entities["entities"]:
+        if e == self: continue
+        if self.collision_box.colliderect(e.collision_box):
+            e.vel = Fun.move_with_vel_angle(e.vel, 2, Fun.angle_between(e.collision_box.center, self.pos))
+            if e.team != self.team:
+                Fun.damage_calculation(e, damage, "Melee", death_message="Ran over")
+            pass
+    if self.draw_aim_line or self.weapon.laser_sight:
+        entities["background particles"].append(Particles.LineParticle(
+            Fun.move_with_vel_angle(self.pos, 20, self.aim_angle), Fun.BLUE, 1, self.weapon.range-20, self.aim_angle, 2, 0))
+
+
+# TODO: Give animations for Gilgamesh's sword
+def gilgamesh_attack_1(self, entities, level):
+    if start_up_lag_handler(self, 120, key="Startup lag sword"):
+        self.free_var["Current sword attack"] = "Dual shot"
+    elif self.free_var["Startup lag sword"] % 40 == 0:
+        for x in range(3):
+            angle = self.angle - 30 + 30 * x
+            Bullets.spawn_bullet(
+                self, entities,
+                Bullets.Bullet,
+                Fun.move_with_vel_angle(self.pos, 20, angle),
+                angle,
+                [2, 600, 4,
+                 20 , {"Particle allowed": True,
+                      "Burn chance": 0,
+                      "Burn duration": 0,
+                       "Damage type": "Fire",
+                      "Colour": (25, 235, 25)
+                      }])
+
+
+def gilgamesh_attack_2(self, entities, level):
+    if start_up_lag_handler(self, 120, key="Startup lag sword"):
+        self.free_var["Current sword attack"] = "Hose"
+    elif self.free_var["Startup lag sword"] % 40 == 0:
+        for x in range(2):
+            angle = self.angle - 30 + 60 * x
+            Bullets.spawn_bullet(
+                self, entities,
+                Bullets.Bullet,
+                Fun.move_with_vel_angle(self.pos, 20, angle),
+                angle,
+                [2, 600, 4,
+                 20 , {"Particle allowed": True,
+                      "Burn chance": 0,
+                      "Burn duration": 0,
+                       "Damage type": "Fire",
+                      "Colour": (25, 235, 25)
+                      }])
+
+
+def gilgamesh_attack_3(self, entities, level):
+    if start_up_lag_handler(self, 120, key="Startup lag sword"):
+        self.free_var["Current sword attack"] = "Trishot"
+    elif self.free_var["Startup lag sword"] % 3 == 0:
+        angle = self.angle + random.randint(-6, 6)
+        Bullets.spawn_bullet(
+            self, entities,
+            Bullets.Bullet,
+            Fun.move_with_vel_angle(self.pos, 20, angle),
+            angle,
+            [2, 600, 4,
+            20 , {"Particle allowed": True,
+                      "Burn chance": 0,
+                      "Burn duration": 0,
+                       "Damage type": "Fire",
+                      "Colour": (25, 235, 25)
+                      }])
+
+
+def gilgamesh_divorce_spiral(self, entities, level):
+    if start_up_lag_handler(self, 72):
+        self.no_shoot_state = 21
+        self.free_var["Current attack"] = "Wall"
+    elif self.free_var["Startup lag"] % 4 == 0:
+        angle = self.angle + 10 * self.free_var["Startup lag"] // 2
+        Bullets.spawn_bullet(
+            self, entities,
+            Bullets.Bullet,
+            Fun.move_with_vel_angle(self.free_var["Pattern pos"], 20, angle),
+            angle,
+            [0.75, 600, 4,
+            10 , {"Particle allowed": True,
+                    "Burn chance": 0,
+                    "Burn duration": 0,
+                       "Damage type": "Fire",
+                    "Colour": Fun.YELLOW_LIGHT
+                    }])
+
+    if self.free_var["Startup lag"] == 0:
+        self.free_var["Pattern pos"] = self.pos.copy()
+
+
+def gilgamesh_reverse_divorce_spiral(self, entities, level):
+    if start_up_lag_handler(self, 72):
+        self.no_shoot_state = 21
+        self.free_var["Current attack"] = "Wall"
+    elif self.free_var["Startup lag"] % 4 == 0:
+        angle = self.angle - 19 * self.free_var["Startup lag"] // 2
+        Bullets.spawn_bullet(
+            self, entities,
+            Bullets.Bullet,
+            Fun.move_with_vel_angle(self.free_var["Pattern pos"], 20, angle),
+            angle,
+            [0.75, 600, 4,
+            10 , {"Particle allowed": True,
+                    "Burn chance": 0,
+                    "Burn duration": 0,
+                       "Damage type": "Fire",
+                    "Colour": Fun.YELLOW_LIGHT
+                    }])
+
+    if self.free_var["Startup lag"] == 0:
+        self.free_var["Pattern pos"] = self.pos.copy()
+
+
+def gilgamesh_desert_flower(self, entities, level):
+    if start_up_lag_handler(self, 72):
+        self.no_shoot_state = 21
+        self.free_var["Current attack"] = Fun.get_random_element_from_list(["Divorce Spiral", "Reverse Divorce Spiral"])
+    elif self.free_var["Startup lag"] % 24 == 0:
+        for x in range(6):
+            angle = self.angle + 60 * x
+            mod = self.free_var["Startup lag"] // 24 * self.free_var["Startup lag"] // 24 * 5
+            for y in [mod, mod * -1]:
+                Bullets.spawn_bullet(
+                    self, entities,
+                    Bullets.Bullet,
+                    Fun.move_with_vel_angle(self.free_var["Pattern pos"], 20, angle + y),
+                    angle,
+                    [1.15, 600, 4,
+                     10, {"Particle allowed": True,
+                          "Burn chance": 0,
+                          "Burn duration": 0,
+                          "Damage type": "Fire",
+                          "Colour": Fun.YELLOW_LIGHT
+                          }])
+
+
+    if self.free_var["Startup lag"] == 0:
+        self.free_var["Pattern pos"] = self.pos.copy()
+
+
+def gilgamesh_desert_dune(self, entities, level):
+    if start_up_lag_handler(self, 72):
+        self.no_shoot_state = 21
+        self.free_var["Current attack"] = Fun.get_random_element_from_list(["Divorce Spiral", "Reverse Divorce Spiral"])
+    elif self.free_var["Startup lag"] % 24 == 0:
+        for x in range(6):
+            angle = self.angle - 5 * self.free_var["Startup lag"] // 24 + 20 * x
+
+            Bullets.spawn_bullet(
+                self, entities,
+                Bullets.Bullet,
+                Fun.move_with_vel_angle(self.free_var["Pattern pos"], 20, angle),
+                angle,
+                [0.75, 600, 4,
+                10 , {"Particle allowed": True,
+                        "Burn chance": 0,
+                        "Burn duration": 0,
+                           "Damage type": "Fire",
+                        "Colour": Fun.YELLOW_LIGHT
+                        }])
+            Bullets.spawn_bullet(
+                self, entities,
+                Bullets.Bullet,
+                Fun.move_with_vel_angle(self.free_var["Pattern pos"], 20, angle - 180),
+                angle - 180,
+                [0.75, 600, 4,
+                10 , {"Particle allowed": True,
+                        "Burn chance": 0,
+                        "Burn duration": 0,
+                           "Damage type": "Fire",
+                        "Colour": Fun.YELLOW_LIGHT
+                        }])
+    if self.free_var["Startup lag"] == 0:
+        self.free_var["Pattern pos"] = self.pos.copy()
+
+
+def gilgamesh_wall(self, entities, level):
+    if start_up_lag_handler(self, 22):
+        self.no_shoot_state = 0
+        self.free_var["Current attack"] = Fun.get_random_element_from_list(["Desert dune", "Desert flower"])
+
+        for x in range(32):
+            angle = self.angle
+            Bullets.spawn_bullet(
+                self, entities,
+                Bullets.BulletSlowing,
+                Fun.move_with_vel_angle(Fun.move_with_vel_angle(self.free_var["Pattern pos"], random.uniform(-48, 48), angle + 90), 20, angle),
+                angle,
+                [4, 600, 8,
+                 10 , {"Slowdown rate": random.random() * 0.2,
+                       "Particle allowed": True,
+                    "Burn chance": 0,
+                    "Burn duration": 0,
+                      "Colour": Fun.YELLOW_LIGHT
+                      }])
+    if self.free_var["Startup lag"] == 0:
+        self.free_var["Pattern pos"] = self.pos.copy()
 
 
 # Fire Support Mech
@@ -3650,7 +3907,7 @@ def attack_helicopter_act(self, entities, level):
                         Fun.move_with_vel_angle(self.pos, (x // 2) * 8,
                                                 [-90 + self.aim_angle, 90 + self.aim_angle][x % 2]),
                         self.aim_angle + [0, 0, -7.5, 7.5, -15, 15, -22.5, 22.5][x], b_info)
-                    self.slowdown_rate = 1 - random.random() * 2
+                    # self.slowdown_rate = 1 - random.random() * 2
 
                 # tell if the trigger was pressed
                 if not self.weapon.full_auto:
@@ -4283,6 +4540,8 @@ F3_RESIT_H = {"Physical": 0.5,  "Fire": 0.25, "Explosion": 0.33, "Energy": 0.4, 
 
 NO_RESIT_L = {"Physical": 1,    "Fire": 1,    "Explosion": 1,    "Energy": 1,       "Melee": 1,     "Healing": 0}
 
+GILG_RESIT = {"Physical": 0.6,  "Fire": 0.6,  "Explosion": 0.6,  "Energy": 0.6,     "Melee": 1.2, "Healing": 0}
+
 enemy_repertory = {
     #                   MHlt	MArm	Resits	Spd 	VisRg	SltMod	SltCntr	Size
     # |Circle|----------------------------------------------------------------------------------------------------------
@@ -4683,6 +4942,28 @@ enemy_repertory = {
                      "IS BOSS": True, "Grenade Shakedown": 600, "Grenade Shakedown angle": 0, "Run people over": 250,
                      "Startup lag": 0, "Startup time": 240}
     },
+    "Gilgamesh": {
+        "name": "Gilgamesh", "faction": "FAC-2",
+        "health": H_HO * 20, "armour": 0, "damage resistances": GILG_RESIT,
+        "sprites": "Sprites/Enemies/Gilgamesh.png", "Sprite Height": 40,
+
+        "thickness": 28, "vel max": V_HO, "speed": 8, "friction": 4,
+        "dash": {"speed": DS_MO * 0.6, "i-frames": 0, "charge": 35},
+        # Weapons
+        "weapon": "Desert's Wind",
+        # AI
+        "func input": "gilgamesh_input", "func act": "gilgamesh_act", "func draw": "enemy_draw_basic",
+        "on death": "none",
+        "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
+        "wall hack": False,
+        "free var": {"IS BOSS": True,
+                     "Current attack": "Divorce Spiral",
+                     "Current sword attack": "Trishot",
+                     "Startup lag sword": 0,
+                     "Startup lag": 0,
+                     "Pattern pos": [0, 0]}
+    },
+
     # AA Site
     # AA laser            Targets last position of a player. Infinite range
     "AA Laser": {

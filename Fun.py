@@ -6546,7 +6546,7 @@ ENEMY_TYPE_TO_FACTION_UNIT = [
      "Specialist 2": "Crusher",
      "Elite": "Assassin",
      "Boss 1": "Hover Tank",
-     "Boss 2": "Attack Helicopter"
+     "Boss 2": "Gilgamesh"
      },
     {"VIP": "Commanding Officer",
      "Grunt": "Infantry",
@@ -6558,6 +6558,10 @@ ENEMY_TYPE_TO_FACTION_UNIT = [
      "Boss 1": "Super Bulwark",
      "Boss 2": "Attack Helicopter"
      },
+    {"True Final Boss": "Rigel",
+     "Alt Zoar Final boss": "THR-1",
+     "Alt THR-1 Final boss": "Zoar",
+     }
 ]
 # Manufacturer
 def enemy_squad_generator(current_mission, faction=0, modified_point_budget=0):

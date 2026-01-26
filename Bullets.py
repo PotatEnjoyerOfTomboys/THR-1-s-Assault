@@ -1197,7 +1197,7 @@ class Fire(BasicBullet):
                                               self.pos[1] + scrolling[1] - self.radius / 2,  self.radius],
                                         self.colour,
                                         # (255, 255, 255),
-                                        32)
+                                        64)
 
 class Napalm(BasicBullet):
     def __init__(self, pos, angle, info, owner):
@@ -1361,7 +1361,7 @@ class ExplosionPrimaryType1(BasicBullet):
             #                                                       [0, 5, self.radius,
             #                                                        self.damage, self.secondary_explosion], self.owner))
             spawn_bullet(
-                self, entities,
+                self.owner, entities,
                 ExplosionSecondary,
                 self.pos,
                 self.angle,
@@ -1401,9 +1401,12 @@ class ExplosionPrimaryType2(BasicBullet):
                     Fun.damage_calculation(collision, self.damage, self.damage_type, death_message="Limbs blown up")
                     self.on_hit_handler(collision, entities, level)
                     # Explode here
-                    entities["bullets"].append(ExplosionSecondary(self.pos, self.angle,
-                                                                          [0, 5, self.radius,
-                                                                           self.damage, self.secondary_explosion], self.owner))
+                    spawn_bullet(
+                        self.owner, entities,
+                        ExplosionSecondary,
+                        self.pos,
+                        self.angle,
+                        [0, 5, self.radius, self.damage, self.secondary_explosion])
                     self.duration = 0
                     self.visual_effect(self, entities)
 
@@ -1543,13 +1546,13 @@ class Missile(BasicBullet):
 class MissileIncendiary(Missile):
     def payload(self, collision, entities, level):
         for x in range(self.secondary_explosion["Amount of Bullets"]):
-            spawn_bullet(self, entities, Napalm, self.pos.copy(), self.angle * 360 / self.secondary_explosion["Amount of Bullets"] * x, self.secondary_explosion["Bullet Info"])
+            spawn_bullet(self.owner, entities, Napalm, self.pos.copy(), self.angle * 360 / self.secondary_explosion["Amount of Bullets"] * x, self.secondary_explosion["Bullet Info"])
 
 
 class MissileShrapnel(Missile):
     def payload(self, collision, entities, level):
         for x in range(self.secondary_explosion["Amount of Bullets"]):
-            spawn_bullet(self, entities, BulletSlowing, self.pos.copy(),
+            spawn_bullet(self.owner, entities, BulletSlowing, self.pos.copy(),
                          random.uniform(self.angle - self.secondary_explosion["Angle range"],
                                         self.angle + self.secondary_explosion["Angle range"]),
                          self.secondary_explosion["Bullet Info"])
@@ -1586,6 +1589,7 @@ class GrenadeType0(BasicBullet):
         pass
 
 
+# TODO: Make sure explosive bullets uses spawn_bullet to spawn bullets.
 class GrenadeType1(BasicBullet):
     def __init__(self, pos, angle, info, owner):
         BasicBullet.__init__(self, pos, angle, info, owner)
