@@ -323,7 +323,24 @@ def mission_start(self, entities, bullets, level, time_passed, screen, CLOCK):
             ])
         return
     # BossIntro
-    entities["UI particles"].append(Particles.BossIntro(boss_name="HOVER TANK"))
+    boss_name = "BOSS-NAME-UNKNOWN"
+    if level["mission number"] == 5:
+        boss_name = [
+            "BOSS-NAME-ARMED-SHIELD-GENERATOR",
+            "BOSS-NAME-HOVER-TANK",
+            "BOSS-NAME-FIRE-SUPPORT-MECH"
+        ][level['faction']]
+    if level["mission number"] == 10:
+        boss_name = [
+            "BOSS-NAME-AA-SITE",
+            "BOSS-NAME-GILGAMESH",
+            "BOSS-NAME-ATTACK-HELICOPTER"
+        ][level['faction']]
+    if level["mission number"] == 15:
+        # Additional stuff for final boss
+        pass
+    # Use the old boss thing for Curtis?
+    entities["UI particles"].append(Particles.BossIntro(boss_name=Fun.write_textline(boss_name)))
     # level["scrolling target"]
     level["events"].append(
         MissionEvent("Finishing", trigger_on_for, False, [change_scrolling_target], free_var={"Timer": 60 * 5}))

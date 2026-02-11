@@ -171,6 +171,23 @@
 	"BOSS-INTRO-18": "Combat Zone Designated",
 	"BOSS-INTRO-19": "Activating Combat Mode",
 	"BOSS-INTRO-20": "ERROR - ALL SYSTEM FAIL",
+	"BOSS-INTRO-21": "Do you remember?",
+	"BOSS-INTRO-22": "Don't kill me...",
+	"BOSS-INTRO-23": "Engage target",
+	"BOSS-INTRO-24": "WARNING - TOO DRY",
+	"BOSS-INTRO-25": "WARNING - TOO WET",
+
+	"BOSS-NAME-UNKNOWN": "UNKNOWN",
+    "BOSS-NAME-ARMED-SHIELD-GENERATOR": "Armed Shield Generator",
+    "BOSS-NAME-HOVER-TANK": "Hover Tank",
+    "BOSS-NAME-FIRE-SUPPORT-MECH": "Fire Support Mech",
+	"BOSS-NAME-AA-SITE": "AA Site",
+    "BOSS-NAME-GILGAMESH": "Gilgamesh",
+    "BOSS-NAME-ATTACK-HELICOPTER": "Attack Helicopter",
+	"BOSS-NAME-RIGEL": "RIGEL",
+	"BOSS-NAME-THR-1": "Merc. Team THR-1",
+	"BOSS-NAME-CURTIS": "CURTIS",
+
 	
 	"__Mission names": "",  
 	"Eliminate Commander Name 0": "Op. Hitman",
@@ -269,6 +286,10 @@
 	"Defeat Elite Unit Name 13": "Op. No Middle Age",
 	"Defeat Elite Unit Name 14": "Op. Mark Ulta",
 	"Defeat Elite Unit Name 15": "Op. Beloved Gerry.",
+
+	"Finale 1": "Op. Unknown Fire",
+	"Finale 2": "Op. Brother Miller",
+	"Finale 3": "Op. THRone",
 		  
 	"__Shop": "",
 	"Shop-Lord-Bought-1": "",

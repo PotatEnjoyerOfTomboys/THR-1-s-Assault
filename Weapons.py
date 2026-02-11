@@ -3717,6 +3717,26 @@ weapon_repertory = {
          "alt fire": "none",
          "passive": "arws_passive",
          "agro": 2},
+    "Drone Gun":
+        {"name": "Drone Gun",
+         "description": "",
+         "class": "?????",
+         "sprite": "Sprites/Enemies/Weapons/Plasma Spray.png",
+         "gunshot sound": "Shotgun",
+         "reloading sound": "Reload Pistol 1",
+         "jamming sound": "Jamming",
+         "sound level": 0.7,
+         "accuracy": 1, "spread": 24,
+         "handle": 6, "recoil": 20,
+         "full auto": True, "fire rate": 28, "reload time": 0,
+         "bullet type": "Bullet",
+         "bullets per shot": 1,
+         "ammo cost": 0, "max ammo": 1, "ammo pool": 0,
+         "bullet info": [4, 90, 6, 5,
+                         {"Piercing": False, "Smoke": False, "Colour": (107, 165, 153), "Damage type": "Energy"}],
+         "crit rate": 0, "crit multiplier": 2,
+         "jam rate": 0, "jam duration": 0,
+         "laser sight": False, "alt fire": "none", "passive": "none"},
     # |Triangle|--------------------------------------------------------------------------------------------------------
     # Plasma Rifle, Bullets are slow
     "Plasma Spray":

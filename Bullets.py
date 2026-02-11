@@ -2022,7 +2022,7 @@ class ExplosionSecondary(BasicBullet):
                 if Fun.collision_rect_circle(collision.collision_box.left, collision.collision_box.top,
                                                  collision.collision_box.width, collision.collision_box.height,
                                                  self.pos[0], self.pos[1], self.radius):
-                    if self.owner.team != collision.team:
+                    if self.owner.team == collision.team:
                         continue
                     Fun.damage_calculation(collision, self.damage, self.damage_type, death_message="Limbs blown up")
                     # Entities inside the explosion are pushed

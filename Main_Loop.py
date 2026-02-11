@@ -136,4 +136,4 @@ def main_loop(WIN, CLOCK, entities, level, party_info, scrolling, scrolling_targ
 
         CLOCK.tick(60)
 
-    return end_status, mission_end_screen, big_game_loop, party_info
+    return end_status, mission_end_screen, big_game_loop, party_info, time_passed

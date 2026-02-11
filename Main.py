@@ -55,15 +55,11 @@ import random
 #   Bosses
 #       Armed Shield Generator  Laser, Missiles, Electric. Tries to run you over too.
 #       Fire Support Mech       Fire, Artillery, Bullets
-#       AA Site                 Made of a few installations
-#           AA laser            Targets last position of a player. Infinite range
-#           Drone builder       Launches drones
-#           Missile Battery     Launches missiles, they have low speed and high manoeuvrability
-#           Shield Generator    Give other building a shield.
-#                                If the shield takes too much damage they get disabled for a time
-#           Energy Generator    If destroyed, kills the boss. Highest amount of health
-#       Gilgamesh               Uses a massive sword
-#       Rigel   (Final boss)
+#       AA Site
+#           Drone builder       Launches drones (animations)
+#       Rigel               (Final boss)
+#       Curtis              (Alt Final boss - THR-1 route)
+#       THR-1 Boss fight    (Alt Final boss - Zoar route)
 # 	Mission Modifiers
 #       Unknown Forces  (Opposite player team spawn, no padraig)
 #   Versus mode
@@ -75,9 +71,7 @@ import random
 #   Animated weapons. Mostly for the pile bunker
 #   Animated radio transmission portraits
 
-
 # 	Padraig?        (cancelled)
-#   Web version? https://pygame-web.github.io/wiki/pygbag/
 pg.mixer.pre_init()
 pg.init()
 pg.joystick.init()
@@ -101,10 +95,11 @@ import Main_Loop
 
 def main_game(party_info):
     big_game_loop = True
-    current_mission = 10
+    current_mission = 15
     run_info = {
         "Player party": player_party,
         "Missions completed": 0,
+        "Time spend in mission": 0,
         "Mission historic": [],  # {"Name": <str>, "Faction": <int>}
 
         # "Funds": 0,
@@ -138,15 +133,15 @@ def main_game(party_info):
             boss_mission = [0, 1, 2]
             boss_mission.pop(Fun.get_random_element_from_list(boss_mission))
             for possible_level in boss_mission:
-                l, ex = Fun.level_generator(possible_levels, party_info, current_mission=current_mission,
+                l, ex = Fun.level_generator(possible_levels, party_info, run_info, current_mission=current_mission,
                                             faction=possible_level)
                 possible_levels.append({"name": f"{possible_level}", "level": l, "extra info": ex})
         elif current_mission == 15:
-            l, ex = Fun.level_generator(possible_levels, party_info, current_mission=current_mission)
+            l, ex = Fun.level_generator(possible_levels, party_info, run_info, current_mission=current_mission)
             possible_levels.append({"name": f"{0}", "level": l, "extra info": ex})
         else:
             for possible_level in range(3):
-                l, ex = Fun.level_generator(possible_levels, party_info, current_mission=current_mission,
+                l, ex = Fun.level_generator(possible_levels, party_info, run_info, current_mission=current_mission,
                                             faction=possible_level)
                 possible_levels.append({"name": f"{possible_level}", "level": l, "extra info": ex})
 
@@ -290,9 +285,10 @@ def main_game(party_info):
             Fun.menu_transition_doom_screen_melt(WIN, CLOCK, WIN.copy(), frame_2)
 
             checked_time = False
-            end_status, mission_end_screen, big_game_loop, party_info = Main_Loop.main_loop(WIN, CLOCK, entities, level,
+            end_status, mission_end_screen, big_game_loop, party_info, time_spent = Main_Loop.main_loop(WIN, CLOCK, entities, level,
                                                                                             party_info, scrolling,
                                                                                             scrolling_target_entities)
+            run_info["Time spend in mission"] += time_spent
 
             pg.mixer.music.fadeout(60)
             # |Mission end screen|----------------------------------------------------------------------------------
@@ -328,7 +324,18 @@ def main_game(party_info):
                 if end_status == "Loss":
                     big_game_loop = False
 
-        #
+        # Story stuff
+        # Story Beat 1
+        # THR-1
+        # Zoar
+        # Story Beat 2
+        # THR-1
+        # Zoar
+        # Endings
+        # THR-1 Good    THR-1 gets paid, but Emperor presses on Secretary to tell him what that mission was about. She mentions a project but that's it.
+        # THR-1 Bad     Secretary says that they failed the mission, but she can still manage to salvage the situation. They don't get paid as much as promised.
+        # Zoar Good     Curtis
+        # Zoar Bad      Curtis
     # Run end screen
     Fun.end_run_menu(WIN, CLOCK, run_info, party_info, end_status)  # TODO: Fix inputs not working there
     # Unlock stuff here
@@ -357,6 +364,8 @@ def main_game(party_info):
                         [{"Name": "Continue", "Value": "No", "On select": "Return", "Render func": "Text only"}],
                         text=f"New weapon unlocked - {Fun.weapon_ownership_table[p][2]}"
                     )
+
+
     save_data["Character weapons unlocked"] = unlocked_weapons
     Fun.dict_to_json("Save.json", save_data)
 
@@ -478,7 +487,7 @@ def versus_mode(party_info):
         Fun.menu_transition_doom_screen_melt(WIN, CLOCK, WIN.copy(), frame_2)
 
         checked_time = False
-        end_status, mission_end_screen, big_game_loop, party_info = Main_Loop.main_loop(WIN, CLOCK, entities, level,
+        end_status, mission_end_screen, big_game_loop, party_info, time_spent = Main_Loop.main_loop(WIN, CLOCK, entities, level,
                                                                                         party_info, scrolling,
                                                                                         scrolling_target_entities,
                                                                                         end_with_main_player=False)

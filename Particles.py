@@ -393,6 +393,22 @@ class AimPoint:
             self.duration = 0
 
 
+class RandomParticle0:
+    def __init__(self, pos, colour, duration, size=(2, 4)):
+        self.survive_wipe = False
+        # Unused
+        self.pos = pos
+        self.colour = colour
+        self.duration = duration
+        self.size = size
+
+    def draw(self, WIN, scrolling):
+        if self.duration > 0:
+            pg.draw.rect(WIN, self.colour, [self.pos[0] + scrolling[0],
+                                            self.pos[1] + scrolling[1], self.size[0], self.size[1]])
+            self.duration -= 1
+
+
 class RandomParticle1:
     def __init__(self, pos, colour, speed, duration, size=(2, 4)):
         self.survive_wipe = False
@@ -1117,7 +1133,7 @@ class BossIntro:
         comms = []
         for i in range(4):
             comms.append(
-                {"Sender": "SYS", "Message": str_to_list(write_textline(f"BOSS-INTRO-{random.randint(0, 19)}"))},
+                {"Sender": "SYS", "Message": str_to_list(write_textline(f"BOSS-INTRO-{random.randint(0, 25)}"))},
             )
         self.comms = UICommunicationLog(comms, [10, 128], speed=3, offset=10)
         # {"Sender": "THR-1", "Message": str_to_list("I AM MAKING MAC AND CHEESE AND NOBODY CAN STOP ME!")}
@@ -1183,6 +1199,93 @@ class BossIntro:
             self.comms.draw(WIN, z=z_mod)
             #  * z_mod
             self.duration -= 1
+
+
+class RigelIntro:
+    def __init__(self, boss_name="Boss Intro", duration=1020):
+        self.survive_wipe = True  # Should it survive FPS boosting measures
+        self.start_duration = duration
+        self.duration = duration
+
+        self.boss_name = str_to_list(boss_name)
+
+        self.written_text = ""
+        self.particles = []
+        self.bar_x_mod = 0
+        self.warning_x_mod = -120
+
+        self.end_duration = -BIG_INT
+
+        comms = []
+        for i in range(4):
+            comms.append(
+                {"Sender": "SYS", "Message": str_to_list(write_textline(f"BOSS-INTRO-{random.randint(0, 25)}"))},
+            )
+        self.comms = UICommunicationLog(comms, [10, 128], speed=3, offset=10)
+        # {"Sender": "THR-1", "Message": str_to_list("I AM MAKING MAC AND CHEESE AND NOBODY CAN STOP ME!")}
+
+    def draw(self, WIN, scrolling):
+        # Fade in
+        if self.duration > self.end_duration:
+            # width, height = WIN.get_size()
+            width, height = FRAME_MAX_SIZE
+            z_mod = FRAME_MAX_SIZE[0]/630
+
+            # Move both bars to the left and right
+            base_dist = 32 * z_mod
+            bar_height = 3 * z_mod
+            bar_spread = 48 * z_mod
+            pg.draw.rect(WIN, AMBER, (self.bar_x_mod* z_mod-width, base_dist, width, bar_height ))
+            pg.draw.rect(WIN, AMBER, (self.bar_x_mod* z_mod-width, base_dist + bar_spread, width, bar_height ))
+            pg.draw.rect(WIN, AMBER, (width-self.bar_x_mod* z_mod, height - base_dist - bar_height * 2 - bar_spread, width, bar_height ))
+            pg.draw.rect(WIN, AMBER, (width-self.bar_x_mod* z_mod, height - base_dist - bar_height, width, bar_height ))
+
+            # draw text
+            temp_font = create_temp_font_4(height)
+            text_sprite = temp_font.render("WARNING", True, AMBER_LIGHT)
+            text_width = text_sprite.get_width() + 30 * z_mod
+            text_spread = (bar_spread - text_sprite.get_height()) / 2
+
+            for x in range(int(width // text_width * 8)):
+                WIN.blit(text_sprite, [
+                    (self.warning_x_mod - text_width * x) * z_mod,
+                    base_dist+bar_height+text_spread
+                ])
+
+            for x in range(int(width // text_width * 8)):
+                WIN.blit(text_sprite, [
+                    (width - self.warning_x_mod + text_width * x - 120) * z_mod,
+                    height - base_dist - bar_height - bar_spread+text_spread
+                ])
+            self.warning_x_mod += 2
+
+            if 630 > self.bar_x_mod:
+                self.bar_x_mod += 4
+                if not 630 > self.bar_x_mod:
+                    # play noise
+                    pass
+            else:
+                # Write boss name
+                if self.duration % 30 == 0:
+                    if self.boss_name:
+                        self.written_text += self.boss_name[0]
+                        self.boss_name.pop(0)
+                        if not self.boss_name:
+                            self.end_duration = self.duration - 240
+
+                name_sprite = temp_font.render(self.written_text, True, AMBER_LIGHT)
+                WIN.blit(name_sprite, [
+                    width//2 - name_sprite.get_width()//2,
+                    height//2 - name_sprite.get_height()//2
+                ])
+            # Handles shits
+            for i in self.particles:
+                i.draw(WIN, scrolling)
+            self.comms.act()
+            self.comms.draw(WIN, z=z_mod)
+            #  * z_mod
+            self.duration -= 1
+
 
 
 class Music:

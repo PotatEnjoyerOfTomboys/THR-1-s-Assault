@@ -708,6 +708,9 @@ SPRITE_AA_SITE_MISSILE = get_sprite_stack_list(get_image('Sprites/Vehicles/AA Si
 SPRITE_AA_SITE_GENERATOR = get_sprite_stack_list(get_image('Sprites/Vehicles/AA Site - Energy Generator.png'), 50)
 SPRITE_AA_SITE_SHIELD = get_sprite_stack_list(get_image('Sprites/Vehicles/AA Site - Shield Generator.png'), 30)
 
+SPRITE_AA_SITE_LASER = get_sprite_stack_list(get_image('Sprites/Vehicles/AA Site - Laser.png'), 50)
+SPRITE_AA_SITE_TURRET = get_sprite_stack_list(get_image('Sprites/Vehicles/AA Site - Laser Turret.png'), 12)
+
 
 # |Radio transmission sprites|-----------------------------------------------------------------------------------------
 def desheetator_radio(sprite_sheet, height):
@@ -4870,7 +4873,6 @@ def get_number_of_thing_in_a_damn_circle(entities, target_type, radius, center_x
 def move_with_vel_angle(base_pos, vel, angle):
     # I could switch math.pi to 3
     angle = angle * math.pi / 180
-    # return [base_pos[0] - vel * math.sin(angle), base_pos[1] - vel * math.cos(angle)]  # Evil
     return [base_pos[0] - vel * math.cos(angle), base_pos[1] - vel * math.sin(angle)]
 
 
@@ -6815,7 +6817,7 @@ def map_generator(current_mission, testing=False, defense_mode=False):
     return final_sprite
 
 
-def level_generator(possible_levels, party_info, current_mission=1, mission_type="", faction=0):
+def level_generator(possible_levels, party_info, run_info, current_mission=1, mission_type="", faction=0):
     # point_budget = int(current_mission * (current_mission*0.25) + 8)
     point_budget = int(math.exp2(current_mission*0.5)+ 14)
     enemy_floor = current_mission * 5 + 5
@@ -6872,6 +6874,23 @@ def level_generator(possible_levels, party_info, current_mission=1, mission_type
         level["rendering"]["Tile set"] = {"Wall": TILE_SET_SALT_FLATS_WALL, "Floor": TILE_SET_SALT_FLATS_FLOOR}
     # level["rendering"]["Tile set"] = {"Wall": TILE_SET_RED_DESERT_WALL, "Floor": TILE_SET_RED_DESERT_FLOOR}
 
+    # Generate mission name
+    if current_mission != 15:
+        name = write_textline(f"{level['objective']} Name {random.randint(0, 15)}")
+        possible_missions_name = []
+        for pp in possible_levels:
+            possible_missions_name.append(pp["level"]["name"])
+        while name in possible_missions_name:
+            name = write_textline(f"{level['objective']} Name {random.randint(0, 15)}")
+        level["name"] = name
+    else:
+        if run_info["Time spend in mission"]/60/60 < 20:
+            level["name"] = write_textline("Finale 1")
+        else:
+            if "Curtis" not in party_info:
+                level["name"] = write_textline("Finale 2")
+            else:
+                level["name"] = write_textline("Finale 3")
     # Bosses get their own generator
     if level["objective"] == "Defense":
         level_map = map_generator(current_mission, defense_mode=True)
@@ -7046,7 +7065,6 @@ def level_generator(possible_levels, party_info, current_mission=1, mission_type
                 mission_reward *= 4
                 continue
 
-
     # |Objectives|------------------------------------------------------------------------------------------------------
     # Generate objective zones
     possible_objective_zone = [pg.Rect(wall) for wall in advanced_image_to_map_geometry(
@@ -7155,16 +7173,25 @@ def level_generator(possible_levels, party_info, current_mission=1, mission_type
                 if test_dist > control_dist:
                     control_dist = test_dist
                     commander_spawn = potential_spawn_point
+
             # Add the commander
-            boss_to_fight = "Boss 1"
-            if current_mission == 10:
-                boss_to_fight = "Boss 2"
-            enemy_spawns.append({"Pos": [commander_spawn.centerx, commander_spawn.centery],
-                                 "Type": ENEMY_TYPE_TO_FACTION_UNIT[faction][boss_to_fight]})
-            if current_mission == 15:
-                enemy_spawns[-1]["Pos"][0] -= 128
-                enemy_spawns.append({"Pos": [commander_spawn.centerx + 128, commander_spawn.centery],
-                                     "Type": ENEMY_TYPE_TO_FACTION_UNIT[faction]["Boss 2"]})
+            if current_mission != 15:
+                boss_to_fight = "Boss 1"
+                if current_mission == 10:
+                    boss_to_fight = "Boss 2"
+                enemy_spawns.append({"Pos": [commander_spawn.centerx, commander_spawn.centery],
+                                     "Type": ENEMY_TYPE_TO_FACTION_UNIT[faction][boss_to_fight]})
+            else:
+                # Get mission name
+                if level['name'] == write_textline("Finale 1"): # Load Rigel
+                    enemy_spawns.append({"Pos": [commander_spawn.centerx, commander_spawn.centery], "Type": "Rigel"})
+                if level['name'] == write_textline("Finale 2"): # Load Curtis
+                    enemy_spawns.append({"Pos": [commander_spawn.centerx, commander_spawn.centery], "Type": "Curtis"})
+                if level['name'] == write_textline("Finale 3"): # Load THR-1 team
+                    for x in ["Lord", "Emperor", "Wizard", "Sovereign", "Duke", "Condor", "Jester"]:
+                        enemy_spawns.append({"Pos": [commander_spawn.centerx, commander_spawn.centery], "Type": x})
+
+
             level['objective points'].append([commander_spawn.centerx, commander_spawn.centery])
             # Add event to check for commander death
             level["events"].append(['Goal', {'rects': [], 'Conditions': 'trigger_check_zero_boss'}, True, ['win']])
@@ -7252,15 +7279,6 @@ def level_generator(possible_levels, party_info, current_mission=1, mission_type
 
     # |Compile extra info|----------------------------------------------------------------------------------------------
     extra_info = {"Spawn": spawn_point, "Enemy spawns": enemy_spawns, "Mission Reward": round(mission_reward)}
-
-    # Generate mission name
-    name = write_textline(f"{level['objective']} Name {random.randint(0, 15)}")
-    possible_missions_name = []
-    for pp in possible_levels:
-        possible_missions_name.append(pp["level"]["name"])
-    while name in possible_missions_name:
-        name = write_textline(f"{level['objective']} Name {random.randint(0, 15)}")
-    level["name"] = name
 
     return level, extra_info
 

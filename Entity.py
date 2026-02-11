@@ -13,7 +13,7 @@ from Fun import none
 from Event import MissionEvent, loss_of_apc, trigger_constant
 
 class Entity:
-    __slots__=['agro', 'agro_decrease_rate', 'ai_state', 'aim_angle', 'angle', 'animation_counter', 'is_target', 'armour', 'armour_break', 'bullets_shot', 'collision_box', 'control', 'controller_angle', 'controller_control', 'crit', 'cutscene_mode', 'damage_taken', 'dash_allowed', 'dash_charge_time', 'dash_cooldown', 'dash_iframes', 'dash_speed', 'did_agro_raise', 'direction_angle', 'draw_aim_line', 'draw_angle', 'draw_rotated_dist', 'draw_targeting_range', 'driving', 'force_draw', 'free_var', 'friction', 'func_act', 'func_draw', 'func_input', 'health', 'input', 'input_mode', 'is_ally', 'is_boss', 'is_player', 'is_targeted', 'is_targeting', 'max_armour', 'max_health', 'mouse_control', 'mouse_pos', 'name', 'no_shoot_state', 'og_info', 'on_death', 'order_builder', 'pathfinding_old_positions', 'pos', 'reloading', 'resistances', 'running', 'shooting', 'shot_allowed', 'skills', 'sound_mod', 'speed', 'sprites', 'standing_still', 'status', 'stealth_counter', 'stealth_mod', 'target', 'targeting_angle', 'targeting_range', 'team', 'thiccness', 'time', 'upgrades', 'vel', 'vel_max', 'walking', 'wall_hack', 'weapon', 'weapon_draw_dist', 'owner']
+    __slots__=['agro', 'agro_decrease_rate', 'ai_state', 'aim_angle', 'angle', 'animation_counter', 'is_target', 'armour', 'armour_break', 'bullets_shot', 'collision_box', 'control', 'controller_angle', 'controller_control', 'crit', 'cutscene_mode', 'damage_taken', 'dash_allowed', 'dash_charge_time', 'dash_cooldown', 'dash_iframes', 'dash_speed', 'did_agro_raise', 'direction_angle', 'draw_aim_line', 'draw_angle', 'draw_rotated_dist', 'draw_targeting_range', 'driving', 'force_draw', 'free_var', 'friction', 'func_act', 'func_draw', 'func_input', 'health', 'input', 'input_mode', 'is_ally', 'is_boss', 'is_player', 'is_targeted', 'is_targeting', 'max_armour', 'max_health', 'mouse_control', 'mouse_pos', 'name', 'no_shoot_state', 'og_info', 'on_death', 'order_builder', 'pathfinding_old_positions', 'pos', 'reloading', 'resistances', 'running', 'shooting', 'shot_allowed', 'skills', 'sound_mod', 'speed', 'sprites', 'standing_still', 'status', 'stealth_counter', 'stealth_mod', 'target', 'targeting_angle', 'targeting_range', 'team', 'thiccness', 'time', 'upgrades', 'vel', 'vel_max', 'walking', 'wall_hack', 'weapon', 'weapon_draw_dist', 'owner', 'sprite_height']
     def __init__(self, info, team="Players", pos=[0, 0], start_angle=0):
         info = info.copy()
         self.og_info = info.copy()
@@ -43,10 +43,10 @@ class Entity:
                 self.sprites = self.sprites.split(".")[0]
                 self.sprites += " - Halloween.png"
             sprite = Fun.get_image(self.sprites)
-            sprite_height = 32
+            self.sprite_height = 32
             if "Sprite Height" in info:
-                sprite_height = info["Sprite Height"]
-            self.sprites = Fun.desheetator(sprite, thiccness=sprite_height)
+                self.sprite_height = info["Sprite Height"]
+            self.sprites = Fun.desheetator(sprite, thiccness=self.sprite_height)
             if "Outline" in info["free var"]:
                 colour = info["free var"]["Outline"]
                 if "Is VIP" in info["free var"]:
@@ -271,7 +271,7 @@ class Entity:
 
         # Draws the player
         sprite_drawn = self.sprites[player_direction][action_type][frame_to_get]
-        WIN.blit(sprite_drawn, (self.pos[0] - 16 + scrolling[0], self.pos[1] - 16 + scrolling[1]))
+        WIN.blit(sprite_drawn, (self.pos[0] - self.sprite_height // 2 + scrolling[0], self.pos[1] - self.sprite_height // 2 + scrolling[1]))
     #
 
 
@@ -2768,6 +2768,26 @@ def enemy_input_faction_1_missile(self, entities, level):
     return target, target_angle
 
 
+def enemy_input_faction_1_drone(self, entities, level):
+    # Input functions are the IA for an enemy
+    # better targeting system
+    target, target_angle, wall_in = entity_target_detection(self, entities, level)
+    self.input = Fun.get_default_inputs()
+    if target:
+        aim_target, move_target, og_dist = entity_get_aim_move_target(self, target)
+        mod = 1
+        # if self.reloading: mod = 3
+        self.mouse_pos = self.target.pos
+        entity_maintain_weapon_range(self, og_dist, move_target, self.weapon.range * 0.98 * mod, get_away=self.weapon.range * 0.75 * mod)
+        entity_shoot_no_startup_lag(self, og_dist, self.weapon.range * 1.1)
+
+    entity_spread_apart(self, entities)
+    # Stunned status manager
+    Fun.stunned_manager(self)
+
+    return target, target_angle
+
+
 def enemy_input_faction_2_basic(self, entities, level):
     # Input functions are the IA for an enemy
     # better targeting system
@@ -3121,6 +3141,35 @@ def enemy_act_type_1(self, entities, level):
         self.armour_break = False
 
 
+def enemy_act_type_2(self, entities, level):
+    # Get the inputs
+    # target, target_angle = self.func_get_input(self, entities, {"enemies": []}, level)
+
+    Fun.aim_system(self, self.weapon)
+
+    # Do shit
+    Fun.movement_entity(self)
+
+    self.crit = False
+    # Gun
+    if self.no_shoot_state == 0:
+        self.reloading = False
+        self.shooting = False
+        if self.input["Shoot"] and self.weapon.ammo > 0:
+            self.shooting = True
+            self.shoot_bullet(entities, level)
+
+    else:
+        self.shooting = False
+        self.no_shoot_state -= 1
+
+    # |Status effects|--------------------------------------------------------------------------------------------------
+    Fun.status_manager(self, entities)
+
+    # |Movement output|-------------------------------------------------------------------------------------------------
+    Fun.movement_output(self, level)
+
+
 # |Enemy Draw|----------------------------------------------------------------------------------------------------------
 def enemy_draw_basic(self, WIN, scrolling):
     # That one has animations
@@ -3141,6 +3190,17 @@ def enemy_draw_basic(self, WIN, scrolling):
                    Fun.move_with_vel_angle([self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]], 10,
                                            self.aim_angle),
                    [0, 0], 180 - self.aim_angle + angle_to_add)
+
+
+def enemy_draw_no_gun(self, WIN, scrolling):
+    # That one has animations
+    if self.status["Stealth"] > 0:
+        return
+    # Draw the enemy
+    WIN.blit(Fun.ENTITY_SHADOW, (self.pos[0]-16 + scrolling[0], self.pos[1] + 11 + scrolling[1]), special_flags=pg.BLEND_RGBA_SUB)
+    enemy_direction = Fun.get_entity_direction(self.angle)
+    # Fun.draw_entity(self, scrolling, WIN, enemy_direction)
+    self.draw_player(scrolling, WIN, enemy_direction)
 
 
 def enemy_draw_advanced_gun(self, WIN, scrolling):
@@ -3231,13 +3291,473 @@ def enforcer_on_death(self, entities, level):
 #   Laser cannon
 #   Shield destroys projectiles
 #   Side launched missiles
+def armoured_shield_generator_input(self, entities, level):
+    # Input functions are the IA for an enemy
+    # better targeting system
+    target, target_angle, wall_in = entity_target_detection(self, entities, level)
+
+    # Find machine gun angle
+    p_targets = {}
+    for e in entities["entities"]:
+        if e.team == self.team:
+            continue
+        if e.agro >= 0 and e.status["Stealth"] == 0:
+            key = f"{e.agro}"
+            if key not in p_targets:
+                p_targets.update({key: [e]})
+            else:
+                p_targets[key].append(e)
+    keys = list(p_targets.keys())
+    keys.sort()
+    self.free_var["Allow machine gun"] = False
+    if p_targets:
+        mod = -2
+        if len(keys) == 1:
+            mod = -1
+        aaa = keys[mod]
+        mg_target = p_targets[aaa][0]
+        mg_target = mg_target.pos
+        self.free_var["Allow machine gun"] = Fun.distance_between(mg_target, [self.pos[0], self.pos[1]-18]) < 40 * 7
+        self.free_var["Machine Gun Angle"] = Fun.angle_value_limiter(
+            Fun.move_angle(
+                Fun.angle_between(mg_target, [self.pos[0], self.pos[1]-18]), self.free_var["Machine Gun Angle"], 7
+            ))
+
+    self.input = Fun.get_default_inputs()
+    if target:
+        aim_target, move_target, og_dist = entity_get_aim_move_target(self, target)
+        aim_target = self.target.pos.copy()
+
+        # basic_fire_control(self, entities, level, target, wall_in)
+        entity_shoot_with_startup_lag(self, og_dist, 320)
+
+    closest_target = Fun.find_closest_in_circle(self, entities, 512, "entities")
+    if closest_target:
+        fortress_move_toward_point(self, closest_target, 40 * 7)
+        fortress_move_away_point(self, closest_target, 25 * 7)
+        if self.free_var["Run people over"] <= 0:
+            self.free_var["Run people over"] = 250
+            self.input["Dash"] = True
+        else:
+            self.free_var["Run people over"] -=1
+
+    entity_shoot_startup_handler(self)
+    # Stunned status manager
+    # Fun.stunned_manager(self)
+    return target, target_angle
+
+
+def armoured_shield_generator_act(self, entities, level):
+    angle = self.free_var["Move angle"] + 226 - 180
+    pos = [self.pos[0], self.pos[1] - 16]
+    pos = Fun.move_with_vel_angle(pos, 22.6274, angle)
+    pos = Fun.move_with_vel_angle(pos, 20, self.aim_angle)
+    # |Movement Input|----------------------------------------------------------------------------------------------
+    self.running = False
+    self.walking = False
+
+    max_vel = self.vel_max
+
+    # Handle double speed and slowness status
+    if self.status["Slowness"]:
+        max_vel *= 0.5
+    if self.status["Double speed"]:
+        max_vel *= 2
+
+    # Checks for which direction the player must move
+    # Rework it so that you are not faster when walking in diagonal, this should be fixed now
+    if self.dash_cooldown <= 0:
+        allow_correction = False
+        speed = 0
+        if self.input["Up"]:
+            speed = 1
+            allow_correction = True
+        if self.input["Down"]:
+            speed = -1
+            allow_correction = True
+        if self.input["Left"]:
+            self.free_var["Move angle"] -= 3
+            self.aim_angle -= 3
+        if self.input["Right"]:
+            self.free_var["Move angle"] += 3
+            self.aim_angle += 3
+        self.vel = Fun.move_with_vel_angle(self.vel, self.speed * speed, self.free_var["Move angle"])
+
+        if not Fun.check_point_in_circle(max_vel, 0, 0, self.vel[0], self.vel[1]) and allow_correction:
+            self.vel = Fun.move_with_vel_angle([0, 0], max_vel * speed, self.free_var["Move angle"])
+        self.walking = allow_correction
+
+        self.free_var["Move angle"] = Fun.angle_value_limiter(self.free_var["Move angle"])
+        self.aim_angle = Fun.angle_value_limiter(self.aim_angle)
+
+    self.standing_still = False
+    if self.vel == [0, 0]:
+        self.standing_still = True
+    elif self.cutscene_mode:
+        # This makes entities use their walking animation during cutscenes
+        self.walking = True
+
+    # Dash mechanic
+    if self.dash_cooldown <= 0 and not self.standing_still and self.input["Dash"]:
+        # Handle dash here
+        Fun.play_sound("Player dash", modified_volume=0.25)
+        dash_angle = self.free_var["Move angle"]
+        self.dash_cooldown = self.dash_charge_time
+        if self.status["Dash recovery up"] > 0:
+            self.dash_cooldown //= 2
+        self.vel = Fun.move_with_vel_angle(self.vel, self.dash_speed / self.friction * speed, dash_angle)
+        for x in range(4):
+            angle = dash_angle - 15 - 3.25 * 2 + x * 7.5 * 2
+            entities["particles"].append(
+                Particles.RandomParticle2(
+                    Fun.move_with_vel_angle([self.pos[0], self.pos[1]], -4, angle),
+                    Fun.WHITE, 1.5 + random.uniform(0, 2), 24, angle))
+
+        if self.status["No damage"] < self.dash_iframes:
+            self.status["No damage"] += self.dash_iframes
+    self.dash_cooldown -= 1
+
+    # |GunPlay|-----------------------------------------------------------------------------------------------------
+    # angle, drawing_pos, length = self.aim_angle, pos, self.weapon.range + 20
+    # Draw the lines
+    # entities["background particles"].append(Fun.LineParticle(drawing_pos, Fun.RED, 1, length, angle, 1, 0))
+
+    # entities["UI particles"].append(Fun.AimPoint(self.mouse_pos))
+    self.weapon.passive(self, entities, level)
+    if self.free_var["Grenade Shakedown"] > 0:
+
+        if self.time % 3 == 0 and self.free_var["Allow machine gun"]:
+            if self.time % 6 == 0:
+                Fun.play_sound("Small arms")
+                if random.random() < 0.15:
+                    self.vel = Fun.move_with_vel_angle(self.vel, 7, self.free_var["Move angle"] + 45 * [1, -1][
+                        round(random.random())])
+            Bullets.spawn_bullet(self, entities, Bullets.Bullet, [self.pos[0], self.pos[1]-18],
+                                 self.free_var["Machine Gun Angle"] + random.uniform(-self.weapon.accuracy,
+                                                                 self.weapon.accuracy) + random.uniform(
+                                     -self.weapon.spread, self.weapon.spread), [7, 40, 2.25, 4, {"Piercing": False, "Smoke": False}])
+        if self.no_shoot_state == 0:
+            # Reset variables
+            self.reloading = False
+
+            if self.input["Alt fire"]:
+                self.weapon.alt_fire(self, entities, level)
+
+            # |Main fire|-----------------------------------------------------------------------------------------------
+            if self.input["Shoot"]:
+                if self.weapon.ammo != 0 and self.shot_allowed:
+                    # |Main fire|-------------------------------------------------------------------------------------------
+                    self.shoot_bullet(entities, level)
+                    # tell if the trigger was pressed
+                    if not self.weapon.full_auto:
+                        self.shot_allowed = False
+                # if the trigger is not pressed and the weapon is not a full auto, allow to shoot for the next trigger press
+                elif self.weapon.ammo == 0 and self.shot_allowed:
+                    Fun.play_sound(self.weapon.jamming_sound, "SFX")
+                    self.shot_allowed = False
+            else:
+                self.shot_allowed = True
+
+            # |Reload|--------------------------------------------------------------------------------------------------
+            if self.input["Reload"] and self.weapon.ammo_pool > 0:
+                self.no_shoot_state, self.reloading = self.weapon.reload()
+        else:
+            self.no_shoot_state -= 1
+        self.free_var["Grenade Shakedown"] -= 1
+        self.free_var["Grenade Shakedown angle"] = [self.free_var["Move angle"], self.aim_angle]
+        p = self.aim_angle
+        self.aim_angle = Fun.angle_value_limiter(Fun.move_angle(self.angle, self.aim_angle, self.weapon.handle))
+        if round(p) != round(self.aim_angle) and self.time % 12 == 0:
+            Fun.play_sound("Chain click")
+    elif self.free_var["Grenade Shakedown"] > -180:
+        self.free_var["Grenade Shakedown"] -= 1
+        angle = self.free_var["Grenade Shakedown"] * 6 + self.free_var["Grenade Shakedown angle"][0]
+        self.free_var["Move angle"] = angle
+        self.aim_angle = self.free_var["Grenade Shakedown angle"][1] + self.free_var["Grenade Shakedown"] * 6
+        if self.free_var["Grenade Shakedown"] % 2 == 0 and self.free_var["Grenade Shakedown"] < 60:
+            Bullets.spawn_bullet(
+                self, entities, Bullets.BulletSlowing,
+                Fun.move_with_vel_angle(self.pos, 32, self.aim_angle),
+                self.aim_angle + random.uniform(-8, 8),
+                [5 + 5 * random.random(), 320, 7, 8, {"Piercing": False, "Smoke": False, "Colour": (107, 165, 153),
+                                                      "Slowdown rate": random.random() / 3}])
+
+        if abs(self.free_var["Grenade Shakedown"]) % 8 == 0:
+            Bullets.spawn_bullet(
+                self, entities, Bullets.GrenadeType1,
+                Fun.move_with_vel_angle(self.pos, 32, angle),
+                angle,
+                [4, 200, 4, 20, {"Secondary explosion": {"Duration": 10, "Growth": 4,
+                                                        "Damage mod": 0}}])
+            if abs(self.free_var["Grenade Shakedown"]) % 16 == 0:
+                Fun.play_sound("Betel 2")
+        # Shoot grenades
+    else:
+        self.free_var["Grenade Shakedown"] = 800
+
+    # |Status effects|----------------------------------------------------------------------------------------------
+    # ha ha, Fun go brr
+    Fun.status_manager(self, entities)
+
+    # |Movement Output|---------------------------------------------------------------------------------------------
+    # Make the player move
+    Fun.movement_output(self, level)
+    damage = round(abs(self.vel[0]) + abs(self.vel[1])) * 2
+    if damage > 40:
+        damage = 40
+    for e in entities["entities"]:
+        if e == self: continue
+        if self.collision_box.colliderect(e.collision_box):
+            e.vel = Fun.move_with_vel_angle(e.vel, 2, Fun.angle_between(e.collision_box.center, self.pos))
+            if e.team != self.team:
+                Fun.damage_calculation(e, damage, "Melee", death_message="Ran over")
+            pass
+    if self.draw_aim_line or self.weapon.laser_sight:
+        entities["background particles"].append(Particles.LineParticle(
+            Fun.move_with_vel_angle(self.pos, 20, self.aim_angle), Fun.BLUE, 1, self.weapon.range-20, self.aim_angle, 2, 0))
+
+
+def armoured_shield_generator_draw(self, WIN, scrolling):
+    h_mod = 0.75
+
+    # Fun.draw_spritestack(WIN, Fun.SPRITE_FORTRESS_APC_CHASSIS,
+    #                          [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
+    #                          self.free_var["Move angle"] + 90, height_diff=0.5)
+    # pos = [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1] - 16]
+    # angle = self.free_var["Move angle"] + 226 - 180
+    # pos = Fun.move_with_vel_angle(pos, 22.6274, angle)
+    # Fun.draw_spritestack(WIN, Fun.SPRITE_FORTRESS_APC_TURRET, pos, self.aim_angle + 90, height_diff=0.5)
+
+    Fun.draw_spritestack(WIN, Fun.SPRITE_HOVER_TANK_CHASSIS, [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
+                         self.free_var["Move angle"] + 90, height_diff=h_mod)
+    Fun.draw_spritestack(WIN, Fun.SPRITE_HOVER_TANK_TURRET, [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1] - 17 * h_mod],
+                         self.aim_angle + 90, height_diff=h_mod)
+    Fun.draw_spritestack(WIN, Fun.SPRITE_HOVER_TANK_GUN, [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1] - 24 * h_mod],
+                         self.free_var["Machine Gun Angle"] + 90, height_diff=h_mod)
+
 
 # AA Site
+def aa_site_input(self, entities, level):
+    target, target_angle, wall_in = entity_target_detection(self, entities, level)
+
+    return target, target_angle
+
+
+def aa_site_act_init(self, entities, level):
+    # Spawn other buildings
+    # Swap act function
+    pos = []
+    for x in range(4):
+        angle = 360 * random.random()
+        new_pos = Fun.move_with_vel_angle(self.pos, 128 + 128 * random.random(), angle)
+        if pos:
+            keep_going = True
+            while len(pos) > 0 and keep_going:
+                keep_going = False
+                for p in pos:
+                     if Fun.check_point_in_circle(196, p[0], p[1], new_pos[0], new_pos[1]):
+                         keep_going = True
+                         break
+                if keep_going:
+                    angle += 180
+                    new_pos = Fun.move_with_vel_angle(self.pos, 128 + 128 * random.random(), 360 * random.random())
+                    angle = 360 * random.random()
+        pos.append(new_pos)
+    entities["entities"].append(Entity(enemy_repertory["AA Laser"], team=self.team, pos=pos[0], start_angle=random.randint(-180, 180)))
+    entities["entities"].append(Entity(enemy_repertory["Missile Battery"], team=self.team, pos=pos[1], start_angle=random.randint(-180, 180)))
+    entities["entities"].append(Entity(enemy_repertory["Drone builder"], team=self.team, pos=pos[2], start_angle=random.randint(-180, 180)))
+    entities["entities"].append(Entity(enemy_repertory["Shield Generator"], team=self.team, pos=pos[3], start_angle=random.randint(-180, 180)))
+    self.func_act = aa_site_act_energy_generator
+
+
+# Need an anti-manslaughter mechanic
+def aa_site_act_energy_generator(self, entities, level):
+    # Check for other buildings
+    build_count = 0
+    for e in entities["entities"]:
+        if e.team != self.team:
+            continue
+        if "AA Site" in e.free_var:
+           build_count += 1
+    # if no buildings, kill itself
+    if build_count == 0:
+        Fun.damage_calculation(self, Fun.BIG_INT, "Melee", ignore_no_damage=True, no_iframes=True, ignore_res=True, ignore_armour=True, death_message=f"Took {Fun.BIG_INT} damage")
+
+    Fun.status_manager(self, entities)
+
+
+def aa_site_on_death_energy_generator(self, entities, level):
+    for e in entities["entities"]:
+        if e.team != self.team:
+            continue
+        if "AA Site" in e.free_var or "Is ASS" in e.free_var:
+            Fun.damage_calculation(e, Fun.BIG_INT, "Melee", ignore_no_damage=True, no_iframes=True, ignore_res=True, ignore_armour=True, death_message=f"Took {Fun.BIG_INT} damage")
+        if "AA Site" in e.free_var:
+            Bullets.spawn_bullet(self, entities, Bullets.ExplosionSecondary, e.pos, self.angle,
+                                 [0, 5, 2, 0, {"Duration": 12, "Growth": 8,"Damage mod": 0}])
+
+
+def aa_site_act_shield_generator(self, entities, level):
+    # Check if a building has a shield.
+    apply_shield = False
+    if not self.free_var["Shield Target"]:
+        apply_shield = True
+    else:
+        if self.free_var["Shield Target"].health <= 0:
+            self.free_var["Shield Target"] = False
+            apply_shield = True
+        elif self.free_var["Shield Target"].armour <= 0:
+            apply_shield = True
+        else:
+            # Visual effect
+            for x in range(round(self.free_var["Shield Target"].armour // 10 * random.random())+4):
+                entities["particles"].append(
+                    Particles.RandomParticle0(
+                        Fun.move_with_vel_angle(self.free_var["Shield Target"].pos, 48, 360 * random.random()),
+                        [(128, 255//2, 255), (125, 200//2, 220), (85, 220//2, 220)][(self.time//6) % 3],
+                        random.randint(6, 32), size=(1, 5)))
+
+    Fun.status_manager(self, entities)
+
+    if apply_shield:
+        if self.free_var["Shield cooldown"] > 0:
+            self.free_var["Shield cooldown"] -= 1
+            # print(self.free_var["Shield cooldown"])
+            return
+        self.free_var["Shield cooldown"] = 320
+        # If no, look for buildings with lowest health by % and give shield. Go on cooldown afterward
+        target_pool = []
+        lowest_hp_percent = 1
+        for e in entities["entities"]:
+            if e in [self, self.free_var["Previous Shield Target"]] or \
+                    not ("AA Site" in e.free_var or "IS BOSS" in e.free_var):
+                continue
+
+            test_value = round(e.health / e.max_health, 2)
+            if test_value == lowest_hp_percent:
+                target_pool.append(e)
+            if test_value < lowest_hp_percent:
+                target_pool = [e]
+                lowest_hp_percent = test_value
+        if target_pool:
+            self.free_var["Shield Target"] = Fun.get_random_element_from_list(target_pool)
+            self.free_var["Shield Target"].armour = self.free_var["Shield Target"].health // 8
+            self.free_var["Previous Shield Target"] = self.free_var["Shield Target"]
+            for x in range(self.free_var["Shield Target"].armour // 5 + 4):
+                entities["particles"].append(
+                    Particles.RandomParticle2(
+                        self.pos,
+                        [(128, 255//2, 255), (125, 200//2, 220), (85, 220//2, 220)][(self.time//6) % 3],
+                        3 + 5 * random.random(),
+                        random.randint(6, 32), 360 * random.random()))
+
+
+def aa_site_act_drone_factory(self, entities, level):
+    # Spawn drones at a regular interval
+    Fun.status_manager(self, entities)
+    drone_count = 0
+    for e in entities["entities"]:
+        if "Is ASS" in e.free_var:
+            drone_count += 1
+
+    if drone_count < 12:
+        if start_up_lag_handler(self, 60):
+            pos = Fun.random_point_in_circle(self.pos, 16)
+            entities["entities"].append(Entity(enemy_repertory["Drone"], team=self.team, pos=pos,
+                                               start_angle=random.randint(-180, 180)))
+
+
+def aa_site_act_missile_battery(self, entities, level):
+    # Spawn missiles at a regular interval
+    Fun.status_manager(self, entities)
+    start_delay, interval_time, interval_amount = 90, 24, 4
+    speed = 2
+    missile_info = [speed, 320, 4, 10, {"Targeting range": 320,
+                         "Targeting angle": 35,
+                         "Manoeuvrability": 5,
+                         "Target": "players",
+                         "Secondary explosion": {"Duration": 10, "Growth": 6, "Damage mod": 1}}]
+    angle = 360 * random.random()
+    if self.target:
+        angle = Fun.angle_between(self.target.pos, self.pos)
+
+    if start_up_lag_handler(self, start_delay + interval_time * interval_amount):
+        for x in range(3):
+            Bullets.spawn_bullet(
+                self, entities, Bullets.Missile, [self.pos[0], self.pos[1]],
+                angle + random.uniform(-7, 7), missile_info)
+    elif self.free_var["Startup lag"] > start_delay and self.free_var["Startup lag"] % interval_time == 0:
+        Bullets.spawn_bullet(
+                self, entities, Bullets.Missile, [self.pos[0], self.pos[1]],
+                angle, missile_info)
+
+
+def aa_site_on_death_shield_generator(self, entities, level):
+    if self.free_var["Shield Target"]:
+        self.free_var["Shield Target"].armour = 0
+
+
+def aa_site_act_aa_laser(self, entities, level):
+    if self.target and self.time > 300:
+        self.free_var["Pos history"].append(self.target.pos.copy())
+        # Make laser
+        pos = [self.pos[0], self.pos[1] - 10]
+        angle = Fun.angle_between(self.free_var["Pos history"][0], pos)
+        self.free_var["Draw angle"] = angle
+        dist = Fun.distance_between(pos, self.free_var["Pos history"][0])
+        Bullets.spawn_bullet(self, entities, Bullets.Laser, pos,
+                             angle, [0, 12, dist, 8, {"Colour": (107, 153, 165)}])
+        entities["particles"].append(Particles.FireParticle(
+            Fun.move_with_vel_angle(pos, dist, angle),
+            colour=(107, 153, 165)))
+
+    self.free_var["History limit"] = round(100 * self.health / self.max_health) + 10
+
+    if len(self.free_var["Pos history"]) > self.free_var["History limit"]:
+        self.free_var["Pos history"].pop(0)
+    if len(self.free_var["Pos history"]) >= self.free_var["History limit"]:
+        self.free_var["Pos history"].pop(0)
+
+    Fun.status_manager(self, entities)
+
+
 def aa_site_draw_energy_generator(self, WIN, scrolling):
-    h_mod = 0.75
+    h_mod = 1
+    Fun.draw_spritestack(WIN, Fun.SPRITE_AA_SITE_GENERATOR,
+                            [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
+                             self.angle, height_diff=h_mod)
+
+
+def aa_site_draw_shield_generator(self, WIN, scrolling):
+    h_mod = 1
+    Fun.draw_spritestack(WIN, Fun.SPRITE_AA_SITE_SHIELD,
+                            [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
+                             self.angle, height_diff=h_mod)
+
+
+def aa_site_draw_drone_factory(self, WIN, scrolling):
+    h_mod = 1
     Fun.draw_spritestack(WIN, Fun.SPRITE_HOVER_TANK_CHASSIS,
                             [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
-                             self.free_var["Move angle"] + 90, height_diff=h_mod)
+                             self.angle, height_diff=h_mod)
+
+
+def aa_site_draw_missile_battery(self, WIN, scrolling):
+    h_mod = 1
+    Fun.draw_spritestack(WIN, Fun.SPRITE_AA_SITE_MISSILE,
+                            [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
+                             self.angle, height_diff=h_mod)
+
+
+def aa_site_draw_aa_laser(self, WIN, scrolling):
+    h_mod = 1
+    Fun.draw_spritestack(WIN, Fun.SPRITE_AA_SITE_LASER,
+                            [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
+                             self.angle, height_diff=h_mod)
+
+    Fun.draw_spritestack(WIN, Fun.SPRITE_AA_SITE_TURRET,
+                            [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1] - len(Fun.SPRITE_AA_SITE_TURRET)],
+                             self.free_var["Draw angle"] + 90, height_diff=h_mod)
 
 
 # Hover Tank
@@ -3478,9 +3998,6 @@ def hover_tank_draw(self, WIN, scrolling):
 
 
 # Gilgamesh
-#       Sword slash dash
-#       Pattern 1
-#       Pattern 2
 def gilgamesh_input(self, entities, level):
     # Input functions are the IA for an enemy
     # better targeting system
@@ -3497,7 +4014,7 @@ def gilgamesh_input(self, entities, level):
     # Stunned status manager
     Fun.stunned_manager(self)
 
-    # TODO: Give dodge
+    entity_dodge_bullets(self, entities, 24)
     return target, target_angle
 
 
@@ -3545,7 +4062,7 @@ def gilgamesh_act(self, entities, level):
             Fun.move_with_vel_angle(self.pos, 20, self.aim_angle), Fun.BLUE, 1, self.weapon.range-20, self.aim_angle, 2, 0))
 
 
-# TODO: Give animations for Gilgamesh's sword
+# TODO: Give animations for Gilgamesh's sword and sound
 def gilgamesh_attack_1(self, entities, level):
     if start_up_lag_handler(self, 120, key="Startup lag sword"):
         self.free_var["Current sword attack"] = "Dual shot"
@@ -4691,6 +5208,130 @@ enemy_repertory = {
          "on death": "enforcer_on_death",
          "free var": {"Startup lag": 0, "Startup time": 60, "missile target": False}
          },
+    "Armed Shield Generator": {
+        "name": "Armed Shield Generator", "faction": "FAC-1",
+        "health": H_HO * 20, "armour": 0, "damage resistances": FO_RESIT,
+        "sprites": "Sprites/Player/THR-1/Condor.png",
+
+        "thickness": 60, "vel max": V_MO, "speed": 2.2, "friction": 0.7,
+        "dash": {"speed": DS_MO * 0.6, "i-frames": 0, "charge": 35},
+        # Weapons
+        "weapon": "Hover Tank Cannon",
+        # AI
+        "func input": "armoured_shield_generator_input", "func act": "armoured_shield_generator_act",
+        "func draw": "armoured_shield_generator_draw",
+        "on death": "none",
+        "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
+        "wall hack": False,
+        "free var": {"Move angle": 0,
+                     "Machine Gun Angle": -90, "Allow machine gun": False,
+                     "IS BOSS": True, "Grenade Shakedown": 600, "Grenade Shakedown angle": 0, "Run people over": 250,
+                     "Startup lag": 0, "Startup time": 240}
+    },
+    # Armored Shield Generator
+    # Hover Tank
+    # AA Site
+    # AA laser            Targets last position of a player. Infinite range
+    "AA Laser": {
+        "name": "AA Laser", "faction": "FAC-1",
+        "health": H_HO * 9, "armour": 0, "damage resistances": FO_RESIT,
+        "sprites": "Sprites/Player/THR-1/Condor.png",
+
+        "thickness": 60, "vel max": 0, "speed": 0, "friction": 0.7,
+        "dash": {"speed": 0, "i-frames": 0, "charge": 0},
+        # Weapons
+        "weapon": "Hover Tank Cannon",
+        # AI
+        "func input": "aa_site_input", "func act": "aa_site_act_aa_laser", "func draw": "aa_site_draw_aa_laser",
+        "on death": "none",
+        "targeting range": R_HO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
+        "wall hack": True,
+        "free var": {"AA Site": True, "Pos history": [], "History limit": 100, "Draw angle": 0}
+    },
+    # Drone builder       Launches drones
+    "Drone builder": {
+        "name": "Drone builder", "faction": "FAC-1",
+        "health": H_HO * 9, "armour": 0, "damage resistances": FO_RESIT,
+        "sprites": "Sprites/Player/THR-1/Condor.png",
+
+        "thickness": 60, "vel max": 0, "speed": 0, "friction": 0.7,
+        "dash": {"speed": 0, "i-frames": 0, "charge": 0},
+        # Weapons
+        "weapon": "Hover Tank Cannon",
+        # AI
+        "func input": "aa_site_input", "func act": "aa_site_act_drone_factory",
+        "func draw": "aa_site_draw_drone_factory",
+        "on death": "none",
+        "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
+        "wall hack": False,
+        "free var": {"AA Site": True, "Startup lag": 0}
+    },
+    # Missile Battery     Launches missiles, they have low speed and high manoeuvrability
+    "Missile Battery": {
+        "name": "Missile Battery", "faction": "FAC-1",
+        "health": H_HO * 9, "armour": 0, "damage resistances": FO_RESIT,
+        "sprites": "Sprites/Player/THR-1/Condor.png",
+
+        "thickness": 60, "vel max": 0, "speed": 0, "friction": 0.7,
+        "dash": {"speed": 0, "i-frames": 0, "charge": 0},
+        # Weapons
+        "weapon": "Hover Tank Cannon",
+        # AI
+        "func input": "aa_site_input", "func act": "aa_site_act_missile_battery",
+        "func draw": "aa_site_draw_missile_battery",
+        "on death": "none",
+        "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
+        "wall hack": False,
+        "free var": {"AA Site": True, "Startup lag": 0, "Pos history": []}
+    },
+    # Shield Generator    Give other building a shield. If the shield takes too much damage they get disabled for a time
+    "Shield Generator": {
+        "name": "Shield Generator", "faction": "FAC-1",
+        "health": H_HO * 6, "armour": 0, "damage resistances": FO_RESIT,
+        "sprites": "Sprites/Player/THR-1/Condor.png",
+
+        "thickness": 60, "vel max": 0, "speed": 0, "friction": 0.7,
+        "dash": {"speed": 0, "i-frames": 0, "charge": 0},
+        # Weapons
+        "weapon": "Hover Tank Cannon",
+        # AI
+        "func input": "aa_site_input", "func act": "aa_site_act_shield_generator",
+        "func draw": "aa_site_draw_shield_generator",
+        "on death": "aa_site_on_death_shield_generator",
+        "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
+        "wall hack": False,
+        "free var": {"AA Site": True, "Shield cooldown": 320, "Shield Target": False, "Previous Shield Target": False}
+    },
+    # Energy Generator    If destroyed, kills the boss. Highest amount of health
+    "Energy Generator": {
+        "name": "Energy Generator", "faction": "FAC-1",
+        "health": H_HO * 15, "armour": 0, "damage resistances": FO_RESIT,
+        "sprites": "Sprites/Player/THR-1/Condor.png",
+
+        "thickness": 60, "vel max": 0, "speed": 0, "friction": 0.7,
+        "dash": {"speed": 0, "i-frames": 0, "charge": 0},
+        # Weapons
+        "weapon": "Hover Tank Cannon",
+        # AI
+        "func input": "aa_site_input", "func act": "aa_site_act_init", "func draw": "aa_site_draw_energy_generator",
+        "on death": "aa_site_on_death_energy_generator",
+        "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
+        "wall hack": False,
+        "free var": {"IS BOSS": True, "Startup lag": 0, "Startup time": 240, "Pos history": []}
+    },
+    "Drone":
+        {"name": "Drone",
+         "faction": "FAC-1",
+         "type": "Special",
+         "targeting range": R_MO, "targeting angle": 60, "stealth mod": S_MO, "stealth counter": C_LO,
+         "wall hack": False,
+         "health": 1, "armour": 0, "damage resistances": NO_RESIT,
+         "thickness": T_LO, "vel max": V_HO, "speed": 1.5, "friction": 1.5,
+         "weapon": "Drone Gun",
+         "func input": "enemy_input_faction_1_drone", "func act": "enemy_act_type_2", "func draw": "enemy_draw_no_gun",
+         "sprites": "Sprites/Enemies/Drone.png", "on death": "none", "Sprite Height": 8,
+         "free var": {"Is ASS": True}
+         },
     #                   MHlt	MArm	Resits	Spd 	VisRg	SltMod	SltCntr	Size
     # |Triangle|--------------------------------------------------------------------------------------------------------
     "Sculptor":
@@ -4808,6 +5449,47 @@ enemy_repertory = {
          "on death": "none",
          "free var": {}
          },
+    "Hover Tank": {
+        "name": "Hover Tank", "faction": "FAC-2",
+        "health": H_HO * 20, "armour": 0, "damage resistances": FO_RESIT,
+        "sprites": "Sprites/Player/THR-1/Condor.png",
+
+        "thickness": 60, "vel max": V_MO, "speed": 2.2, "friction": 0.7,
+        "dash": {"speed": DS_MO * 0.6, "i-frames": 0, "charge": 35},
+        # Weapons
+        "weapon": "Hover Tank Cannon",
+        # AI
+        "func input": "hover_tank_input", "func act": "hover_tank_act", "func draw": "hover_tank_draw",
+        "on death": "none",
+        "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
+        "wall hack": False,
+        "free var": {"Move angle": 0,
+                     "Machine Gun Angle": -90, "Allow machine gun": False,
+                     "IS BOSS": True, "Grenade Shakedown": 600, "Grenade Shakedown angle": 0, "Run people over": 250,
+                     "Startup lag": 0, "Startup time": 240}
+    },
+    "Gilgamesh": {
+        "name": "Gilgamesh", "faction": "FAC-2",
+        "health": H_HO * 20, "armour": 0, "damage resistances": GILG_RESIT,
+        "sprites": "Sprites/Enemies/Gilgamesh.png", "Sprite Height": 40,
+
+        "thickness": 28, "vel max": V_HO, "speed": 8, "friction": 4,
+        "dash": {"speed": DS_MO * 0.6, "i-frames": 0, "charge": 35},
+        # Weapons
+        "weapon": "Desert's Wind",
+        # AI
+        "func input": "gilgamesh_input", "func act": "gilgamesh_act", "func draw": "enemy_draw_basic",
+        "on death": "none",
+        "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
+        "wall hack": False,
+        "free var": {"IS BOSS": True,
+                     "Current attack": "Divorce Spiral",
+                     "Current sword attack": "Trishot",
+                     "Startup lag sword": 0,
+                     "Startup lag": 0,
+                     "Pattern pos": [0, 0]}
+    },
+
     #                   MHlt	MArm	Resits	Spd 	VisRg	SltMod	SltCntr	Size
     # |Square|----------------------------------------------------------------------------------------------------------
     # Infantry	        M/H	    M/H	    M	    L/M	    M	    L	    M	    M	    Basic and tough.
@@ -4920,137 +5602,6 @@ enemy_repertory = {
          "sprites": "Sprites/Enemies/Commanding Officer.png", "on death": "none",
          "free var": {"Is VIP": True}
          },
-    # |Bosses|----------------------------------------------------------------------------------------------------------
-    # Armored Shield Generator
-    # Hover Tank
-    "Hover Tank": {
-        "name": "Hover Tank", "faction": "FAC-2",
-        "health": H_HO * 20, "armour": 0, "damage resistances": FO_RESIT,
-        "sprites": "Sprites/Player/THR-1/Condor.png",
-
-        "thickness": 60, "vel max": V_MO, "speed": 2.2, "friction": 0.7,
-        "dash": {"speed": DS_MO * 0.6, "i-frames": 0, "charge": 35},
-        # Weapons
-        "weapon": "Hover Tank Cannon",
-        # AI
-        "func input": "hover_tank_input", "func act": "hover_tank_act", "func draw": "hover_tank_draw",
-        "on death": "none",
-        "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
-        "wall hack": False,
-        "free var": {"Move angle": 0,
-                     "Machine Gun Angle": -90, "Allow machine gun": False,
-                     "IS BOSS": True, "Grenade Shakedown": 600, "Grenade Shakedown angle": 0, "Run people over": 250,
-                     "Startup lag": 0, "Startup time": 240}
-    },
-    "Gilgamesh": {
-        "name": "Gilgamesh", "faction": "FAC-2",
-        "health": H_HO * 20, "armour": 0, "damage resistances": GILG_RESIT,
-        "sprites": "Sprites/Enemies/Gilgamesh.png", "Sprite Height": 40,
-
-        "thickness": 28, "vel max": V_HO, "speed": 8, "friction": 4,
-        "dash": {"speed": DS_MO * 0.6, "i-frames": 0, "charge": 35},
-        # Weapons
-        "weapon": "Desert's Wind",
-        # AI
-        "func input": "gilgamesh_input", "func act": "gilgamesh_act", "func draw": "enemy_draw_basic",
-        "on death": "none",
-        "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
-        "wall hack": False,
-        "free var": {"IS BOSS": True,
-                     "Current attack": "Divorce Spiral",
-                     "Current sword attack": "Trishot",
-                     "Startup lag sword": 0,
-                     "Startup lag": 0,
-                     "Pattern pos": [0, 0]}
-    },
-
-    # AA Site
-    # AA laser            Targets last position of a player. Infinite range
-    "AA Laser": {
-        "name": "AA Laser", "faction": "FAC-2",
-        "health": H_HO * 20, "armour": 0, "damage resistances": FO_RESIT,
-        "sprites": "Sprites/Player/THR-1/Condor.png",
-
-        "thickness": 60, "vel max": 0, "speed": 0, "friction": 0.7,
-        "dash": {"speed": 0, "i-frames": 0, "charge": 0},
-        # Weapons
-        "weapon": "Hover Tank Cannon",
-        # AI
-        "func input": "hover_tank_input", "func act": "hover_tank_act", "func draw": "hover_tank_draw",
-        "on death": "none",
-        "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
-        "wall hack": False,
-        "free var": {"IS BOSS": True, "Startup lag": 0, "Startup time": 240, "Pos history": []}
-    },
-    # Drone builder       Launches drones
-    "Drone builder": {
-        "name": "Drone builder", "faction": "FAC-2",
-        "health": H_HO * 20, "armour": 0, "damage resistances": FO_RESIT,
-        "sprites": "Sprites/Player/THR-1/Condor.png",
-
-        "thickness": 60, "vel max": 0, "speed": 0, "friction": 0.7,
-        "dash": {"speed": 0, "i-frames": 0, "charge": 0},
-        # Weapons
-        "weapon": "Hover Tank Cannon",
-        # AI
-        "func input": "hover_tank_input", "func act": "hover_tank_act", "func draw": "hover_tank_draw",
-        "on death": "none",
-        "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
-        "wall hack": False,
-        "free var": {"IS BOSS": True, "Startup lag": 0, "Startup time": 240, "Pos history": []}
-    },
-    # Missile Battery     Launches missiles, they have low speed and high manoeuvrability
-    "Missile Battery": {
-        "name": "Missile Battery", "faction": "FAC-2",
-        "health": H_HO * 20, "armour": 0, "damage resistances": FO_RESIT,
-        "sprites": "Sprites/Player/THR-1/Condor.png",
-
-        "thickness": 60, "vel max": 0, "speed": 0, "friction": 0.7,
-        "dash": {"speed": 0, "i-frames": 0, "charge": 0},
-        # Weapons
-        "weapon": "Hover Tank Cannon",
-        # AI
-        "func input": "hover_tank_input", "func act": "hover_tank_act", "func draw": "hover_tank_draw",
-        "on death": "none",
-        "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
-        "wall hack": False,
-        "free var": {"IS BOSS": True, "Startup lag": 0, "Startup time": 240, "Pos history": []}
-    },
-    # Shield Generator    Give other building a shield. If the shield takes too much damage they get disabled for a time
-    "Shield Generator": {
-        "name": "Shield Generator", "faction": "FAC-2",
-        "health": H_HO * 20, "armour": 0, "damage resistances": FO_RESIT,
-        "sprites": "Sprites/Player/THR-1/Condor.png",
-
-        "thickness": 60, "vel max": 0, "speed": 0, "friction": 0.7,
-        "dash": {"speed": 0, "i-frames": 0, "charge": 0},
-        # Weapons
-        "weapon": "Hover Tank Cannon",
-        # AI
-        "func input": "hover_tank_input", "func act": "hover_tank_act", "func draw": "hover_tank_draw",
-        "on death": "none",
-        "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
-        "wall hack": False,
-        "free var": {"IS BOSS": True, "Startup lag": 0, "Startup time": 240, "Pos history": []}
-    },
-    # Energy Generator    If destroyed, kills the boss. Highest amount of health
-    "Energy Generator": {
-        "name": "Energy Generator", "faction": "FAC-2",
-        "health": H_HO * 20, "armour": 0, "damage resistances": FO_RESIT,
-        "sprites": "Sprites/Player/THR-1/Condor.png",
-
-        "thickness": 60, "vel max": 0, "speed": 0, "friction": 0.7,
-        "dash": {"speed": 0, "i-frames": 0, "charge": 0},
-        # Weapons
-        "weapon": "Hover Tank Cannon",
-        # AI
-        "func input": "hover_tank_input", "func act": "hover_tank_act", "func draw": "hover_tank_draw",
-        "on death": "none",
-        "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
-        "wall hack": False,
-        "free var": {"IS BOSS": True, "Startup lag": 0, "Startup time": 240, "Pos history": []}
-    },
-
     # Fire Support Mech
     "Super Bulwark":
         {"name": "Super Bulwark",
@@ -5087,6 +5638,30 @@ enemy_repertory = {
                      "Machine Gun Angle": -90, "Allow machine gun": False,
                      "IS BOSS": True, "Grenade Shakedown": 600, "Grenade Shakedown angle": 0, "Run people over": 250,
                      "Startup lag": 0, "Startup time": 240}
+    },
+
+    # |Others|----------------------------------------------------------------------------------------------------------
+    # Rigel
+    "Curtis": {
+        "name": "Gilgamesh", "faction": "Zoar Colonists",
+        "health": H_HO * 20, "armour": 0, "damage resistances": GILG_RESIT,
+        "sprites": "Sprites/Enemies/Gilgamesh.png", "Sprite Height": 40,
+
+        "thickness": 28, "vel max": V_HO, "speed": 8, "friction": 4,
+        "dash": {"speed": DS_MO * 0.6, "i-frames": 0, "charge": 35},
+        # Weapons
+        "weapon": "Desert's Wind",
+        # AI
+        "func input": "gilgamesh_input", "func act": "gilgamesh_act", "func draw": "enemy_draw_basic",
+        "on death": "none",
+        "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
+        "wall hack": False,
+        "free var": {"IS BOSS": True,
+                     "Current attack": "Divorce Spiral",
+                     "Current sword attack": "Trishot",
+                     "Startup lag sword": 0,
+                     "Startup lag": 0,
+                     "Pattern pos": [0, 0]}
     },
 
     "VIP":
