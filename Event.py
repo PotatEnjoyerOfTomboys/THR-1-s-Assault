@@ -115,10 +115,15 @@ def spawn_enemy(entities, enemy: str, pos: [int, int], angle: float, team="Enemi
         info["free var"].update({"Outline": {
             "FAC-1": Fun.OUTLINE_ENEMIES_FACTION_1,
             "FAC-2": Fun.OUTLINE_ENEMIES_FACTION_2,
-            "FAC-3": Fun.OUTLINE_ENEMIES_FACTION_3
+            "FAC-3": Fun.OUTLINE_ENEMIES_FACTION_3,
+            "Zoar Colonists": (0, 0, 0),
+            "THR-1": (0, 0, 0),
         }[info["faction"]]
         })
+
         entities["entities"].append(Entity.Entity(info, team=team, pos=pos, start_angle=angle))
+        if info["faction"] == 'THR-1':
+            entities["entities"][-1].ai_state = "Attack"
         return
 
     Fun.print_to_error_stream(f"Error {enemy} does not exist")
@@ -359,6 +364,19 @@ def win(self, entities, bullets, level, time_passed, screen, CLOCK):
     for e in entities["entities"]:
         if e.team == "Players":
             e.status["No damage"] = 300
+    #
+
+
+
+def loss(self, entities, bullets, level, time_passed, screen, CLOCK):
+    level["events"].append(MissionEvent("Finishing", trigger_timer, False, [finish_mission], free_var={"Timer": 60 * 5}))
+    for e in entities["entities"]:
+        if e.team != "Players":
+            e.status["No damage"] = 300
+    radio_handler(entities, [
+        [Fun.SPRITE_RADIO_EMPLOYER[0], "Squad leader is down, retreat at once.", Fun.AMBER, 300]
+    ])
+    level["free var"].update({"Loss": True})
     #
 
 

@@ -4022,7 +4022,7 @@ def gilgamesh_act(self, entities, level):
     # |Movement Input|----------------------------------------------------------------------------------------------
 
     Fun.movement_entity(self)
-
+    Fun.aim_system(self, self.weapon)
     # |Status effects|----------------------------------------------------------------------------------------------
     # ha ha, Fun go brr
     Fun.status_manager(self, entities)
@@ -4522,6 +4522,283 @@ def attack_helicopter_draw(self, WIN, scrolling):
 #       Raining hell            Shoots artillery around the boss
 
 
+# Curtis
+def curtis_input(self, entities, level):
+    # Input functions are the IA for an enemy
+    # better targeting system
+    target, target_angle, wall_in = entity_target_detection(self, entities, level)
+
+    self.input = Fun.get_default_inputs()
+    if target:
+        aim_target, move_target, og_dist = entity_get_aim_move_target(self, target)
+        dist = 420
+        if self.no_shoot_state != 0:
+            dist = 64
+        entity_maintain_weapon_range(self, og_dist, move_target, dist, get_away=64)
+        self.input["Skill 1"] = entity_get_enemy_count(self, entities, goal=0, dist=80, entity_type="bullets")
+
+    # Stunned status manager
+    Fun.stunned_manager(self)
+
+    # Dash bullet thing
+    if self.free_var["Stamina"] >= 50 and self.dash_cooldown <= 0:
+        bullet_to_dodge = Fun.find_closest_bullet_types_in_circle(self, entities, 32, [
+            Bullets.Bullet, Bullets.BulletSlowing, Bullets.Missile
+        ])
+        if bullet_to_dodge:
+            # dodge_pos = Fun.move_with_vel_angle(self.pos, bullet_to_dodge.radius, bullet_to_dodge.angle  - 75)
+            dodge_pos = bullet_to_dodge.pos
+
+            self.input["Right"] = self.pos[0] < dodge_pos[0]
+            self.input["Left"] = self.pos[0] > dodge_pos[0]
+            self.input["Down"] = self.pos[1] < dodge_pos[1]
+            self.input["Up"] = self.pos[1] > dodge_pos[1]
+            self.input["Dash"] = True
+            self.free_var["Stamina"] -= 50
+    return target, target_angle
+
+
+def curtis_act(self, entities, level):
+    if self.free_var["Stamina"] < 300:
+        self.free_var["Stamina"] += 1
+
+    # |Movement Input|----------------------------------------------------------------------------------------------
+    speed = self.speed
+    self.running = False
+    self.walking = False
+
+    max_vel = self.vel_max
+
+    # Handle double speed and slowness status
+    if self.status["Slowness"]:
+        max_vel *= 0.5
+    if self.status["Double speed"]:
+        max_vel *= 2
+
+    # Checks for which direction the player must move
+    # Rework it so that you are not faster when walking in diagonal, this should be fixed now
+    vel_limit_x, vel_limit_y = not abs(self.vel[0]) > max_vel, not abs(self.vel[1]) > max_vel
+    allow_correction = False
+    dash_vel = [0, 0]
+    if self.input["Up"] and vel_limit_y:
+        self.vel[1] -= speed
+        dash_vel[1] -= speed
+        allow_correction = True
+    if self.input["Down"] and vel_limit_y:
+        self.vel[1] += speed
+        dash_vel[1] += speed
+
+        allow_correction = True
+    if self.input["Left"] and vel_limit_x:
+        self.vel[0] -= speed
+        dash_vel[0] -= speed
+
+        allow_correction = True
+    if self.input["Right"] and vel_limit_x:
+        self.vel[0] += speed
+        dash_vel[0] += speed
+        allow_correction = True
+
+    if not Fun.check_point_in_circle(max_vel, 0, 0, self.vel[0], self.vel[1]) and allow_correction:
+        self.vel = Fun.move_with_vel_angle([0, 0], max_vel, Fun.angle_between(self.vel, [0, 0]))
+    self.walking = allow_correction
+
+    self.standing_still = False
+    if self.vel == [0, 0]:
+        self.standing_still = True
+
+    # Dash mechanic
+    if self.dash_cooldown <= 0 and self.input["Dash"]:
+        # Handle dash here
+        Fun.play_sound("Player dash", modified_volume=0.25)
+        dash_angle = Fun.angle_between(dash_vel, [0, 0])
+        self.dash_cooldown = self.dash_charge_time
+        if self.status["Dash recovery up"] > 0:
+            self.dash_cooldown //= 2
+        self.vel = Fun.move_with_vel_angle(self.vel, self.dash_speed / self.friction, dash_angle)
+        for x in range(4):
+            angle = dash_angle - 15 - 3.25 * 2 + x * 7.5 * 2
+            entities["particles"].append(
+                Particles.RandomParticle2(
+                    Fun.move_with_vel_angle([self.pos[0], self.pos[1]], -4, angle),
+                    Fun.WHITE, 1.5 + random.uniform(0, 2), 24, angle))
+
+        if self.status["No damage"] < self.dash_iframes:
+            self.status["No damage"] += self.dash_iframes
+
+        if self.health < self.max_health / 2:
+            for x in range(3):
+                Bullets.spawn_bullet(
+                    self, entities, Bullets.HomingSword, Fun.random_point_in_circle(self.pos.copy(), 32), self.aim_angle,
+                    [9, 60, 28, 20, {
+                        "Swing Speed": 0,
+                        "Swing Limit": [0, 0],
+                        "Targeting range": 320,
+                        "Targeting time": 20 * (x + 1), "Colour": Fun.BLUE
+                    }])
+
+    self.dash_cooldown -= 1
+    Fun.aim_system(self, self.weapon)
+    # |Status effects|----------------------------------------------------------------------------------------------
+    # ha ha, Fun go brr
+    Fun.status_manager(self, entities)
+    if self.target or self.free_var["Startup lag"] > 0:
+        if self.no_shoot_state == 0:
+            # Attack logic
+            {
+                "Buckshot": curtis_buckshot,
+                "Slug": curtis_slug,
+                "Burst Ricochet": curtis_burst_ricochet,
+                "Burst Long": curtis_burst_long,
+                "Flower Volley": curtis_flower_volley,
+                "Inverted Flower Volley": curtis_inverted_flower_volley,
+            }[self.free_var["Current attack"]](self, entities, level)
+
+        else:
+            self.no_shoot_state -= 1
+    else:
+        self.free_var["Current attack"] = Fun.get_random_element_from_list(["Buckshot", "Slug", "Burst Ricochet", "Burst Long", "Flower Volley", "Inverted Flower Volley"])
+
+    Skills.skills_manager(self, entities, level)
+    # |Movement Output|---------------------------------------------------------------------------------------------
+    # Make the player move
+    Fun.movement_output(self, level)
+
+    if self.draw_aim_line or self.weapon.laser_sight:
+        entities["background particles"].append(Particles.LineParticle(
+            Fun.move_with_vel_angle(self.pos, 20, self.aim_angle), Fun.BLUE, 1, self.weapon.range-20, self.aim_angle, 2, 0))
+
+
+def curtis_buckshot(self, entities, level):
+    if start_up_lag_handler(self, 30):
+        angle = self.aim_angle
+        pos = Fun.move_with_vel_angle(self.pos, 10, self.aim_angle)
+        Fun.play_sound("Rifle 2")
+        for b in range(32):
+            Bullets.spawn_bullet(
+                self, entities,
+                Bullets.Bullet,
+                Fun.move_with_vel_angle(pos, -64 + b * 4, angle + 90),
+                angle + random.uniform(-2, 2),
+                [4 + 3.5 * random.random(), 120, 4, 10, {'Colour': Fun.ORANGE}])
+        self.free_var["Current attack"] = Fun.get_random_element_from_list(["Burst Ricochet", "Burst Long"])
+        Fun.play_sound("Shotgun 2 Shooting")
+    elif self.free_var["Startup lag"] == 1:
+        Fun.play_sound("Shotgun 1 Pump")
+
+
+
+def curtis_slug(self, entities, level):
+    if start_up_lag_handler(self, 30):
+        self.free_var["Current attack"] = Fun.get_random_element_from_list(["Burst Ricochet", "Burst Long"])
+
+        angle = self.aim_angle
+        pos = Fun.move_with_vel_angle(self.pos, 10, self.aim_angle)
+        Bullets.spawn_bullet(
+            self, entities,
+            Bullets.Bullet,
+            pos,
+            angle,
+            [8, 60, 9, 30, {'Colour': Fun.ORANGE}])
+        for b in range(32):
+            Bullets.spawn_bullet(
+                self, entities,
+                Bullets.Bullet,
+                [pos[0], pos[1]],
+                angle + random.uniform(-25, 25),
+                [4 + 3.5 * random.random(), 60, 1 + 3 * random.random(), 10,
+                 {'Colour': Fun.ORANGE, "Particle allowed": b % 3 == 0, "Burn chance": 0.25, "Burn duration": 30}])
+        Fun.play_sound("Shotgun 2 Shooting")
+    elif self.free_var["Startup lag"] == 1:
+        Fun.play_sound("Shotgun 1 Pump")
+
+
+def curtis_burst_ricochet(self, entities, level):
+    if start_up_lag_handler(self, 61):
+        self.free_var["Current attack"] = Fun.get_random_element_from_list(["Flower Volley", "Inverted Flower Volley"])
+
+    elif self.free_var["Startup lag"] % 20 == 0:
+
+        pos = Fun.move_with_vel_angle(self.pos, 10, self.aim_angle)
+        Bullets.spawn_bullet(
+            self, entities,
+            Bullets.Bullet,
+            pos,
+            self.aim_angle + random.uniform(-4, 4),
+            [11.4, 200, 5, 35, {"Piercing": True, "Smoke": False}])
+        entities["bullets"][-1].wall_physics = Bullets.base_grenade_wall_hit
+        Fun.play_sound("Rifle 1 Shooting")
+
+
+def curtis_burst_long(self, entities, level):
+    if start_up_lag_handler(self, 141):
+        self.free_var["Current attack"] = Fun.get_random_element_from_list(["Flower Volley", "Inverted Flower Volley"])
+
+    elif self.free_var["Startup lag"] % 10 == 0:
+
+        pos = Fun.move_with_vel_angle(self.pos, 10, self.aim_angle)
+        Bullets.spawn_bullet(
+            self, entities,
+            Bullets.Bullet,
+            pos,
+            self.aim_angle + random.uniform(-14, 14),
+            [11.4, 200, 5, 35, {"Piercing": True, "Smoke": False}])
+        Fun.play_sound("Rifle 1 Shooting")
+
+
+def curtis_flower_volley(self, entities, level):
+    # War == Left
+    # Peace == Right
+    if start_up_lag_handler(self, 20 + 70 + 1):
+        self.free_var["Current attack"] = Fun.get_random_element_from_list(["Buckshot", "Slug"])
+    elif self.free_var["Startup lag"] > 20:
+        temp = self.free_var["Startup lag"] - 20
+        if temp % 5 == 0:
+            self.weapon.free_var["Peace angle"] += 10
+            self.weapon.free_var["War angle"] -= 10
+
+            bullet_info = [5, 200, 4, 20, {"Piercing": True, "Smoke": False}]
+
+            pos = Fun.move_with_vel_angle(self.pos, 7, self.weapon.free_var["War angle"])
+            Bullets.spawn_bullet(
+                self, entities, Bullets.Bullet, pos, self.weapon.free_var["War angle"], bullet_info)
+            pos = Fun.move_with_vel_angle(self.pos, 7, self.weapon.free_var["Peace angle"])
+            Bullets.spawn_bullet(
+                self, entities, Bullets.Bullet, pos, self.weapon.free_var["Peace angle"], bullet_info)
+
+            Fun.play_sound("Rifle", "SFX")
+    else:
+        self.weapon.free_var["War angle"] = self.aim_angle + 30
+        self.weapon.free_var["Peace angle"] = self.aim_angle - 30
+
+
+def curtis_inverted_flower_volley(self, entities, bullets):
+    if start_up_lag_handler(self, 20 + 70 + 1):
+        self.free_var["Current attack"] = Fun.get_random_element_from_list(["Buckshot", "Slug"])
+    elif self.free_var["Startup lag"] > 20:
+        temp = self.free_var["Startup lag"] - 20
+        if temp % 10 == 0:
+            self.weapon.free_var["Peace angle"] -= 20
+            self.weapon.free_var["War angle"] += 20
+
+            bullet_info = [5, 200, 4, 20, {"Piercing": True, "Smoke": False}]
+
+            pos = Fun.move_with_vel_angle(self.pos, 7, self.weapon.free_var["War angle"])
+            Bullets.spawn_bullet(
+                self, entities, Bullets.Bullet, pos, self.weapon.free_var["War angle"], bullet_info)
+            entities["bullets"][-1].wall_physics = Bullets.base_grenade_wall_hit
+
+            pos = Fun.move_with_vel_angle(self.pos, 7, self.weapon.free_var["Peace angle"])
+            Bullets.spawn_bullet(
+                self, entities, Bullets.Bullet, pos, self.weapon.free_var["Peace angle"], bullet_info)
+            entities["bullets"][-1].wall_physics = Bullets.base_grenade_wall_hit
+
+            Fun.play_sound("Rifle", "SFX")
+    else:
+        self.weapon.free_var["War angle"] = self.aim_angle + 30
+        self.weapon.free_var["Peace angle"] = self.aim_angle - 30
+
+
 ACT_FREELY_DICT = {
          "Lord": ally_sub_input_roam,
          "Emperor": ally_sub_input_focus_objective,
@@ -4735,7 +5012,6 @@ player_repertory = {
         "armour": 50,
         "damage resistances": CU_RESIT,
         "weapon": "Standard Shotgun",
-        # "weapon": "War and Peace",
 
         "thickness": 16,
         "vel max": 6.25,
@@ -5643,27 +5919,160 @@ enemy_repertory = {
     # |Others|----------------------------------------------------------------------------------------------------------
     # Rigel
     "Curtis": {
-        "name": "Gilgamesh", "faction": "Zoar Colonists",
-        "health": H_HO * 20, "armour": 0, "damage resistances": GILG_RESIT,
-        "sprites": "Sprites/Enemies/Gilgamesh.png", "Sprite Height": 40,
+        "name": "Curtis", "faction": "Zoar Colonists",
+        "health": 200*4, "armour": 50, "damage resistances": CU_RESIT,
+        "sprites": "Sprites/Player/Curtis.png",
 
-        "thickness": 28, "vel max": V_HO, "speed": 8, "friction": 4,
-        "dash": {"speed": DS_MO * 0.6, "i-frames": 0, "charge": 35},
+        "dash": {"speed": DS_HO, "i-frames": 24, "charge": 25},
         # Weapons
-        "weapon": "Desert's Wind",
+        "targeting angle": 180, "targeting range": 512,
+
+        "thickness": 16,
+        "vel max": 6.25,
+        "speed": 1.17,
+        "friction": 1.15,
+
+        "weapon": "Curtis' Arsenal",
+        "skills": ["Kick Boss"],
         # AI
-        "func input": "gilgamesh_input", "func act": "gilgamesh_act", "func draw": "enemy_draw_basic",
+        "func input": "curtis_input", "func act": "curtis_act", "func draw": "enemy_draw_basic",
         "on death": "none",
-        "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
+        "stealth mod": S_LO, "stealth counter": C_LM,
         "wall hack": False,
         "free var": {"IS BOSS": True,
-                     "Current attack": "Divorce Spiral",
-                     "Current sword attack": "Trishot",
-                     "Startup lag sword": 0,
+                     "Stamina": 300,
+                     "Current attack": "Flower Volley",
                      "Startup lag": 0,
                      "Pattern pos": [0, 0]}
     },
 
+    # THR-1 enemy version
+    "Lord": {
+        "name": "Lord", "faction": "THR-1",
+        "health": H_MH, "armour": A_MO, "damage resistances": LO_RESIT,
+        "sprites": "Sprites/Player/THR-1/Lord.png",
+
+        "thickness": T_MH, "vel max": V_MO, "speed": 2.2, "friction": 1.5,
+        "dash": {"speed": DS_HO, "i-frames": 12, "charge": 35},
+        # Weapons
+        "weapon": "Saloum Mk-2", "skills": ["Gauntlet Punch", "Beast Mode"],
+        # AI
+        "func input": test_ally_input, "func act": player_act, "func draw": player_draw, "on death": lord_on_death,
+        "targeting range": R_MH, "targeting angle": D_LM, "wall hack": False,
+        "driving": DRIVE_MO,
+        "free var": {"Ally waypoint": [0, 0], "IS BOSS": True}
+    },
+    # Emperor	    M       L/M     M       M/H     H       M       M/H     M       M       M       H       H       Jack of all trades
+    "Emperor": {
+        "name": "Emperor", "faction": "THR-1",
+        "health": H_MO, "armour": A_LM, "damage resistances": EM_RESIT, "sprites": "Sprites/Player/THR-1/Emperor.png",
+        "thickness": T_MO,
+        "vel max": V_MH,
+        "speed": 2.2,
+        "friction": 1.5,
+        "dash": {"speed": DS_MO, "i-frames": 12, "charge": 35},
+        # Weapons
+        "weapon": "GunBlade", "skills": ["Stun Kick", "Mega Buff"],
+        # AI
+        "func input": test_ally_input, "func act": player_act, "func draw": player_draw, "on death": "none",
+        "targeting range": R_HO, "targeting angle": D_MO, "stealth mod": S_MO, "stealth counter": C_MH,
+        "wall hack": False,
+        "driving": DRIVE_MO,
+        "free var": {"Ally waypoint": [0, 0], "Startup lag": 0, "Startup time": 60, "Kicked": 0}
+    },
+    # Wizard        L/M     M       M/H     M       M       L/M     M       M       H       M       H       M       Area denial
+    "Wizard": {
+        "name": "Wizard", "faction": "THR-1",
+        "health": H_LM, "armour": A_MO, "damage resistances": WI_RESIT, "sprites": "Sprites/Player/THR-1/Wizard.png",
+        "thickness": T_MO,
+        "vel max": V_MO, "speed": 2.2, "friction": 1.5,
+        "dash": {"speed": DS_MO, "i-frames": 12, "charge": 35},
+        # Weapons
+        "weapon": "Jeanne's Family Shotgun", "skills": ["Building", "All Guns Blazing"],
+        # AI
+        "func input": test_ally_input, "func act": player_act, "func draw": player_draw, "on death": "none",
+        "targeting range": R_MO, "targeting angle": D_MH, "stealth mod": S_LM, "stealth counter": C_MO,
+        "wall hack": False,
+        "driving": DRIVE_HO,
+        "free var": {"Ally waypoint": [0, 0]}
+    },
+    # Sovreig       L/M     L/M     L       M/H     H++     M/H     H       L       L       L/M     L       M       Sniper recon
+    "Sovereign": {
+        "name": "Sovereign", "faction": "THR-1",
+        "health": H_LM, "armour": A_LM, "damage resistances": SO_RESIT, "sprites": "Sprites/Player/THR-1/Sovereign.png",
+        "thickness": T_LO,
+        "vel max": V_MH,
+        "speed": 2.2,
+        "friction": 1.5,
+        "dash": {"speed": DS_LM, "i-frames": 12, "charge": 35},
+        # Weapons
+        "weapon": "St-Maurice", "skills": ["Cardboard box", "Detect Targets"],
+        # AI
+        "func input": test_ally_input, "func act": player_act, "func draw": player_draw, "on death": "none",
+        "targeting range": R_HO * 1.5, "targeting angle": D_LM, "stealth mod": S_MH, "stealth counter": C_HO,
+        "wall hack": False,
+        "driving": DRIVE_LO,
+        "free var": {"Ally waypoint": [0, 0], "Detect Targets Duration": 3 * 60, "Exposed blue ball timer": 0}
+    },
+    # Duke	        M       L/M     M       H       M       H       M       L/M     L/M     H       H       H	    Plays with agro
+    "Duke": {
+        "name": "Duke", "faction": "THR-1",
+        "health": H_MO, "armour": A_LM, "damage resistances": DU_RESIT,
+        "sprites": "Sprites/Player/THR-1/Duke.png",
+        "thickness": T_LM,
+        "vel max": V_HO,
+        "speed": 2.2,
+        "friction": 1.5,
+        "dash": {"speed": DS_HO, "i-frames": 12, "charge": 35},
+        # Weapons
+        "weapon": "Chain Axe", "skills": ["Tail Swipe", "Smoke Screen"],
+        # AI
+        "func input": test_ally_input, "func act": player_act, "func draw": player_draw, "on death": "none",
+        "targeting range": R_MO, "targeting angle": D_HO, "stealth mod": S_HO, "stealth counter": C_HO,
+        "driving": DRIVE_LM,
+        "wall hack": False,
+        "free var": {"Ally waypoint": [0, 0]}
+    },
+    # Jester	    L--     H++     H       L       L/M     L/M     H++     M/H     L/M     L--     H++     L       Primary support. Helps them not dying
+    "Jester": {
+        "name": "Jester", "faction": "THR-1",
+        "health": int(H_LO * 0.5), "armour": A_MH * 2, "damage resistances": JE_RESIT,
+        "sprites": "Sprites/Player/THR-1/Jester.png",
+        "thickness": T_MH,
+        "vel max": V_LO,
+        "speed": 2.2,
+        "friction": 0.5,
+        "dash": {"speed": DS_LO * 0.4, "i-frames": 12, "charge": 35},
+
+        # Weapons
+        "weapon": "Epicurean Medic Rifle", "skills": ["Discharge", "Robot Fuck Off"],
+        # AI
+        "func input": jester_input, "func act": player_act, "func draw": player_draw, "on death": "none",
+        "targeting range": R_LM, "targeting angle": D_MH, "stealth mod": S_LM, "stealth counter": C_HO * 1.2,
+        "wall hack": False,
+        "driving": DRIVE_LM,
+        "free var": {"Ally waypoint": [0, 0]}
+    },
+    # Condor        H       H       M/H     L/M     M       L       L/M     M/H     M/H     M       L       L       Tank and cause debuffs
+    "Condor": {
+        "name": "Condor", "faction": "THR-1",
+        "health": H_HO, "armour": A_HO, "damage resistances": CO_RESIT,
+        "sprites": "Sprites/Player/THR-1/Condor.png",
+
+        "thickness": T_MH,
+        "vel max": V_LM,
+        "speed": 2.2,
+        "friction": 0.8,
+        "dash": {"speed": DS_LO, "i-frames": 12, "charge": 35},
+        # Weapons
+        "weapon": "Type 41 SMG", "skills": ["Armour Breaker", "Last Stand"],
+        # AI
+        "func input": test_ally_input, "func act": player_act, "func draw": player_draw, "on death": "condor_on_death",
+        "targeting range": R_MO, "targeting angle": D_MO, "stealth mod": S_LO, "stealth counter": C_LM,
+        "driving": DRIVE_MH,
+        "wall hack": False,
+        "free var": {"Ally waypoint": [0, 0]}
+    },
     "VIP":
         {"name": "Nest Trooper",
          "faction": "FAC-1",

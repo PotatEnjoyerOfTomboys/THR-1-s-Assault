@@ -51,17 +51,15 @@ import random
 #           Lawrence    3
 #           Mark        2
 #           Vivianne    8   (Need to code all tomboys)
-
 #   Bosses
 #       Armed Shield Generator  Laser, Missiles, Electric. Tries to run you over too.
 #       Fire Support Mech       Fire, Artillery, Bullets
 #       AA Site
 #           Drone builder       Launches drones (animations)
 #       Rigel               (Final boss)
-#       Curtis              (Alt Final boss - THR-1 route)
-#       THR-1 Boss fight    (Alt Final boss - Zoar route)
+#       THR-1 Boss fight    (Alt Final boss - Zoar route)   (Figure how to make it playable)
 # 	Mission Modifiers
-#       Unknown Forces  (Opposite player team spawn, no padraig)
+#       Unknown Forces  (Opposite player team spawn)
 #   Versus mode
 #       Balance changes (small ones)
 #   Character conversations
@@ -71,7 +69,6 @@ import random
 #   Animated weapons. Mostly for the pile bunker
 #   Animated radio transmission portraits
 
-# 	Padraig?        (cancelled)
 pg.mixer.pre_init()
 pg.init()
 pg.joystick.init()
@@ -281,7 +278,7 @@ def main_game(party_info):
             # |Main game loop|------------------------------------------------------------------------------------------
             go_to_hub = False,  # mission_end_screen = False, True
             frame_2 = WIN.copy()
-            Render.draw(WIN, CLOCK, 0, scrolling, scrolling_target, level, entities, {})
+            Render.draw(WIN, CLOCK, 0, scrolling, scrolling_target, level, entities, 1)
             Fun.menu_transition_doom_screen_melt(WIN, CLOCK, WIN.copy(), frame_2)
 
             checked_time = False
@@ -468,12 +465,6 @@ def versus_mode(party_info):
                                    free_var=free_var))
         level["events"] = new_events
 
-        # Spawn enemies
-        for p in extra_info["Enemy spawns"]:
-            Event.spawn_enemy(entities, p["Type"], Fun.random_point_in_circle(p["Pos"], 16), 360 * random.random())
-            enemy = entities["entities"][-1]
-            enemy.vel = Fun.move_with_vel_angle([0, 0], 6 + 2 * random.random(), enemy.angle)
-
         # Scrolling
         scrolling_target = Fun.find_scrolling_target(scrolling_target_entities)
         scrolling = scrolling_target
@@ -483,7 +474,7 @@ def versus_mode(party_info):
         go_to_hub = False,  # mission_end_screen = False, True
 
         frame_2 = WIN.copy()
-        Render.draw(WIN, CLOCK, 0, scrolling, scrolling_target, level, entities, {})
+        Render.draw(WIN, CLOCK, 0, scrolling, scrolling_target, level, entities, 1)
         Fun.menu_transition_doom_screen_melt(WIN, CLOCK, WIN.copy(), frame_2)
 
         checked_time = False

@@ -469,8 +469,8 @@
 
 	"Upgrade-Desc-Breaking Limits": "Unlocks all remainging upgrades",
 
-	"Upgrade-Desc-Skill Issue": "Skill recharge slower",
-	"Upgrade-Desc-Skill Solution": "Skills recharge faster. ",
+	"Upgrade-Desc-Skill Issue": "Skill recharge slower. Buff to speed and FOV",
+	"Upgrade-Desc-Skill Solution": "Skills recharge faster. Minor debuff to speed and FOV",
 
 	"Upgrade-Desc-Seeking Blue Balls": "Blue Balls take a few seconds before starting to move, then move toward the closest enemy",
 	"Upgrade-Desc-Bouncing Blue Balls": "Blue balls will now bounce when hitting walls. Cannot be used with Seeking Blue Balls",
@@ -548,7 +548,7 @@
 	"Upgrade-Desc-Brittle Blue Balls": "When Jester receives damage, summon blue balls in a circle.",
 
 	"Upgrade-Desc-Ricochet": "Bullets splits in 2 and bounces when hitting walls. Split and bounce only happens once. Flechettes bounces 3 times and do not split.",
-	"Upgrade-Desc-Spread": "hen Vincent defeats an enemy, any remaing debuffs get's tranfered to enemies close by",
+	"Upgrade-Desc-Spread": "When Vincent defeats an enemy, any remaing debuffs get's tranfered to enemies close by",
 	"Upgrade-Desc-Guardian": "While Vincent is standing still and not attacking, double resistances and increased agro gain.",
 	"Upgrade-Desc-Pierce": "Condor's bullets have a piercing effect",
 	"Upgrade-Desc-Intimidation": "Condor has a 25% chance to give enemies an inacuracy debuff for 10 sec on hit.",

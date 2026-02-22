@@ -691,7 +691,10 @@ def vincent_armour_breaker(self, skill, entities, level):
             continue
         e.armour -= e.max_armour // 3
         if e.armour < 0:
-            e.status["Stunned"] += abs(e.armour) * 60
+            stun_time = abs(e.armour) * 60
+            if stun_time > 240:
+                stun_time = 240
+            e.status["Stunned"] += stun_time
             if "Startup lag" in e.free_var:
                 e.free_var["Startup lag"] = 0
             e.armour = 0
@@ -801,6 +804,29 @@ def curtis_kick(self, skill, entities, level):
 
     Fun.play_sound("Hitting 1", "SFX")
 
+
+def curtis_kick_boss(self, skill, entities, level):
+    for b in entities["bullets"]:
+        if b.team == self.team:
+            continue
+        if b.laser_based:
+            continue
+        if Fun.check_point_in_cone(96, self.pos[0], self.pos[1], b.pos[0], b.pos[1], self.angle, 30):
+            Bullets.spawn_blue_balls(
+                self, entities,
+                b.pos.copy(),
+                self.angle,
+                [b.og_info[0], b.og_info[1], b.radius * 1.75, b.damage, {"Colour": Fun.DARK_BLUE}])
+
+    # Visual effects
+    for y in range(3):
+        for x in range(7):
+            angle = self.aim_angle - 5 * 3 + 5 * x + random.uniform(-30, 30)
+            entities["particles"].append(Particles.RandomParticle2(
+                Fun.move_with_vel_angle(self.pos, 6, angle),
+                Fun.DARK_GRAY, 4, 15, angle, size=3))
+
+    Fun.play_sound("Hitting 1", "SFX")
 
 def curtis_fool(self, skill, entities, level):
     sound_allowed = False
@@ -1164,6 +1190,16 @@ skill_repertory = {
          "func": "curtis_kick",
          "activation mode": "normal",
          "recharge rate": 2,
+         "depletion rate": 0,
+         "free variables": {}
+         },
+    "Kick Boss":
+        {"name": "Kick Boss",
+         "class": "Offense",
+         "description": "",
+         "func": "curtis_kick_boss",
+         "activation mode": "normal",
+         "recharge rate": 1.2,
          "depletion rate": 0,
          "free variables": {}
          },

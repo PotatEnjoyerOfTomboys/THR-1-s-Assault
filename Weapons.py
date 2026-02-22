@@ -4231,6 +4231,36 @@ weapon_repertory = {
          "passive": "attack_helicopter_weaponry_passive",
          "free var": {}
          },
+    "Curtis' Arsenal":
+        {"name": "War and Peace",
+         "description": "",
+         "class": "Pistol",
+         "sprite": "Sprites/Weapon/Peace.png",
+         "gunshot sound": "Small arms",
+         "reloading sound": "Reload Pistol 1",
+         "jamming sound": "Jamming",
+         "sound level": 1,
+         "accuracy": 5,
+         "spread": 2,
+         "handle": 10,
+         "recoil": 0,
+         "full auto": True,
+         "fire rate": 8,
+         "reload time": 20,
+         "bullet type": "Bullet",
+         "bullets per shot": 2,
+         "ammo cost": 1,
+         "bullet info": [8, 20, 3, 30, {"Piercing": True}],
+         "max ammo": 14,
+         "ammo pool": 20000,
+         "crit rate": 0,
+         "crit multiplier": 5,
+         "jam rate": 0.01,
+         "jam duration": 10,
+         "laser sight": False,
+         "alt fire": "war_and_peace_alt",
+         "passive": "war_and_peace_passive",
+         "free var": {"Peace angle": 0, "War angle": 0}},
 }
 
 for e in weapon_repertory:
@@ -4238,6 +4268,7 @@ for e in weapon_repertory:
 
 # Encyclopedia notes
 # GunBlade
+#   Manufacturer: DIC TEC||Caliber: 10mm & 20 Gauge||||This
 # St-Maurice Youth model
 #   Manufacturer: Compagnie d'Fusils Chasses d'3 Rivières
 #   Caliber: 22lr, 6.5mm Creemoore, 5.56, 7.62x39mm, 7.62x52mm, .303, .308, .410, 20 Gauge
@@ -4248,9 +4279,8 @@ for e in weapon_repertory:
 # St-Maurice
 #   Manufacturer: Compagnie d'Fusils Chasses d'3 Rivières
 #   This rifle became a must-have for any shooter in North America. It has great precision, very simple to maintain and
-#   build, came in so many calibers that nobody knows which was the intended one and most importantly, cheap. Some
-#   started to call it "the standard rifle" because of how wide-spread it is and ubiquitous it became with bolt action
-#   rifles.
+#   build, came in almost any caliber imaginable and most importantly, cheap. Some started to call it "the standard rifle"
+#   because of how wide-spread it is and ubiquitous it became with bolt action rifles.
 
 # St-Laurent Gen 1
 #   Manufacturer: Compagnie d'Fusils Chasses d'3 Rivières
@@ -4258,7 +4288,6 @@ for e in weapon_repertory:
 #   Production dates: December 2099 - end of production announced for January 2106
 #   There's no way to go around it, this is an anti-material rifle disguised as a big game hunting rifle. And no one can
 #   argue that it doesn't get the job done. The model was finished just in time for it to get used during the Solar War.
-#
 
 # Corrine's Hands
 #   Manufacturer: Her mother.
@@ -4270,7 +4299,6 @@ for e in weapon_repertory:
 # Type 23 Shotgun
 #   Manufacturer: Novak & Boyko||Caliber: 4 Gauge Shells||Production dates:
 #   A
-#   Slugs for the weapon almost went into production. They were cancelled due to low demand for the model.
 # Standard Shotgun
 # Cowboy's Repeater
 # Mark's Rifle

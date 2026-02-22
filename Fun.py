@@ -26,6 +26,7 @@ DEFAULT_KEY_PRESSED, DEFAULT_KEY_COOLDOWN = 10, 7  # Could make these 2 a settin
 pg.display.set_caption(f"THR-1's Assault - {VERSION}")
 DECODING = locale.getpreferredencoding()
 SPOOKY_DAY = start_october <= current_date <= start_november
+DELTA_TIME = [60/17]
 
 
 # |Testing|-------------------------------------------------------------------------------------------------------------
@@ -108,12 +109,6 @@ DEFAULT_CONTROLLER_BINDS = {
     "Order Hold": ["D-pad Up"], "Order Follow": ["D-pad Right"], "Order Attack": ["D-pad Down"], "Order Act Free": ["D-pad Left"],
     "Up": [], "Down": [], "Left": [], "Right": [],
     "Pause": ["Button Start"], "Screenshot": ["Button Select"]}
-
-STARTING_WEAPONS = ["Unarmed", "Greatsword", "Spear", "Hammer",
-                    "Standard Pistol",
-                    "Standard Shotgun", "Standard Rifle", "Standard Semi-Auto",
-                    "Standard Flame Thrower", "Standard RocketL.", "Grenade Launcher"]
-STARTING_SKILLS = ["Dodge", "Dash", "Dart"]
 
 SYSTEM_CONTROLS = {"Pause": 27, "Screenshot": pg.K_BACKSPACE}
 SYSTEM_CONTROLS_INPUT = {"Pause": False, "Screenshot": False}
@@ -407,6 +402,7 @@ sounds_dict = {
     "Gun Silenced": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Rifle_Silenced.ogg')), "Volume": 1},
     "Shotgun 1 Shooting": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Shotgun_Shoot_Pump.ogg')), "Volume": 0.8},
     "Shotgun 2 Shooting": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Shotgun.ogg')), "Volume": 0.8},
+    "Shotgun 1 Pump": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Shotgun_Pumped_1.ogg')), "Volume": 0.8},
     "Rifle 1 Shooting": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Rifle_1.ogg')), "Volume": 0.8},
     "Rifle 2 Shooting": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Rifle_2.ogg')), "Volume": 1},
     # "Shot gun 2 Shooting": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Shotgun.ogg')), "Volume": 0.8},
@@ -1382,7 +1378,10 @@ def title_screen(WIN, CLOCK, controls):
 
 def main_menu(WIN, CLOCK):
     pg.mixer.music.pause()
-    transition = False
+    transition = True
+    frame_1 = some_bullshit_for_transitions(WIN)
+
+    win_copy = WIN.copy()
 
     menu_sprite = pg.image.load(os.path.join("Sprites/UI/Settings Screen.png")).convert_alpha()
     menu_overlay = pg.image.load(os.path.join("Sprites/UI/Overlay.png")).convert_alpha()
@@ -2378,6 +2377,9 @@ def mission_menu(WIN, CLOCK, missions_to_choose, party_info, run_info):
                     # return_value = do_shit
                     # return_value = new_player_party_info
                     break
+
+                frame_1 = some_bullshit_for_transitions(WIN)
+                transition = True
             if do_shit == "Shop":
                 # Do that later
                 shop_menu(WIN, CLOCK, party_info, run_info)
@@ -2690,7 +2692,7 @@ def character_menu(WIN, CLOCK, missions_to_choose, player_party, mission_name):
     # Render stuff
     pg.mixer.music.pause()
     frame_1 = some_bullshit_for_transitions(WIN)
-    transition = False
+    transition = True
     win_copy = WIN.copy()
     frame_1.set_alpha(128)
     menu_sprite = pg.image.load(os.path.join("Sprites/UI/Settings Screen.png")).convert_alpha()
@@ -2872,6 +2874,9 @@ weapon_ownership_table = {
 
 def weapons_menu(WIN, CLOCK, party_info, run_info, exit_message="Continue", from_shop=False):
     options = []
+
+    # transition = True
+    # frame_1 = some_bullshit_for_transitions(WIN)
     # Look for unlocked weapons
     unlocked_weapons = get_from_json("Save.json", "Character weapons unlocked")
     party_members_with_no_weapon_alts = 0
@@ -2925,7 +2930,7 @@ def weapons_menu(WIN, CLOCK, party_info, run_info, exit_message="Continue", from
     # Check for unlocks
     pg.mixer.music.pause()
     frame_1 = some_bullshit_for_transitions(WIN)
-    transition = False
+    transition = True
     win_copy = WIN.copy()
     frame_1.set_alpha(128)
     menu_overlay = pg.image.load(os.path.join("Sprites/UI/Overlay.png")).convert_alpha()
@@ -3197,7 +3202,8 @@ def versus_character_menu(WIN, CLOCK, missions_to_choose, player_party, mission_
     # Render stuff
     pg.mixer.music.pause()
     frame_1 = some_bullshit_for_transitions(WIN)
-    transition = False
+    transition = True
+
     win_copy = WIN.copy()
     frame_1.set_alpha(128)
     menu_sprite = pg.image.load(os.path.join("Sprites/UI/Settings Screen.png")).convert_alpha()
@@ -4260,6 +4266,9 @@ def end_menu(WIN, CLOCK, elements_to_show):
     menu_overlay = pg.image.load(os.path.join("Sprites/UI/Overlay.png")).convert_alpha()
     key_pressed = DEFAULT_KEY_PRESSED * 4
 
+    frame_1 = some_bullshit_for_transitions(WIN)
+    transition = True
+    win_copy = WIN.copy()
     controller = PseudoPlayer()
 
     menu_render = UICommunicationLog(elements_to_show, [20, 300], speed=1)
@@ -4288,6 +4297,10 @@ def end_menu(WIN, CLOCK, elements_to_show):
         crt(surface_to_draw)
         surface_to_draw.blit(menu_overlay, [0, 0])
         scale_render(WIN, surface_to_draw, CLOCK)
+
+        if transition:
+            transition = False
+            menu_transition_doom_screen_melt(WIN, CLOCK, WIN, win_copy)
         pg.display.update()
         CLOCK.tick(60)
         end_timer -= 1
@@ -4296,6 +4309,7 @@ def end_menu(WIN, CLOCK, elements_to_show):
 def end_mission_menu(WIN, CLOCK, party_info, status):
     # temp_ui_font =  create_temp_font_2(450, font_name="Sprites/JetBrainsMono-SemiBold.ttf")
     b = "Secretary" # use a bird name, she is part of the Nest but
+
     p1 = {
         "Win": "COMPLETED",
         "Loss": "FAILED"
@@ -4326,6 +4340,7 @@ def end_mission_menu(WIN, CLOCK, party_info, status):
 
 def end_run_menu(WIN, CLOCK, run_info, party_info, status):
     # temp_ui_font =  create_temp_font_2(450, font_name="Sprites/JetBrainsMono-SemiBold.ttf")
+
     b = "Secretary" # use a bird name, she is part of the Nest but
     p1 = {'Win': 'COMPLETED', 'Loss': 'FAILED'}[status]
     if status == "Loss":
@@ -4486,6 +4501,8 @@ def crt(WIN):
 
 # |Blit/draw functions|-------------------------------------------------------------------------------------------------
 def scrolling_manager(scrolling, scrolling_target, WIN_WIDTH, WIN_HEIGHT, scrolling_speed=3.75):
+    if not scrolling_speed:
+        return scrolling
     # I am satisfied with the scrolling right now
     dist = distance_between(scrolling_target, scrolling) / 50
     scrolling_speed *= dist
@@ -7184,13 +7201,16 @@ def level_generator(possible_levels, party_info, run_info, current_mission=1, mi
             else:
                 # Get mission name
                 if level['name'] == write_textline("Finale 1"): # Load Rigel
-                    enemy_spawns.append({"Pos": [commander_spawn.centerx, commander_spawn.centery], "Type": "Rigel"})
+                    for x in ["Lord", "Emperor", "Wizard", "Sovereign", "Duke", "Condor", "Jester"]:
+                        enemy_spawns.append(
+                            {"Pos": random_point_in_circle([commander_spawn.centerx, commander_spawn.centery], 48),
+                             "Type": x})
+                    # enemy_spawns.append({"Pos": [commander_spawn.centerx, commander_spawn.centery], "Type": "Rigel"})
                 if level['name'] == write_textline("Finale 2"): # Load Curtis
                     enemy_spawns.append({"Pos": [commander_spawn.centerx, commander_spawn.centery], "Type": "Curtis"})
                 if level['name'] == write_textline("Finale 3"): # Load THR-1 team
                     for x in ["Lord", "Emperor", "Wizard", "Sovereign", "Duke", "Condor", "Jester"]:
                         enemy_spawns.append({"Pos": [commander_spawn.centerx, commander_spawn.centery], "Type": x})
-
 
             level['objective points'].append([commander_spawn.centerx, commander_spawn.centery])
             # Add event to check for commander death

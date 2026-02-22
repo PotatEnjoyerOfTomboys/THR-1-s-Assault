@@ -17,7 +17,7 @@ def main_loop(WIN, CLOCK, entities, level, party_info, scrolling, scrolling_targ
     mission_end_screen = True
     big_game_loop = True
 
-
+    scrolling_mod = 1
     while gaming:
         # Get inputs
         mouse_key = pg.mouse.get_pressed(3)
@@ -57,12 +57,14 @@ def main_loop(WIN, CLOCK, entities, level, party_info, scrolling, scrolling_targ
                 end_status = "Loss"
             mission_end_screen = True
         elif main_player.health <= 0:
-            gaming = False
+            # gaming = False
             mission_end_screen = True
             big_game_loop = True
-            break
 
-        # |Handle items|----------------------------------------------------------------------------------------
+            level["events"].append(Event.MissionEvent("Finishing", Event.trigger_constant, False, [Event.loss]))
+            scrolling_mod = 0
+
+            # |Handle items|----------------------------------------------------------------------------------------
         for count, item in enumerate(entities["items"]):
             if Fun.distance_between([scrolling[0] * -1, scrolling[1] * -1],
                                     item.pos) > act_limit:  # Saves a lot of performances
@@ -104,7 +106,7 @@ def main_loop(WIN, CLOCK, entities, level, party_info, scrolling, scrolling_targ
             if screen_shake[0] <= 0: entities["screen shake"] = []
 
         # Draw function
-        Render.draw(WIN, CLOCK, time_passed, scrolling, scrolling_target, level, entities, {})
+        Render.draw(WIN, CLOCK, time_passed, scrolling, scrolling_target, level, entities, scrolling_mod)
         entities["scrolling"] = scrolling
         time_passed += 1
 

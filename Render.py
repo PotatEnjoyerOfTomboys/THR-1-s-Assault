@@ -81,7 +81,7 @@ def draw_bottom_health_bar(entity, surface_to_draw, round_scrolling):
 
 
 # |General Draw Function|-----------------------------------------------------------------------------------------------
-def draw(WIN, CLOCK, time_passed, scrolling, scrolling_target, level, entities, bullets):
+def draw(WIN, CLOCK, time_passed, scrolling, scrolling_target, level, entities, scrolling_mod=1):
     player = entities["entities"][0]
     # win_width, win_height = WIN.get_size()
 
@@ -94,7 +94,7 @@ def draw(WIN, CLOCK, time_passed, scrolling, scrolling_target, level, entities, 
     WIN.fill((0, 0, 0))
     temp_ui_font = Fun.create_temp_font_1(win_height, font_name="Sprites/JetBrainsMono-SemiBold.ttf")
     # Scrolling
-    Fun.scrolling_manager(scrolling, scrolling_target, win_width, win_height)
+    Fun.scrolling_manager(scrolling, scrolling_target, win_width, win_height, scrolling_speed=3.75*scrolling_mod)
     # Limit scrolling when needed
     # if "Limit scrolling" in level:
     #     if scrolling[0] > level["Limit scrolling"][0][1]:
