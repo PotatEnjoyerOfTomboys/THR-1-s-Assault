@@ -1,5 +1,8 @@
-THR-1's Assault - 0.3
+THR-1's Assault - 0.3 on our way to the last version
 
+    Requirements
+numpy	    version 2.4.2
+pygame-ce	version 2.5.6
 
 	Default controls
 Input		Action

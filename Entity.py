@@ -4074,7 +4074,7 @@ def gilgamesh_attack_1(self, entities, level):
                 Bullets.Bullet,
                 Fun.move_with_vel_angle(self.pos, 20, angle),
                 angle,
-                [2, 600, 4,
+                [4, 600, 4,
                  20 , {"Particle allowed": True,
                       "Burn chance": 0,
                       "Burn duration": 0,
@@ -4094,7 +4094,7 @@ def gilgamesh_attack_2(self, entities, level):
                 Bullets.Bullet,
                 Fun.move_with_vel_angle(self.pos, 20, angle),
                 angle,
-                [2, 600, 4,
+                [4, 600, 4,
                  20 , {"Particle allowed": True,
                       "Burn chance": 0,
                       "Burn duration": 0,
@@ -4107,19 +4107,20 @@ def gilgamesh_attack_3(self, entities, level):
     if start_up_lag_handler(self, 120, key="Startup lag sword"):
         self.free_var["Current sword attack"] = "Trishot"
     elif self.free_var["Startup lag sword"] % 3 == 0:
-        angle = self.angle + random.randint(-6, 6)
-        Bullets.spawn_bullet(
-            self, entities,
-            Bullets.Bullet,
-            Fun.move_with_vel_angle(self.pos, 20, angle),
-            angle,
-            [2, 600, 4,
-            20 , {"Particle allowed": True,
-                      "Burn chance": 0,
-                      "Burn duration": 0,
-                       "Damage type": "Fire",
-                      "Colour": (25, 235, 25)
-                      }])
+        for x in range(2):
+            angle = self.angle + random.randint(-12, 12)
+            Bullets.spawn_bullet(
+                self, entities,
+                Bullets.Bullet,
+                Fun.move_with_vel_angle(self.pos, 20, angle),
+                angle,
+                [4, 600, 4,
+                20 , {"Particle allowed": True,
+                          "Burn chance": 0,
+                          "Burn duration": 0,
+                           "Damage type": "Fire",
+                          "Colour": (25, 235, 25)
+                          }])
 
 
 def gilgamesh_divorce_spiral(self, entities, level):
@@ -4134,7 +4135,7 @@ def gilgamesh_divorce_spiral(self, entities, level):
             Fun.move_with_vel_angle(self.free_var["Pattern pos"], 20, angle),
             angle,
             [0.75, 600, 4,
-            10 , {"Particle allowed": True,
+            20 , {"Particle allowed": True,
                     "Burn chance": 0,
                     "Burn duration": 0,
                        "Damage type": "Fire",
@@ -4157,7 +4158,7 @@ def gilgamesh_reverse_divorce_spiral(self, entities, level):
             Fun.move_with_vel_angle(self.free_var["Pattern pos"], 20, angle),
             angle,
             [0.75, 600, 4,
-            10 , {"Particle allowed": True,
+            20 , {"Particle allowed": True,
                     "Burn chance": 0,
                     "Burn duration": 0,
                        "Damage type": "Fire",
@@ -4183,7 +4184,7 @@ def gilgamesh_desert_flower(self, entities, level):
                     Fun.move_with_vel_angle(self.free_var["Pattern pos"], 20, angle + y),
                     angle,
                     [1.15, 600, 4,
-                     10, {"Particle allowed": True,
+                     20, {"Particle allowed": True,
                           "Burn chance": 0,
                           "Burn duration": 0,
                           "Damage type": "Fire",
@@ -4209,7 +4210,7 @@ def gilgamesh_desert_dune(self, entities, level):
                 Fun.move_with_vel_angle(self.free_var["Pattern pos"], 20, angle),
                 angle,
                 [0.75, 600, 4,
-                10 , {"Particle allowed": True,
+                20 , {"Particle allowed": True,
                         "Burn chance": 0,
                         "Burn duration": 0,
                            "Damage type": "Fire",
@@ -4221,7 +4222,7 @@ def gilgamesh_desert_dune(self, entities, level):
                 Fun.move_with_vel_angle(self.free_var["Pattern pos"], 20, angle - 180),
                 angle - 180,
                 [0.75, 600, 4,
-                10 , {"Particle allowed": True,
+                20 , {"Particle allowed": True,
                         "Burn chance": 0,
                         "Burn duration": 0,
                            "Damage type": "Fire",
@@ -4243,8 +4244,8 @@ def gilgamesh_wall(self, entities, level):
                 Bullets.BulletSlowing,
                 Fun.move_with_vel_angle(Fun.move_with_vel_angle(self.free_var["Pattern pos"], random.uniform(-48, 48), angle + 90), 20, angle),
                 angle,
-                [4, 600, 8,
-                 10 , {"Slowdown rate": random.random() * 0.2,
+                [6, 600, 8,
+                 20 , {"Slowdown rate": random.random() * 0.2,
                        "Particle allowed": True,
                     "Burn chance": 0,
                     "Burn duration": 0,

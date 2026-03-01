@@ -820,7 +820,7 @@ def effect_add_summon(self, entities, level):
 # ?	Birna & Sardine
 # 		Summons Birna and Sardine. She flies toward enemies and launches Sardine (Sardine is a re-skinned Missile that has piercing and is slow as fuck)
 # ?	Elecktra
-# 		Summons Elecktra. Doesn't move, she shoots at the target closest to Vivianne
+# 		Summons Elecktra. Doesn't move, she shoots at the target closest to Vivianne. Uses Type 59 Carbine
 # ?	Agatha
 # 		Summons Agatha. Follows, She'll charge at enemies if they get too close.
 # ?	M (Marisa)

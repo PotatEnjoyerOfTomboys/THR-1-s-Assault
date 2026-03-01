@@ -10,6 +10,21 @@ import json
 import time
 import datetime
 import sys
+# NN TSS remake plan
+#   M1, new map. takes place during Solar War. Becomes a prologue
+#   M2,
+#   M3,
+#   M4,
+#   M5,
+#   M6,
+#   M7,
+#   M8,
+#   M9, removed. Svenus is moved into the Lover side level with the doppelganger
+#   M10, the agency investigate the government office
+#   M11,
+#   M12,
+#   M13,
+#   M14,
 
 
 # Fun.py is not fun

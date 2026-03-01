@@ -58,8 +58,7 @@ import random
 #           Drone builder       Launches drones (animations)
 #       Rigel               (Final boss)
 #       THR-1 Boss fight    (Alt Final boss - Zoar route)   (Figure how to make it playable)
-# 	Mission Modifiers
-#       Unknown Forces  (Opposite player team spawn)
+#       Gilgamesh (animations)
 #   Versus mode
 #       Balance changes (small ones)
 #   Character conversations
@@ -68,6 +67,12 @@ import random
 #   Encyclopedia
 #   Animated weapons. Mostly for the pile bunker
 #   Animated radio transmission portraits
+
+
+# Cut
+# 	Mission Modifiers
+#       Unknown Forces  (Opposite player team spawn)
+
 
 pg.mixer.pre_init()
 pg.init()
@@ -92,7 +97,7 @@ import Main_Loop
 
 def main_game(party_info):
     big_game_loop = True
-    current_mission = 15
+    current_mission = 10
     run_info = {
         "Player party": player_party,
         "Missions completed": 0,
