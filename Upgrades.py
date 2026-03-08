@@ -734,8 +734,6 @@ def effect_inferno(self, entities, level):
     self.owner.status["Burning"] = 60
 
 
-# H	Burning Blue Balls
-# 		Hitting an enemy who already have the burning effect generate blue balls
 def effect_burning_blue_balls(self, entities, level):
     for b in self.owner.bullets_shot:
         b.on_hit.append(Bullets.on_hit_burning_blue_balls)
@@ -744,7 +742,7 @@ def effect_burning_blue_balls(self, entities, level):
 # Mark -----------------------------------------------------------------------------------------------------------------
 # Mark	T1				T2					T3
 # 	Low Pressure Reload	Like a Shadow
-# 			    		.	---	---	---	---	.
+# 			    		And Stay Back	---	---	---	---	.
 # 	Slow mark          -|- Disable weapon mark 	---	-|-	Stun Mark
 # 	Burning mark       -|-	Helping mark	---	---	-|-
 # 					Marked Blue Balls
@@ -758,8 +756,6 @@ def effect_like_a_shadow(self, entities, level):
     self.owner.weapon.volume *= 0.25
 
 
-# L/M	Slow mark
-# 		When reloading, place a mark on a randomly chosen enemy in sight
 def effect_slow_mark(self, entities, level):
     potential_victims = []
     target_check = self.owner.targeting_range
@@ -783,27 +779,41 @@ def effect_slow_mark(self, entities, level):
         entities["items"][-1].thiccness = victim.thiccness * 1.2
         entities["items"][-1].free_var["Payload"] = Items.payload_slow
 
-# M	Burning mark
-# 		When hitting enemies 25% chance to place a mark which cause burn on hit
+
 def effect_burning_mark(self, entities, level):
     for b in self.owner.bullets_shot:
         b.on_hit.append(Bullets.on_hit_burning_mark)
 
-# M	Disable weapon mark
-# 		When using Smoke Grenade. Multiple random enemies receives a mark which make them lose all ammo in magazine. Bosses are immune. Cancel attacks with startup lag
-# M/H	Helping mark
-# 		When spotting an enemy with Target Locator. Place a mark that give them a bigger hitbox
-# H	Stun mark
-# 		When hitting enemies with no bullet remaining in the magazine at the time of hitting. Place a mark that stuns them on hit.
+
 def effect_stun_mark(self, entities, level):
     for b in self.owner.bullets_shot:
         b.on_hit.append(Bullets.on_hit_stun_mark)
-# ?	.
-# 		.
-# ?	.
-# 		.
-# M	Marked Blue Balls
-# 		When a mark is activated, create a blue ball
+
+
+
+def effect_get_out(self, entities, level):
+    dist = 96
+    for e in entities["entities"]:
+        if e.team == self.owner.team:
+            continue
+        if "IS BOSS" in e.free_var:
+            continue
+        e_dist = Fun.distance_between(self.owner.pos, e.pos)
+        if e_dist < dist:
+            e.vel = Fun.move_with_vel_angle([0, 0], dist - e_dist, Fun.angle_between(e.pos, self.owner.pos))
+    Fun.play_sound("Electricity 2")
+
+    number_of_particle = 12
+    for particles_to_add in range(360 // number_of_particle):
+        entities["particles"].append(Particles.RandomParticle2(
+            [self.owner.pos[0], self.owner.pos[1]], Particles.WHITE, 1 + 3 * random.random(), random.randint(10, 20),
+            particles_to_add * number_of_particle, size=Fun.get_random_element_from_list([3, 4 ,6])))
+
+
+def effect_and_stay_back(self, entities, level):
+    for b in self.owner.bullets_shot:
+        b.on_hit.append(Bullets.on_hit_and_stay_back)
+
 
 # Vivianne -------------------------------------------------------------------------------------------------------------
 # Viv.	T1				T2					T3

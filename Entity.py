@@ -3289,9 +3289,8 @@ def enforcer_on_death(self, entities, level):
 # |Bosses|--------------------------------------------------------------------------------------------------------------
 # Armoured Shield Generator
 #   Laser cannon
-#   Shield destroys projectiles
-#   Side launched missiles
 def armoured_shield_generator_input(self, entities, level):
+
     # Input functions are the IA for an enemy
     # better targeting system
     target, target_angle, wall_in = entity_target_detection(self, entities, level)
@@ -3328,13 +3327,21 @@ def armoured_shield_generator_input(self, entities, level):
         aim_target, move_target, og_dist = entity_get_aim_move_target(self, target)
         aim_target = self.target.pos.copy()
 
-        # basic_fire_control(self, entities, level, target, wall_in)
         entity_shoot_with_startup_lag(self, og_dist, 320)
 
     closest_target = Fun.find_closest_in_circle(self, entities, 512, "entities")
     if closest_target:
         fortress_move_toward_point(self, closest_target, 40 * 7)
         fortress_move_away_point(self, closest_target, 25 * 7)
+
+        angle = Fun.angle_between(closest_target, self.pos)
+        self.input["Right"] = self.free_var["Move angle"] < angle
+        self.input["Left"] = self.free_var["Move angle"] > angle
+
+        if not -(180 - 4) + angle < self.free_var["Move angle"] < 180 - 4 + angle:
+            self.input["Right"] = self.free_var["Move angle"] > angle
+            self.input["Left"] = self.free_var["Move angle"] < angle
+
         if self.free_var["Run people over"] <= 0:
             self.free_var["Run people over"] = 250
             self.input["Dash"] = True
@@ -3348,10 +3355,39 @@ def armoured_shield_generator_input(self, entities, level):
 
 
 def armoured_shield_generator_act(self, entities, level):
+    radius, radius_small = 90, 120
+    for x in range(10):
+        entities["particles"].append(
+            Particles.RandomParticle0(
+                Fun.move_with_vel_angle(self.pos, random.randint(radius, radius_small),
+                                        self.free_var["Move angle"] + random.uniform(-48, 48)),
+                [(128, 255 // 2, 255), (125, 200 // 2, 220), (85, 220 // 2, 220)][(self.time // 6) % 3],
+                random.randint(4, 16), size=(1, 5)))
+
+    for b in entities["bullets"]:
+        if b.team == self.team:
+            continue
+        if type(b) in [Bullets.Laser, Bullets.Artillery, Bullets.ArtilleryFlare, Bullets.ArtillerySmoke]:
+            continue
+        if Fun.check_point_in_cone(radius, self.pos[0], self.pos[1], b.pos[0], b.pos[1],
+                                         self.free_var["Move angle"], 48):
+            # if Fun.distance_between(b.pos, self.pos) >= radius_small:
+            b.duration = 0
+            number_of_particle = 9
+            for particles_to_add in range(360 // number_of_particle):
+                entities["background particles"].append(Particles.RandomParticle2(
+                    [b.pos[0], b.pos[1]], [(128, 255 // 2, 255), (125, 200 // 2, 220), (85, 220 // 2, 220)][((self.time + particles_to_add) // 6) % 3],
+                    2 * random.random(), random.randint(15, 45),
+                                                     particles_to_add * number_of_particle,
+                    size=Fun.get_random_element_from_list([3, 4, 6])))
+
     angle = self.free_var["Move angle"] + 226 - 180
     pos = [self.pos[0], self.pos[1] - 16]
     pos = Fun.move_with_vel_angle(pos, 22.6274, angle)
     pos = Fun.move_with_vel_angle(pos, 20, self.aim_angle)
+    turret_pos = Fun.move_with_vel_angle(
+                    [self.pos[0], self.pos[1] - 30 * 0.75],
+                    22.6274, self.free_var["Move angle"] + 226 - 180)
     # |Movement Input|----------------------------------------------------------------------------------------------
     self.running = False
     self.walking = False
@@ -3365,7 +3401,6 @@ def armoured_shield_generator_act(self, entities, level):
         max_vel *= 2
 
     # Checks for which direction the player must move
-    # Rework it so that you are not faster when walking in diagonal, this should be fixed now
     if self.dash_cooldown <= 0:
         allow_correction = False
         speed = 0
@@ -3376,11 +3411,9 @@ def armoured_shield_generator_act(self, entities, level):
             speed = -1
             allow_correction = True
         if self.input["Left"]:
-            self.free_var["Move angle"] -= 3
-            self.aim_angle -= 3
+            self.free_var["Move angle"] -= 0.8
         if self.input["Right"]:
-            self.free_var["Move angle"] += 3
-            self.aim_angle += 3
+            self.free_var["Move angle"] += 0.8
         self.vel = Fun.move_with_vel_angle(self.vel, self.speed * speed, self.free_var["Move angle"])
 
         if not Fun.check_point_in_circle(max_vel, 0, 0, self.vel[0], self.vel[1]) and allow_correction:
@@ -3388,7 +3421,7 @@ def armoured_shield_generator_act(self, entities, level):
         self.walking = allow_correction
 
         self.free_var["Move angle"] = Fun.angle_value_limiter(self.free_var["Move angle"])
-        self.aim_angle = Fun.angle_value_limiter(self.aim_angle)
+        # self.aim_angle = Fun.angle_value_limiter(self.aim_angle)
 
     self.standing_still = False
     if self.vel == [0, 0]:
@@ -3418,82 +3451,53 @@ def armoured_shield_generator_act(self, entities, level):
     self.dash_cooldown -= 1
 
     # |GunPlay|-----------------------------------------------------------------------------------------------------
-    # angle, drawing_pos, length = self.aim_angle, pos, self.weapon.range + 20
-    # Draw the lines
-    # entities["background particles"].append(Fun.LineParticle(drawing_pos, Fun.RED, 1, length, angle, 1, 0))
-
-    # entities["UI particles"].append(Fun.AimPoint(self.mouse_pos))
     self.weapon.passive(self, entities, level)
-    if self.free_var["Grenade Shakedown"] > 0:
 
-        if self.time % 3 == 0 and self.free_var["Allow machine gun"]:
-            if self.time % 6 == 0:
-                Fun.play_sound("Small arms")
-                if random.random() < 0.15:
-                    self.vel = Fun.move_with_vel_angle(self.vel, 7, self.free_var["Move angle"] + 45 * [1, -1][
-                        round(random.random())])
-            Bullets.spawn_bullet(self, entities, Bullets.Bullet, [self.pos[0], self.pos[1]-18],
-                                 self.free_var["Machine Gun Angle"] + random.uniform(-self.weapon.accuracy,
-                                                                 self.weapon.accuracy) + random.uniform(
-                                     -self.weapon.spread, self.weapon.spread), [7, 40, 2.25, 4, {"Piercing": False, "Smoke": False}])
-        if self.no_shoot_state == 0:
-            # Reset variables
-            self.reloading = False
+    if self.target:
+        self.angle = Fun.angle_between(self.target.pos, turret_pos)
 
-            if self.input["Alt fire"]:
-                self.weapon.alt_fire(self, entities, level)
-
-            # |Main fire|-----------------------------------------------------------------------------------------------
-            if self.input["Shoot"]:
-                if self.weapon.ammo != 0 and self.shot_allowed:
-                    # |Main fire|-------------------------------------------------------------------------------------------
-                    self.shoot_bullet(entities, level)
-                    # tell if the trigger was pressed
-                    if not self.weapon.full_auto:
-                        self.shot_allowed = False
-                # if the trigger is not pressed and the weapon is not a full auto, allow to shoot for the next trigger press
-                elif self.weapon.ammo == 0 and self.shot_allowed:
-                    Fun.play_sound(self.weapon.jamming_sound, "SFX")
-                    self.shot_allowed = False
-            else:
-                self.shot_allowed = True
-
-            # |Reload|--------------------------------------------------------------------------------------------------
-            if self.input["Reload"] and self.weapon.ammo_pool > 0:
-                self.no_shoot_state, self.reloading = self.weapon.reload()
-        else:
-            self.no_shoot_state -= 1
-        self.free_var["Grenade Shakedown"] -= 1
-        self.free_var["Grenade Shakedown angle"] = [self.free_var["Move angle"], self.aim_angle]
-        p = self.aim_angle
-        self.aim_angle = Fun.angle_value_limiter(Fun.move_angle(self.angle, self.aim_angle, self.weapon.handle))
-        if round(p) != round(self.aim_angle) and self.time % 12 == 0:
-            Fun.play_sound("Chain click")
-    elif self.free_var["Grenade Shakedown"] > -180:
-        self.free_var["Grenade Shakedown"] -= 1
-        angle = self.free_var["Grenade Shakedown"] * 6 + self.free_var["Grenade Shakedown angle"][0]
-        self.free_var["Move angle"] = angle
-        self.aim_angle = self.free_var["Grenade Shakedown angle"][1] + self.free_var["Grenade Shakedown"] * 6
-        if self.free_var["Grenade Shakedown"] % 2 == 0 and self.free_var["Grenade Shakedown"] < 60:
+        # Missile attack
+        if start_up_lag_handler(self, 300, key="Startup lag missile"):
+            pass
+        elif self.free_var["Startup lag missile"] > 240:
+            angle = self.free_var["Move angle"] + {
+                "odd": -50, "even": 50
+            }[Fun.meme(self.free_var["Startup lag missile"])]
             Bullets.spawn_bullet(
-                self, entities, Bullets.BulletSlowing,
-                Fun.move_with_vel_angle(self.pos, 32, self.aim_angle),
-                self.aim_angle + random.uniform(-8, 8),
-                [5 + 5 * random.random(), 320, 7, 8, {"Piercing": False, "Smoke": False, "Colour": (107, 165, 153),
-                                                      "Slowdown rate": random.random() / 3}])
-
-        if abs(self.free_var["Grenade Shakedown"]) % 8 == 0:
-            Bullets.spawn_bullet(
-                self, entities, Bullets.GrenadeType1,
-                Fun.move_with_vel_angle(self.pos, 32, angle),
+                self, entities,
+                Bullets.Missile,
+                Fun.move_with_vel_angle(Fun.move_with_vel_angle(self.pos, -20, self.free_var["Move angle"]), 30, angle),
                 angle,
-                [4, 200, 4, 20, {"Secondary explosion": {"Duration": 10, "Growth": 4,
-                                                        "Damage mod": 0}}])
-            if abs(self.free_var["Grenade Shakedown"]) % 16 == 0:
-                Fun.play_sound("Betel 2")
-        # Shoot grenades
+                [2 + 3 * random.random(), 180, 4, 3, {"Targeting range": 512,
+                                                      "Targeting angle": 60,
+                                                      "Target": "enemies",
+                                                      "Secondary explosion": {"Duration": 5,
+                                                                              "Growth": 2,
+                                                                              "Damage mod": 0.75}}])
+
+        if start_up_lag_handler(self, 450, key="Startup lag railgun"):
+            Bullets.spawn_bullet(
+                self, entities,
+                Bullets.Bullet,
+                Fun.move_with_vel_angle(turret_pos, 30, self.aim_angle),
+                angle,
+                [4 + 2 * random.random(), 60, 4, round(self.weapon.bullet_info[3] * 0.8), {'Colour': Fun.ORANGE}])
+        elif self.free_var["Startup lag railgun"] > 350:
+            for x in range(2):
+                dist = 64 * random.random()
+                angle = self.aim_angle + random.uniform(-30, 30)
+                pos = [turret_pos[0], turret_pos[1]]
+                entities["particles"].append(Particles.RandomParticle2(Fun.move_with_vel_angle(pos, dist, angle),
+                    Fun.YELLOW_LIGHT,
+                    2, dist // 2,
+                    angle + 180,
+                    size=Fun.get_random_element_from_list([1, 2, 4])))
     else:
-        self.free_var["Grenade Shakedown"] = 800
+        self.free_var["Startup lag missile"] = 0
+        self.free_var["Startup lag railgun"] = 0
+        self.free_var["Startup lag tesla"] = 0
+
+    Fun.aim_system(self, self.weapon)
 
     # |Status effects|----------------------------------------------------------------------------------------------
     # ha ha, Fun go brr
@@ -3512,28 +3516,24 @@ def armoured_shield_generator_act(self, entities, level):
             if e.team != self.team:
                 Fun.damage_calculation(e, damage, "Melee", death_message="Ran over")
             pass
+
     if self.draw_aim_line or self.weapon.laser_sight:
         entities["background particles"].append(Particles.LineParticle(
-            Fun.move_with_vel_angle(self.pos, 20, self.aim_angle), Fun.BLUE, 1, self.weapon.range-20, self.aim_angle, 2, 0))
+            Fun.move_with_vel_angle(turret_pos, 20, self.aim_angle), Fun.BLUE, 1, self.weapon.range-20, self.aim_angle, 2, 0))
 
 
 def armoured_shield_generator_draw(self, WIN, scrolling):
     h_mod = 0.75
 
-    # Fun.draw_spritestack(WIN, Fun.SPRITE_FORTRESS_APC_CHASSIS,
-    #                          [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
-    #                          self.free_var["Move angle"] + 90, height_diff=0.5)
-    # pos = [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1] - 16]
-    # angle = self.free_var["Move angle"] + 226 - 180
-    # pos = Fun.move_with_vel_angle(pos, 22.6274, angle)
-    # Fun.draw_spritestack(WIN, Fun.SPRITE_FORTRESS_APC_TURRET, pos, self.aim_angle + 90, height_diff=0.5)
-
-    Fun.draw_spritestack(WIN, Fun.SPRITE_HOVER_TANK_CHASSIS, [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
+    pos = [self.pos[0], self.pos[1] + 8]
+    Fun.draw_spritestack(WIN, Fun.SPRITE_ARMORED_GENERATOR_CHASSIS, [pos[0] + scrolling[0], pos[1] + scrolling[1]],
                          self.free_var["Move angle"] + 90, height_diff=h_mod)
-    Fun.draw_spritestack(WIN, Fun.SPRITE_HOVER_TANK_TURRET, [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1] - 17 * h_mod],
-                         self.aim_angle + 90, height_diff=h_mod)
-    Fun.draw_spritestack(WIN, Fun.SPRITE_HOVER_TANK_GUN, [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1] - 24 * h_mod],
-                         self.free_var["Machine Gun Angle"] + 90, height_diff=h_mod)
+    # 226
+    # angle = 226 + self.free_var["Move angle"]e
+    pos = [pos[0] + scrolling[0], pos[1] + scrolling[1] - 30 * h_mod]
+    angle = self.free_var["Move angle"] + 226 - 180
+    pos = Fun.move_with_vel_angle(pos, 22.6274, angle)
+    Fun.draw_spritestack(WIN, Fun.SPRITE_ARMORED_GENERATOR_TURRET, pos, self.aim_angle + 90, height_diff=h_mod)
 
 
 # AA Site
@@ -3563,14 +3563,19 @@ def aa_site_act_init(self, entities, level):
                     new_pos = Fun.move_with_vel_angle(self.pos, 128 + 128 * random.random(), 360 * random.random())
                     angle = 360 * random.random()
         pos.append(new_pos)
+    self.force_draw = True
     entities["entities"].append(Entity(enemy_repertory["AA Laser"], team=self.team, pos=pos[0], start_angle=random.randint(-180, 180)))
+    entities["entities"][-1].force_draw = True
     entities["entities"].append(Entity(enemy_repertory["Missile Battery"], team=self.team, pos=pos[1], start_angle=random.randint(-180, 180)))
+    entities["entities"][-1].force_draw = True
     entities["entities"].append(Entity(enemy_repertory["Drone builder"], team=self.team, pos=pos[2], start_angle=random.randint(-180, 180)))
+    entities["entities"][-1].force_draw = True
     entities["entities"].append(Entity(enemy_repertory["Shield Generator"], team=self.team, pos=pos[3], start_angle=random.randint(-180, 180)))
+    entities["entities"][-1].force_draw = True
     self.func_act = aa_site_act_energy_generator
 
 
-# Need an anti-manslaughter mechanic
+# Need an anti-vehicular manslaughter mechanic
 def aa_site_act_energy_generator(self, entities, level):
     # Check for other buildings
     build_count = 0
@@ -4688,7 +4693,6 @@ def curtis_buckshot(self, entities, level):
         Fun.play_sound("Shotgun 1 Pump")
 
 
-
 def curtis_slug(self, entities, level):
     if start_up_lag_handler(self, 30):
         self.free_var["Current attack"] = Fun.get_random_element_from_list(["Burst Ricochet", "Burst Long"])
@@ -5485,6 +5489,7 @@ enemy_repertory = {
          "on death": "enforcer_on_death",
          "free var": {"Startup lag": 0, "Startup time": 60, "missile target": False}
          },
+    # Armored Shield Generator
     "Armed Shield Generator": {
         "name": "Armed Shield Generator", "faction": "FAC-1",
         "health": H_HO * 20, "armour": 0, "damage resistances": FO_RESIT,
@@ -5493,7 +5498,7 @@ enemy_repertory = {
         "thickness": 60, "vel max": V_MO, "speed": 2.2, "friction": 0.7,
         "dash": {"speed": DS_MO * 0.6, "i-frames": 0, "charge": 35},
         # Weapons
-        "weapon": "Hover Tank Cannon",
+        "weapon": "Shield Generator Railgun",
         # AI
         "func input": "armoured_shield_generator_input", "func act": "armoured_shield_generator_act",
         "func draw": "armoured_shield_generator_draw",
@@ -5502,10 +5507,14 @@ enemy_repertory = {
         "wall hack": False,
         "free var": {"Move angle": 0,
                      "Machine Gun Angle": -90, "Allow machine gun": False,
+
+                     "Startup lag missile": 0,
+                     "Startup lag railgun": 0,
+                     "Startup lag tesla": 0,
+
                      "IS BOSS": True, "Grenade Shakedown": 600, "Grenade Shakedown angle": 0, "Run people over": 250,
                      "Startup lag": 0, "Startup time": 240}
     },
-    # Armored Shield Generator
     # Hover Tank
     # AA Site
     # AA laser            Targets last position of a player. Infinite range

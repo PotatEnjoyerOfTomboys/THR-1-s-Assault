@@ -345,6 +345,10 @@ def mission_start(self, entities, bullets, level, time_passed, screen, CLOCK):
         # Additional stuff for final boss
         pass
     # Use the old boss thing for Curtis?
+    for e in entities["entities"]:
+        if e.team == "Player":
+            continue
+        e.force_draw = True
     entities["UI particles"].append(Particles.BossIntro(boss_name=Fun.write_textline(boss_name)))
     # level["scrolling target"]
     level["events"].append(

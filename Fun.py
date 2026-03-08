@@ -708,6 +708,9 @@ SPRITE_CARDBOARD_BOX = get_sprite_stack_list(get_image('Sprites/Vehicles/Corrine
 SPRITE_BULLET_HOLES = get_image('Sprites/Effect/Bullet hole.png')
 
 # Bosses
+SPRITE_ARMORED_GENERATOR_CHASSIS = get_sprite_stack_list(get_image('Sprites/Vehicles/Armed Shield Generator.png'), 86)
+SPRITE_ARMORED_GENERATOR_TURRET = get_sprite_stack_list(get_image('Sprites/Vehicles/Armed Sheild Generator - Turret.png'), 110)
+
 SPRITE_HOVER_TANK_CHASSIS = get_sprite_stack_list(get_image('Sprites/Vehicles/Hover Tank - Chassis.png'), 160)
 SPRITE_HOVER_TANK_TURRET = get_sprite_stack_list(get_image('Sprites/Vehicles/Hover Tank - Turret.png'), 160)
 SPRITE_HOVER_TANK_GUN = get_sprite_stack_list(get_image('Sprites/Vehicles/Hover Tank - Machine Gun.png'), 160)
@@ -3787,7 +3790,7 @@ UPGRADE_INFO = {
     'Tier': 1, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(0, 360, 40, 40),
     'name': "Low Pressure Reloader", 'effect': 'effect_low_pressure_reloader', 'trigger': 'trigger_reloading'},
 "Like a Shadow": {
-    'Tier': 2, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(0, 360, 40, 40),
+    'Tier': 2, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(120, 360, 40, 40),
     'name': "Like a Shadow", 'effect': 'effect_like_a_shadow', 'trigger': 'trigger_when_loaded'},
 "Slow mark": {
     'Tier': 1, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(40, 360, 40, 40),
@@ -3795,9 +3798,9 @@ UPGRADE_INFO = {
 "Burning mark": {
     'Tier': 1, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(80, 360, 40, 40),
     'name': "Burning mark", 'effect': 'effect_burning_mark', 'trigger': 'trigger_on_hit_effect'},
-"Mark tier 2 2": {
-    'Tier': 2, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(0, 360, 40, 40),
-    'name': "Mark tier 2 2", 'effect': 'effect_none', 'trigger': 'trigger_standing_still'},
+"Get Out": {
+    'Tier': 2, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(160, 360, 40, 40),
+    'name': "Get Out", 'effect': 'effect_get_out', 'trigger': 'trigger_on_hit_effect'},
 "Disable weapon mark": {
     'Tier': 2, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(200, 360, 40, 40),
     'name': "Disable weapon mark", 'effect': 'effect_skill_activate', 'trigger': 'trigger_when_loaded'},
@@ -3807,9 +3810,9 @@ UPGRADE_INFO = {
 "Stun mark": {
     'Tier': 3, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(320, 360, 40, 40),
     'name': "Stun mark", 'effect': 'effect_stun_mark', 'trigger': 'trigger_on_hit_effect'},
-"Mark Tier 3": {
-    'Tier': 3, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(320, 360, 40, 40),
-    'name': "Mark Tier 3", 'effect': 'effect_none', 'trigger': 'trigger_standing_still'},
+"And Stay Back": {
+    'Tier': 3, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(280, 360, 40, 40),
+    'name': "And Stay Back", 'effect': 'effect_and_stay_back', 'trigger': 'trigger_on_hit_effect'},
 "Marked Blue Balls": {
     'Tier': 2, 'Cost': 1000, 'Owner': 'Mark', 'Icon': UPGRADE_SHEET.subsurface(360, 360, 40, 40),
     'name': "Marked Blue Balls", 'effect': 'effect_skill_activate', 'trigger': 'trigger_when_loaded'},
@@ -4687,7 +4690,6 @@ def write_control(player, input_to_check, is_move=False, fucking_hell=True):
     if player.input_mode == "Controller":
         if is_move:
             return f"[{player.controller_control['Move']}]"
-        # self.controller_control
         elif fucking_hell:
             valid_inputs = player.controller_control[input_to_check]
             string_to_return = valid_inputs
@@ -4947,6 +4949,23 @@ def check_point_in_cone(radius, center_x, center_y, x, y, direction, angle):
             return True
     return False
 
+
+
+def check_point_in_donut_cone(radius, radius_small, center_x, center_y, x, y, direction, angle):
+    radius = int(radius)
+    angle_to_check = angle_between([x, y], [center_x, center_y])
+    if check_point_in_donut([radius_small, radius], center_x, center_y, x, y):
+    # if math.sqrt((center_x - x) ** 2 + (center_y - y) ** 2) < radius ^ 2:
+        smaller_angle = direction - angle
+        bigger_angle = direction + angle
+        # if the direction the AI is looking at is near -180/180
+        if 180 - angle < direction or direction < -180 + angle:
+            if 180 - angle < angle_to_check or angle_to_check < -180 + angle:
+                return True
+
+        if smaller_angle < angle_to_check < bigger_angle:
+            return True
+    return False
 
 def check_angle_between_range(angle, t_angle):
     smaller_angle = angle - 30
@@ -6569,7 +6588,7 @@ ENEMY_TYPE_TO_FACTION_UNIT = [
      "Specialist 1": "Missile Operator",
      "Specialist 2": "Marksman",
      "Elite": "Enforcer",
-     "Boss 1": "Hover Tank",
+     "Boss 1": "Armed Shield Generator",
      "Boss 2": "Energy Generator"
      },
     {"VIP": "Sculptor",

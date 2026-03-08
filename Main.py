@@ -3,19 +3,18 @@ import os
 import random
 
 
-# Do a web version with pybag
+# Do a web version with pybag?
 
 # Get it done in a year
 # Music	8
 # 	1 menu track            (smooth jazz)
-# 	3 mission track (increase in intensity)
+# 	3 mission track (Like SMT3's normal battle theme, solos are different)
 #       Industrial Park     ()
 #       Red Desert          ()
-#       Iron Mines          (You're on the last stretch and the finish line is just in hand's reach)
+#       Iron Mines          (The end is almost there)
 # 	1 THR-1 boss track      ()
-# 	1 Curtis boss theme	    (Confidant, you are the dangerous one)
-# 	1 final boss track      (You're ending )
-# 	1 Padraig boss theme    (Something primal is after you)
+# 	1 Curtis boss theme	    (Confidant)
+# 	1 final boss track      (SHIT IS ABOUT TO END!!!)
 
 # Secret level?
 
@@ -49,16 +48,16 @@ import random
 #       Colonist
 #           Curtis      1
 #           Lawrence    3
-#           Mark        2
 #           Vivianne    8   (Need to code all tomboys)
 #   Bosses
-#       Armed Shield Generator  Laser, Missiles, Electric. Tries to run you over too.
+#       Armed Shield Generator  Electric
 #       Fire Support Mech       Fire, Artillery, Bullets
-#       AA Site
-#           Drone builder       Launches drones (animations)
-#       Rigel               (Final boss)
-#       THR-1 Boss fight    (Alt Final boss - Zoar route)   (Figure how to make it playable)
-#       Gilgamesh (animations)
+#       Rigel                   (Final boss)
+
+#       THR-1 Boss fight        (Alt Final boss - Zoar route)   (Figure how to make it playable)
+#       AA Site - Drone builder (animations)
+#       Gilgamesh               (animations)
+
 #   Versus mode
 #       Balance changes (small ones)
 #   Character conversations
@@ -97,7 +96,7 @@ import Main_Loop
 
 def main_game(party_info):
     big_game_loop = True
-    current_mission = 10
+    current_mission = 1
     run_info = {
         "Player party": player_party,
         "Missions completed": 0,

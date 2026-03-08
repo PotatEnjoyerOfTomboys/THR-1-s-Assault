@@ -676,6 +676,12 @@ def on_hit_burning_blue_balls(self, collision, entities, level):
                 [5, 100, 3, 10, {"Colour": Fun.DARK_BLUE}])
 
 
+def on_hit_and_stay_back(self, collision, entities, level):
+    if "IS BOSS" in collision.free_var:
+        return
+    collision.vel = Fun.move_with_vel_angle(collision.vel, self.speed * collision.friction, self.angle)
+
+
 def on_hit_burning_mark(self, collision, entities, level):
     if random.random() <= 0.25 and "Has Burning Mark" not in collision.free_var:
         collision.free_var.update({"Has Burning Mark": True})
