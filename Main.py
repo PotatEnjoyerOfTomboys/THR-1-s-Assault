@@ -6,7 +6,7 @@ import random
 # Do a web version with pybag?
 
 # Get it done in a year
-# Music	8
+# Music 7
 # 	1 menu track            (smooth jazz)
 # 	3 mission track (Like SMT3's normal battle theme, solos are different)
 #       Industrial Park     ()
@@ -46,11 +46,9 @@ import random
 # Version 1.0 - Final version
 #   Upgrades
 #       Colonist
-#           Curtis      1
-#           Lawrence    3
 #           Vivianne    8   (Need to code all tomboys)
 #   Bosses
-#       Armed Shield Generator  Electric
+#       Armed Shield Generator  Tesla coil attack
 #       Fire Support Mech       Fire, Artillery, Bullets
 #       Rigel                   (Final boss)
 

@@ -343,7 +343,11 @@ def mission_start(self, entities, bullets, level, time_passed, screen, CLOCK):
         ][level['faction']]
     if level["mission number"] == 15:
         # Additional stuff for final boss
-        pass
+        if level['name'] == Fun.write_textline("Finale 3"):
+            for e in entities["entities"]:
+                if e.team == "Player":
+                    continue
+                e.weapon.fire_rate *= 2
     # Use the old boss thing for Curtis?
     for e in entities["entities"]:
         if e.team == "Player":

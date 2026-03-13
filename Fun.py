@@ -34,7 +34,7 @@ start_october = (10, 1)
 current_date = (datetime.datetime.now().month, datetime.datetime.now().day)
 start_november = (11, 1)
 
-VERSION = "0.3"
+VERSION = "0.3.1"
 DEBUG_MODE =  False             # Use that to have access to debug functions
 APOSTROPHE = "'"
 DEFAULT_KEY_PRESSED, DEFAULT_KEY_COOLDOWN = 10, 7  # Could make these 2 a setting
@@ -341,7 +341,6 @@ sounds_dict = {
     "Grenade hit wall": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Grenade_hit_wall.ogg')),
                          "Volume": 0.5},
     # Anomaly
-
     "Slime death": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Anomaly_5.ogg')), "Volume": 0.9},
     "Slime split": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Anomaly_3.ogg')), "Volume": 0.8},
     "Snake shoot": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Snake Shoot.ogg')), "Volume": 0.8},
@@ -420,6 +419,7 @@ sounds_dict = {
     "Shotgun 1 Pump": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Shotgun_Pumped_1.ogg')), "Volume": 0.8},
     "Rifle 1 Shooting": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Rifle_1.ogg')), "Volume": 0.8},
     "Rifle 2 Shooting": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Rifle_2.ogg')), "Volume": 1},
+    "Safety": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Safety_Click.ogg')), "Volume": 0.4},
     # "Shot gun 2 Shooting": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Shotgun.ogg')), "Volume": 0.8},
 }
 
@@ -2307,14 +2307,7 @@ def game_credits(WIN, clock):
                 [seperator, write_textline("Credits main dev"), seperator], "",
                 "Seigneur des Patates",
                 "", "",
-                [seperator, write_textline("Credits voice acting"), seperator], "",
-                ["AngKaiser", "Seigneur des Patates"],
-                "", "",
                 [seperator, write_textline("Credits additional"), seperator], "",
-                [write_textline("Credits classmate"),  # Fishing Level (Isaac)
-                 "Doot-O",
-                 "Nikkii"],
-                ["Basement Goblin"],
                 "",
                 write_textline("Credits Thanks")
             ]
@@ -3754,9 +3747,6 @@ UPGRADE_INFO = {
 "Salamander": {
     'Tier': 1, 'Cost': 1000, 'Owner': 'Lawrence', 'Icon': UPGRADE_SHEET.subsurface(40, 320, 40, 40),
     'name': "Salamander", 'effect': 'effect_salamander', 'trigger': 'trigger_when_loaded'},
-"Sulfur": {
-    'Tier': 1, 'Cost': 1000, 'Owner': 'Lawrence', 'Icon': UPGRADE_SHEET.subsurface(80, 320, 40, 40),
-    'name': "Sulfur", 'effect': 'effect_none', 'trigger': 'trigger_standing_still'},
 "Slow Burn": {
     'Tier': 2, 'Cost': 1000, 'Owner': 'Lawrence',
     'Condition': {'Require': ["Cremation"]}, 'Icon': UPGRADE_SHEET.subsurface(120, 320, 40, 40),
@@ -3769,18 +3759,23 @@ UPGRADE_INFO = {
     'Tier': 2, 'Cost': 1000, 'Owner': 'Lawrence',
     'Condition': {'Require': ["Salamander"]}, 'Icon': UPGRADE_SHEET.subsurface(200, 320, 40, 40),
     'name': "Dragon's Breath", 'effect': 'effect_dragon_breath', 'trigger': 'trigger_dragon_breath'},
-"Brimstone": {
-    'Tier': 2, 'Cost': 1000, 'Owner': 'Lawrence',
-    'Condition': {'Require': ["Sulfur"]}, 'Icon': UPGRADE_SHEET.subsurface(240, 320, 40, 40),
-    'name': "Brimstone", 'effect': 'effect_none', 'trigger': 'trigger_standing_still'},
 "Inferno": {
     'Tier': 3, 'Cost': 1000, 'Owner': 'Lawrence',
     'Condition': {'Require': ["Slow Burn", "Spontaneous Combustion", "Dragon's Breath"]}, 'Icon': UPGRADE_SHEET.subsurface(280, 320, 40, 40),
     'name': "Inferno", 'effect': 'effect_inferno', 'trigger': 'trigger_every_2_sec'},
-"Hellfire": {
+
+"Carcass": {    # Projectiles now damage over time
+    'Tier': 2, 'Cost': 1000, 'Owner': 'Lawrence',
+    'Condition': {'No': 'Grapeshot'}, 'Icon': UPGRADE_SHEET.subsurface(240, 320, 40, 40),
+    'name': "Carcass", 'effect': 'effect_skill_activate', 'trigger': 'trigger_when_loaded'},
+"Grapeshot": {  # Increase spread, increase bullet count
+    'Tier': 2, 'Cost': 1000, 'Owner': 'Lawrence',
+    'Condition': {'No': 'Carcass'}, 'Icon': UPGRADE_SHEET.subsurface(80, 320, 40, 40),
+    'name': "Grapeshot", 'effect': 'effect_skill_activate', 'trigger': 'trigger_when_loaded'},
+"Hellfire": {   # Projectiles now inflict burn
     'Tier': 3, 'Cost': 1000, 'Owner': 'Lawrence',
-    'Condition': {'Require': ["Brimstone"]}, 'Icon': UPGRADE_SHEET.subsurface(320, 320, 40, 40),
-    'name': "Hellfire", 'effect': 'effect_none', 'trigger': 'trigger_standing_still'},
+    'Condition': {'Require': ["Carcass", "Grapeshot"]}, 'Icon': UPGRADE_SHEET.subsurface(320, 320, 40, 40),
+    'name': "Hellfire", 'effect': 'effect_skill_activate', 'trigger': 'trigger_when_loaded'},
 "Burning Blue Balls": {
     'Tier': 2, 'Cost': 1000, 'Owner': 'Lawrence', 'Icon': UPGRADE_SHEET.subsurface(360, 320, 40, 40),
     'name': "Burning Blue Balls", 'effect': 'effect_burning_blue_balls', 'trigger': 'trigger_on_hit_effect'},
@@ -6608,7 +6603,7 @@ ENEMY_TYPE_TO_FACTION_UNIT = [
      "Specialist 1": "Artilleryman",
      "Specialist 2": "Grenadier",
      "Elite": "Bulwark",
-     "Boss 1": "Super Bulwark",
+     "Boss 1": "Fire Support Mech",
      "Boss 2": "Attack Helicopter"
      },
     {"True Final Boss": "Rigel",

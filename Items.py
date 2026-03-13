@@ -448,6 +448,7 @@ def mark(self, entities, level):
     for p in range(6):
         entities["particles"].append(Particles.FireParticle(Fun.move_with_vel_angle(pos, self.thiccness * 1.25, 360 * random.random()), self.free_var["Colour"]))
 
+
 # 	Slow mark          -|- Disable weapon mark 	---	-|-	Stun Mark
 # 	Burning mark       -|-	Helping mark	---	---	-|-
 def payload_slow(self):
@@ -480,6 +481,51 @@ def payload_stun(self):
         self.free_var["Startup lag"] = 0
 
 
+def sardine(self, entities, level):
+    # Follow target, when in range, starts blow up animation
+    pass
+
+
+def sardine_draw(self, WIN, scrolling):
+    pass
+    # 93, 167, 133
+
+
+def justice_homing(self, entities, level):
+    self.alive = self.free_var["Bullet"].duration > 0
+    manoeuvrability = 4
+
+    self.free_var["Target"] = Bullets.missile_seek(self.free_var["Bullet"], entities,
+                                                   320, self.free_var["Bullet"].angle, 45)
+    if self.free_var["Target"]:
+        target_angle = Fun.angle_between(self.free_var["Target"].pos, self.free_var["Bullet"].pos)
+        invert_aim = 1
+        if not -(
+                180 - manoeuvrability) + target_angle < self.free_var["Bullet"].angle < 180 - manoeuvrability + target_angle:
+            invert_aim = -1
+
+        # Adjust angle
+        if self.free_var["Bullet"].angle < target_angle:
+            self.free_var["Bullet"].angle += manoeuvrability * invert_aim
+            if self.free_var["Bullet"].angle > target_angle:
+                self.free_var["Bullet"].angle = target_angle
+        elif self.free_var["Bullet"].angle > target_angle:
+            self.free_var["Bullet"].angle += -manoeuvrability * invert_aim
+            if self.free_var["Bullet"].angle < target_angle:
+                self.free_var["Bullet"].angle = target_angle
+
+        # Value Limiter
+        if self.free_var["Bullet"].angle > 180:
+            self.free_var["Bullet"].angle = -180 + (self.free_var["Bullet"].angle - 180)
+        if self.free_var["Bullet"].angle < -180:
+            self.free_var["Bullet"].angle = 180 - (self.free_var["Bullet"].angle + 180)
+
+        # Add particles
+        pos = self.free_var["Bullet"].pos
+        for p in range(6):
+            entities["particles"].append(Particles.FireParticle(Fun.move_with_vel_angle(pos, self.thiccness * 1.25, 360 * random.random()), Fun.YELLOW))
+
+
 item_repertory = {
     # |Cover|-----------------------------------------------------------------------------------------------------------
     # |Skill|-----------------------------------------------------------------------------------------------------------
@@ -494,6 +540,18 @@ item_repertory = {
             "Victim": None,
             "Colour": Fun.WHITE,
             "Payload": Fun.none
+        }
+    },
+    "Justice": {
+        "name": "Justice",
+        "friction": 0, "thickness": 0,
+        "act": justice_homing,
+        "draw": Fun.none,
+        "sprites": [],
+        "life time": -1,
+        "free var": {   # Modify everything here to change effects
+            "Bullet": None,
+            "Target": None
         }
     },
     "Riot Shield": {

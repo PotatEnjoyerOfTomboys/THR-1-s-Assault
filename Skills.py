@@ -716,7 +716,7 @@ def vincent_armour_breaker(self, skill, entities, level):
                 Fun.move_with_vel_angle(self.pos, 6, angle),
                 [Fun.LIGHT_GREEN, Fun.DARK_GREEN][num], 4 * [1, 1.75][num], 15, angle, size=4 * [1, 2][num]))
 
-    Fun.play_sound("Hitting 1", "SFX") # TODO: Give a new sound effect, need to sound like a big crunch
+    Fun.play_sound("Hitting 1") # TODO: Give a new sound effect, need to sound like a big crunch
 
 
 def vincent_last_stand(self, skill, entities, level):
@@ -828,6 +828,7 @@ def curtis_kick_boss(self, skill, entities, level):
 
     Fun.play_sound("Hitting 1", "SFX")
 
+
 def curtis_fool(self, skill, entities, level):
     sound_allowed = False
     for b in entities["bullets"]:
@@ -843,6 +844,9 @@ def curtis_fool(self, skill, entities, level):
                      b.pos[1] - 30 * math.sin(particles_to_add * 36 * math.pi / 180)],
                     Fun.LIGHT_BLUE, -2, 15, particles_to_add * 36, size=3))
             b.free_var.update({"Redirect": True})
+            if "VIII, La Justice" in self.free_var:
+                Items.spawn_item(entities, "Justice", b.pos, self.owner)
+                entities["items"][-1].free_var["Bullet"] = b
             continue
         # Redirect
         b.duration = round(b.og_info[1] * 2)

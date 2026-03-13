@@ -8,9 +8,12 @@ import Bullets
 import Skills
 import Particles
 import Weapons
+import MechRenderer
+
 
 from Fun import none
 from Event import MissionEvent, loss_of_apc, trigger_constant
+
 
 class Entity:
     __slots__=['agro', 'agro_decrease_rate', 'ai_state', 'aim_angle', 'angle', 'animation_counter', 'is_target', 'armour', 'armour_break', 'bullets_shot', 'collision_box', 'control', 'controller_angle', 'controller_control', 'crit', 'cutscene_mode', 'damage_taken', 'dash_allowed', 'dash_charge_time', 'dash_cooldown', 'dash_iframes', 'dash_speed', 'did_agro_raise', 'direction_angle', 'draw_aim_line', 'draw_angle', 'draw_rotated_dist', 'draw_targeting_range', 'driving', 'force_draw', 'free_var', 'friction', 'func_act', 'func_draw', 'func_input', 'health', 'input', 'input_mode', 'is_ally', 'is_boss', 'is_player', 'is_targeted', 'is_targeting', 'max_armour', 'max_health', 'mouse_control', 'mouse_pos', 'name', 'no_shoot_state', 'og_info', 'on_death', 'order_builder', 'pathfinding_old_positions', 'pos', 'reloading', 'resistances', 'running', 'shooting', 'shot_allowed', 'skills', 'sound_mod', 'speed', 'sprites', 'standing_still', 'status', 'stealth_counter', 'stealth_mod', 'target', 'targeting_angle', 'targeting_range', 'team', 'thiccness', 'time', 'upgrades', 'vel', 'vel_max', 'walking', 'wall_hack', 'weapon', 'weapon_draw_dist', 'owner', 'sprite_height']
@@ -3474,24 +3477,41 @@ def armoured_shield_generator_act(self, entities, level):
                                                       "Secondary explosion": {"Duration": 5,
                                                                               "Growth": 2,
                                                                               "Damage mod": 0.75}}])
+            if self.free_var["Startup lag missile"] % 4 == 0:
+                # Fun.play_sound("Safety")
+                Fun.play_sound("Com 1", modified_volume=1.4)
 
-        if start_up_lag_handler(self, 450, key="Startup lag railgun"):
+        # Railgun attack
+        if start_up_lag_handler(self, 550, key="Startup lag railgun"):
+            Fun.play_sound("Electricity 2", modified_volume=1.2)
             Bullets.spawn_bullet(
                 self, entities,
-                Bullets.Bullet,
+                Bullets.LaserDanmaku2,
                 Fun.move_with_vel_angle(turret_pos, 30, self.aim_angle),
-                angle,
-                [4 + 2 * random.random(), 60, 4, round(self.weapon.bullet_info[3] * 0.8), {'Colour': Fun.ORANGE}])
+                self.aim_angle,
+                [0, 300, 1, 60, {'Colour': Fun.LIGHT_BLUE, "Growth": 32, "Bullet mod": [
+                    {
+                        "Target time": 295,
+                        "speed": 40,
+                        "Growth": 0
+                    }
+                ]}])
         elif self.free_var["Startup lag railgun"] > 350:
+            colour_pool = [Fun.YELLOW_LIGHT]
+            if self.free_var["Startup lag railgun"] > 425:
+                colour_pool.append(Fun.ORANGE)
+                Fun.play_sound("Charging", modified_volume=0.9)
             for x in range(2):
                 dist = 64 * random.random()
                 angle = self.aim_angle + random.uniform(-30, 30)
                 pos = [turret_pos[0], turret_pos[1]]
                 entities["particles"].append(Particles.RandomParticle2(Fun.move_with_vel_angle(pos, dist, angle),
-                    Fun.YELLOW_LIGHT,
+                    Fun.get_random_element_from_list(colour_pool),
                     2, dist // 2,
                     angle + 180,
                     size=Fun.get_random_element_from_list([1, 2, 4])))
+
+        # Tesla Coil attack
     else:
         self.free_var["Startup lag missile"] = 0
         self.free_var["Startup lag railgun"] = 0
@@ -3499,11 +3519,11 @@ def armoured_shield_generator_act(self, entities, level):
 
     Fun.aim_system(self, self.weapon)
 
-    # |Status effects|----------------------------------------------------------------------------------------------
+    # |Status effects|--------------------------------------------------------------------------------------------------
     # ha ha, Fun go brr
     Fun.status_manager(self, entities)
 
-    # |Movement Output|---------------------------------------------------------------------------------------------
+    # |Movement Output|-------------------------------------------------------------------------------------------------
     # Make the player move
     Fun.movement_output(self, level)
     damage = round(abs(self.vel[0]) + abs(self.vel[1])) * 2
@@ -4265,6 +4285,11 @@ def gilgamesh_wall(self, entities, level):
 #       Napalm sword            Generates a wave of napalm
 #       Cannon
 #       Minigun
+
+
+def bloodhound_draw(self, WIN, scrolling):
+    self.free_var["Mech"].pos = [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]]
+    self.free_var["Mech"].draw(WIN, self.aim_angle)
 
 
 # Attack Helicopter
@@ -5904,6 +5929,23 @@ enemy_repertory = {
          "func draw": "enemy_draw_bulwark",
          "sprites": "Sprites/Enemies/Bulwark.png", "on death": "none",
          "free var": {"IS BOSS": True}
+         },
+    "Fire Support Mech":
+        {"name": "Super Bulwark",
+         "faction": "FAC-3",
+         "type": "Elite",
+         "targeting range": R_MO, "targeting angle": D_HO, "stealth mod": S_LO, "stealth counter": C_MO,
+         "wall hack": False, "health": H_HO, "armour": round(A_HO * 1.5), "damage resistances": F3_RESIT_H,
+         "thickness": T_HO,
+         "vel max": V_LO * 0.8, "speed": V_LO * 0.8, "friction": V_LO * 0.8,
+         "weapon": "Bulwark Minigun",
+
+         "func input": "enemy_input_faction_3_bulwark",
+         "func act": "enemy_act_type_1",
+         "func draw": "bloodhound_draw",
+         # "func draw": "enemy_draw_basic",
+         "sprites": "Sprites/Enemies/Bulwark.png", "on death": "none",
+         "free var": {"IS BOSS": True, "Mech": MechRenderer.Mech(MechRenderer.bloodhound_mech, MechRenderer.bloodhound_palette, [0, -350])}
          },
     # Attack Helicopter
     "Attack Helicopter": {

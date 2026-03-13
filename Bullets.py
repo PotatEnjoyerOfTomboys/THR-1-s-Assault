@@ -213,7 +213,7 @@ class BlueBall(BasicBullet):
         if self.duration == 0:
             if self.secondary_explosion:
                 spawn_bullet(
-                    self, entities,
+                    self.owner, entities,
                     ExplosionSecondary,
                     self.pos,
                     self.angle,
@@ -706,6 +706,21 @@ def on_hit_stun_mark(self, collision, entities, level):
         entities["items"][-1].free_var["Payload"] = Items.payload_stun
 
 
+def on_hit_carcass(self, collision, entities, level):
+    collision.status["Damage Over time"] += 60
+    number_of_particle = 12
+    for particles_to_add in range(360 // number_of_particle):
+        entities["particles"].append(Particles.RandomParticle2(
+            [collision.pos[0], collision.pos[1]], (146, 255, 110), 1 + 2 * random.random(), random.randint(5, 15),
+            particles_to_add * number_of_particle, size=Fun.get_random_element_from_list([1, 2 ,4])))
+
+
+def on_hit_hellfire(self, collision, entities, level):
+    collision.status["Burning"] += 60
+    for x in range(8):
+        entities["particles"].append(Particles.FireParticle(collision.pos, self.owner.weapon.free_var["Colour"]))
+
+
 # |The simplest projectile|---------------------------------------------------------------------------------------------
 class Bullet(BasicBullet):
     def __init__(self, pos, angle, info, owner):
@@ -853,7 +868,8 @@ class BulletDanmaku(BasicBullet):
             self.duration -= 1
 
 
-# TODO: Rewrite Danmaku bullets so that they don't crash the game, isn't a priority until I need them for a boss
+# NOTTODO: Rewrite Danmaku bullets so that they don't crash the game, isn't a priority until I need them for a boss
+# Not using that for bosses
 class BulletDanmaku2(BasicBullet):
     # Coolest bullet type
     def __init__(self, pos, angle, info, owner):

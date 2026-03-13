@@ -18,7 +18,6 @@ class BasicWeapon:
     __slots__=['accuracy', 'agro_gain', 'alt_fire', 'ammo', 'ammo_cost', 'ammo_pool', 'bullet_info', 'bullet_type', 'bullets_per_shot', 'crit_multiplier', 'crit_rate', 'fire_rate', 'free_var', 'full_auto', 'gunshot_sound', 'handle', 'jam_duration', 'jam_rate', 'jamming_sound', 'laser_sight', 'max_ammo', 'max_ammo_pool', 'mods', 'name', 'passive', 'range', 'recoil', 'reload_sound', 'reload_style', 'reload_time', 'spread', 'sprite', 'volume', 'weight']
     def __init__(self, weapon):
         self.name = weapon["name"]
-        # self.weapon_class = weapon["class"]
         #
         self.sprite = weapon["sprite"]
         if type(self.sprite) == str:
@@ -1342,13 +1341,24 @@ def cutlass_flintlock(self, entities, level):
             self.status["Perfect Aim"] = 2
         if self.input["Shoot"]:
             # [6, 80, 5, 30, {"Piercing": True, "Smoke": False}]
-
-            Bullets.spawn_bullet(
-                self, entities,
-                Bullets.Bullet,
-                pos,
-                self.angle,
-                [6, 80, 5, 30, {"Piercing": True, "Smoke": False}])
+            on_hit_list = []
+            if "Carcass" in self.free_var:
+                on_hit_list.append(Bullets.on_hit_carcass)
+            if "Hellfire" in self.free_var:
+                on_hit_list.append(Bullets.on_hit_hellfire)
+            angle_mod = 0
+            bullet_count = 1
+            if "Grapeshot" in self.free_var:
+                angle_mod = 20
+                bullet_count = 3
+            for x in range(bullet_count):
+                Bullets.spawn_bullet(
+                    self, entities,
+                    Bullets.Bullet,
+                    pos,
+                    self.angle + random.uniform(-angle_mod, angle_mod),
+                    [6, 80, 5, 30, {"Piercing": True, "Smoke": False}])
+                entities["bullets"][-1].on_hit = on_hit_list
             Fun.play_sound("Rifle 2")
             self.no_shoot_state = 300
         return
@@ -1587,18 +1597,31 @@ def axe_blunderbuss(self, entities, level):
 
         if self.status["Perfect Aim"] in (1, 0):
             self.status["Perfect Aim"] = 2
+
+        # Blunderbuss attack
         if self.input["Shoot"]:
-            # Blunderbuss attack
-            for x in range(12):
+            on_hit_list = []
+            if "Carcass" in self.free_var:
+                on_hit_list.append(Bullets.on_hit_carcass)
+            if "Hellfire" in self.free_var:
+                on_hit_list.append(Bullets.on_hit_hellfire)
+            angle_mod = 15
+            bullet_count = 1
+            if "Grapeshot" in self.free_var:
+                angle_mod = 35
+                bullet_count = 3
+            for x in range(12*bullet_count):
                 Bullets.spawn_bullet(
                     self, entities, Bullets.Bullet,
-                    pos.copy(), self.angle + random.uniform(-15, 15),
+                    pos.copy(), self.angle + random.uniform(-angle_mod, angle_mod),
                     [3 + 3 * random.random(), 80, 5, 30 * mod, {"Piercing": True, "Smoke": True}])
                 entities["bullets"][-1].wall_physics = Bullets.base_grenade_wall_hit
+                entities["bullets"][-1].on_hit = on_hit_list
             Fun.play_sound("Rifle 2")
             self.no_shoot_state = 300
         return
-    # Draw flintlock
+
+    # Draw blunderbuss
     angle = self.angle + 45
     entities["particles"].append(Particles.AfterImageRotated(
         Fun.move_with_vel_angle(self.pos, 15, angle),
@@ -1800,13 +1823,25 @@ def musket_360(self, entities, level):
         entities["particles"].append(Particles.LineParticle(pos, Fun.GREEN, 1, 6 * 80, angle))
 
         if self.input["Shoot"]:
-            Bullets.spawn_bullet(
-                self, entities,
-                Bullets.Bullet,
-                pos,
-                self.aim_angle,
-                self.weapon.bullet_info)
-            entities["bullets"][-1].damage *= mod
+            on_hit_list = []
+            if "Carcass" in self.free_var:
+                on_hit_list.append(Bullets.on_hit_carcass)
+            if "Hellfire" in self.free_var:
+                on_hit_list.append(Bullets.on_hit_hellfire)
+            angle_mod = 0
+            bullet_count = 1
+            if "Grapeshot" in self.free_var:
+                angle_mod = 15
+                bullet_count = 3
+            for x in range(bullet_count):
+                Bullets.spawn_bullet(
+                    self, entities,
+                    Bullets.Bullet,
+                    pos,
+                    self.aim_angle + random.uniform(-angle_mod, angle_mod),
+                    self.weapon.bullet_info)
+                entities["bullets"][-1].damage *= mod
+                entities["bullets"][-1].on_hit = on_hit_list
             Fun.play_sound("Rifle 2")
             self.no_shoot_state = 300
         return
