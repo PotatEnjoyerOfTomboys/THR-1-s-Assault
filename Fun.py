@@ -5335,7 +5335,7 @@ def damage_calculation(self, damage_received, damage_type, ignore_no_damage=Fals
             if self.health > self.max_health:
                 self.health = self.max_health
             # This never happens
-            return
+            return 0
 
         self.status["No damage"] = 8 * (1 - no_iframes)  # Gives everyone invincibility frames
         if self.armour > 0 and not ignore_armour:
@@ -5354,14 +5354,8 @@ def damage_calculation(self, damage_received, damage_type, ignore_no_damage=Fals
         if self.health <= 0:
             self.health = 0
             self.free_var.update({"Death message": death_message})
-            # This make bosses have multiple health bars
-            if self.is_boss:
-                if self.health_bars:
-                    self.health = self.health_bars[0]
-                    self.health_bars.pop(0)
-
         if no_sound:
-            return
+            return true_damage
 
         sound = {"Physical": "Bullet hit 1",
                  "Fire": "Bullet hit 2",
@@ -5373,6 +5367,7 @@ def damage_calculation(self, damage_received, damage_type, ignore_no_damage=Fals
         if self.is_player:
             sound = "Curtis Hit"
         play_sound(sound, "SFX")
+        return true_damage
 
 
 def aim_system(self, current_weapon):

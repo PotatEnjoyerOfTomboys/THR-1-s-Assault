@@ -190,6 +190,13 @@ bloodhound_mech = [
         {"Type": "Shoulder R", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/ML-Hadean.png'), 15)},
     ]
 
+rigel_mech = [
+        # {"Type": "Leg", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/LR-Orion.png'), 26)},
+        # {"Type": "Torso", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/TO-Orion.png'), 64)},
+        # {"Type": "Head", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/HD-Orion.png'), 17)},
+        # {"Type": "Arm L", "Sprite": invert_sprite_stack('Sprites/Mech parts/AM-Rigel.png', 10)},
+        # {"Type": "Arm R", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/AM-Orion.png'), 27)},
+    ]
 
 def make_part(sprite_list, part_palette, part_type, unbuilt_mech):
     offset = [0, 0, 0]
@@ -298,15 +305,18 @@ class Mech:
         for i in range(MAX_MECH_HEIGHT):
             new_layer = []
             for e in self.mech_parts:
-                # It should be possible to store the sprites in a way that makes this check useless.
-                # Which would help performances
-                if self.mech_parts[e]["offset"][2] <= i < self.mech_parts[e]["offset"][2] +self.mech_parts[e]["h2"]:
+                if self.mech_parts[e]["offset"][2] <= i < self.mech_parts[e]["offset"][2] + self.mech_parts[e]["h2"]:
                     num = i - self.mech_parts[e]["offset"][2]
                     sprite = self.mech_parts[e]["Sprite"][num]
                     new_layer.append([sprite, self.mech_parts[e]])
             if new_layer:
                 self.mech_sprite_stack.append(new_layer)
         self.pos = pos
+        for p in self.mech_parts:
+            print(p)
+            for pp in self.mech_parts[p]:
+                print(pp)
+                print(self.mech_parts[p][pp])
 
         # {"Time": 0, "Angle Speed": 0}
         self.mech_animations = {
@@ -348,6 +358,17 @@ class Mech:
                 if info["Time"] == 0:
                     self.mech_animations[part].pop(0)
 
+    def reset_animations(self):
+        for p in self.mech_parts:
+            self.mech_parts[p]["Draw angle"] = 0
+        self.mech_animations = {
+            "Leg": [], "Torso": [], "Head": [],
+            "Arm L": [], "Arm R": [],
+            "Wpn L": [], "Wpn R": [],
+            "Arm Shoulder L": [], "Arm Shoulder R": [],
+            "Shoulder L": [], "Shoulder R": [],
+        }
+
     def draw(self, win, angle):
         self.animate()  # Don't know where to put that
         mech_surface = win
@@ -371,6 +392,6 @@ class Mech:
             mech_surface.blit(layer_surf,
                               (self.pos[0] - layer_surf.get_width() // 2,
                                self.pos[1] - layer_surf.get_height() // 2 - HEIGHT_DIFF * draw_height
-                               * (1 + math.sin(self.time/20)*0.33) # Bouncy mode
+                               # * (1 + math.sin(self.time/20)*0.33) # Bouncy mode
                                ))
         self.time += 1

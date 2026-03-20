@@ -188,15 +188,15 @@ def leopold_gauntlet_punch(self, skill, entities, level):
             if Fun.check_point_in_rotated_rectangle([corner_1, corner_2, corner_3, corner_4], e.pos):
                 Fun.damage_calculation(e, 150, "Melee", death_message="Punched by Lord")
                 e.vel = Fun.move_with_vel_angle([0, 0], knockback, self.angle)
-                e.status["Stunned"] += 90
-                if "Startup lag" in e.free_var:
-                    e.free_var["Startup lag"] = 0
+                if "IS BOSS" in e.free_var:
+                    e.status["Stunned"] += 90
+                    if "Startup lag" in e.free_var:
+                        e.free_var["Startup lag"] = 0
                 for x in range(12):
                     num = x % 2
                     entities["particles"].append(Particles.RandomParticle2(
                         e.pos.copy(), Fun.DARK_RED, 4 * [1, 1.75][num], 15,
                         self.angle + [-90, 90][num] + random.uniform(-15, 15), size=4 * [1, 2][num]))
-
                 if self.weapon.name == "Big Iron":
                     self.weapon.ammo += 1
                     if self.weapon.ammo > self.weapon.max_ammo:

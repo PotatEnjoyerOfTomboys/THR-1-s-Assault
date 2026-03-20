@@ -49,9 +49,9 @@ import random
 #           Vivianne    8   (Need to code all tomboys)
 #   Bosses
 #       Armed Shield Generator  Tesla coil attack
-#       Fire Support Mech       Fire, Artillery, Bullets
 #       Rigel                   (Final boss)
 
+#       Fire Support Mech       Boost effects
 #       THR-1 Boss fight        (Alt Final boss - Zoar route)   (Figure how to make it playable)
 #       AA Site - Drone builder (animations)
 #       Gilgamesh               (animations)

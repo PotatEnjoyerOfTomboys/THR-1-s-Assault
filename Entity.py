@@ -1,3 +1,5 @@
+from random import uniform
+
 import pygame as pg
 import random
 import math
@@ -3888,9 +3890,6 @@ def hover_tank_act(self, entities, level):
     self.standing_still = False
     if self.vel == [0, 0]:
         self.standing_still = True
-    elif self.cutscene_mode:
-        # This makes entities use their walking animation during cutscenes
-        self.walking = True
 
     # Dash mechanic
     if self.dash_cooldown <= 0 and not self.standing_still and self.input["Dash"]:
@@ -4285,11 +4284,283 @@ def gilgamesh_wall(self, entities, level):
 #       Napalm sword            Generates a wave of napalm
 #       Cannon
 #       Minigun
+def bloodhound_input(self, entities, level):
+    # Input functions are the IA for an enemy
+    # better targeting system
+    target, target_angle, wall_in = entity_target_detection(self, entities, level)
+
+    self.input = Fun.get_default_inputs()
+    if target:
+        aim_target, move_target, og_dist = entity_get_aim_move_target(self, target)
+        aim_target = self.target.pos.copy()
+
+        entity_shoot_with_startup_lag(self, og_dist, 320)
+
+    closest_target = Fun.find_closest_in_circle(self, entities, 512, "entities")
+    if closest_target:
+        fortress_move_toward_point(self, closest_target, 40 * 7)
+        fortress_move_away_point(self, closest_target, 25 * 7)
+
+        angle = Fun.angle_between(closest_target, self.pos)
+        self.input["Right"] = self.free_var["Move angle"] < angle
+        self.input["Left"] = self.free_var["Move angle"] > angle
+
+        if not -(180 - 4) + angle < self.free_var["Move angle"] < 180 - 4 + angle:
+            self.input["Right"] = self.free_var["Move angle"] > angle
+            self.input["Left"] = self.free_var["Move angle"] < angle
+
+    # Stunned status manager
+    # Fun.stunned_manager(self)
+    return target, target_angle
+
+
+def bloodhound_act(self, entities, level):
+    # |Movement Input|----------------------------------------------------------------------------------------------
+    self.running = False
+    self.walking = False
+
+    max_vel = self.vel_max
+
+    # Handle double speed and slowness status
+    if self.status["Slowness"]:
+        max_vel *= 0.5
+    if self.status["Double speed"]:
+        max_vel *= 2
+
+
+    # Quick boost
+    bloodhound_boost(self, entities, level)
+    # Checks for which direction the player must move
+    # Rework it so that you are not faster when walking in diagonal, this should be fixed now
+    if self.dash_cooldown <= 0:
+        allow_correction = False
+        speed = 0
+        if self.input["Up"]:
+            speed = 1
+            allow_correction = True
+        if self.input["Down"]:
+            speed = -1
+            allow_correction = True
+        if self.input["Left"]:
+            self.free_var["Move angle"] -= self.free_var["Turn speed"]
+        if self.input["Right"]:
+            self.free_var["Move angle"] += self.free_var["Turn speed"]
+        self.vel = Fun.move_with_vel_angle(self.vel, self.speed * speed, self.free_var["Move angle"])
+
+        if not Fun.check_point_in_circle(max_vel, 0, 0, self.vel[0], self.vel[1]) and allow_correction:
+            self.vel = Fun.move_with_vel_angle([0, 0], max_vel * speed, self.free_var["Move angle"])
+        self.walking = allow_correction
+
+        self.free_var["Move angle"] = Fun.angle_value_limiter(self.free_var["Move angle"])
+        self.aim_angle = Fun.angle_value_limiter(self.aim_angle)
+
+    self.standing_still = False
+    if self.vel == [0, 0]:
+        self.standing_still = True
+
+    # Fun.aim_system(self, self.weapon)
+    self.aim_angle = self.free_var["Move angle"]
+    # |Status effects|----------------------------------------------------------------------------------------------
+    # ha ha, Fun go brr
+    Fun.status_manager(self, entities)
+    if self.no_shoot_state == 0:
+        # Attack logic
+        {
+            "Missile": bloodhound_hadean_missile,
+            "Blade": bloodhound_magma_blade,
+            "Minigun": bloodhound_lopolith_minigun,
+            "Canon": bloodhound_canon
+        } [self.free_var["Current attack"]](self, entities, level)
+
+    else:
+        self.no_shoot_state -= 1
+        if self.no_shoot_state == 0:
+            self.free_var["Mech"].reset_animations()
+
+    # |Movement Output|---------------------------------------------------------------------------------------------
+    # Make the player move
+    Fun.movement_output(self, level)
+    damage = round(abs(self.vel[0]) + abs(self.vel[1])) * 2
+    if damage > 40:
+        damage = 40
+    for e in entities["entities"]:
+        if e == self: continue
+        if self.collision_box.colliderect(e.collision_box):
+            e.vel = Fun.move_with_vel_angle(e.vel, 2, Fun.angle_between(e.collision_box.center, self.pos))
+            if e.team != self.team:
+                Fun.damage_calculation(e, damage, "Melee", death_message="Ran over")
+            pass
+    if self.draw_aim_line or self.weapon.laser_sight:
+        entities["background particles"].append(Particles.LineParticle(
+            Fun.move_with_vel_angle(self.pos, 20, self.aim_angle), Fun.BLUE, 1, self.weapon.range-20, self.aim_angle, 2, 0))
 
 
 def bloodhound_draw(self, WIN, scrolling):
-    self.free_var["Mech"].pos = [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]]
-    self.free_var["Mech"].draw(WIN, self.aim_angle)
+    self.free_var["Mech"].pos = [self.pos[0] + scrolling[0], self.pos[1] + 28 + scrolling[1]]
+    self.free_var["Mech"].draw(WIN, self.free_var["Move angle"])
+
+
+def bloodhound_hadean_missile(self, entities, level):
+    if start_up_lag_handler(self, 200):
+        self.no_shoot_state = 10
+        self.free_var["Current attack"] = Fun.get_random_element_from_list(["Minigun", "Blade", "Blade"])
+
+    elif 30 <= self.free_var["Startup lag"] <= 190 and self.free_var["Startup lag"] % 10 == 0:
+        # spawn fire
+        angle = self.free_var["Mech"].mech_parts["Torso"]["Draw angle"] * -1 + self.free_var["Move angle"]
+        Bullets.spawn_bullet(
+            self, entities,
+            Bullets.Missile,
+            Fun.move_with_vel_angle(self.pos, -10, angle+20),
+            angle + random.uniform(-20, 20),
+            [2 + 3 * random.random(), 140, 4, 3, {"Targeting range": 512,
+                                                  "Targeting angle": 60,
+                                                  "Target": "players",
+                                                  "Secondary explosion": {"Duration": 5,
+                                                                          "Growth": 2,
+                                                                          "Damage mod": 0.75}}])
+    elif self.free_var["Startup lag"] == 29:
+        for x in range(6):
+            self.free_var["Boost type"].append(Fun.get_random_element_from_list(["Side Boost L", "Side Boost R"]))
+
+
+def bloodhound_lopolith_minigun(self, entities, level):
+    animation = True
+    if start_up_lag_handler(self, 240):
+        self.no_shoot_state = 10
+        self.free_var["Mech"].reset_animations()
+        self.free_var["Current attack"] = Fun.get_random_element_from_list(["Canon", "Missile", "Missile"])
+        animation = False
+
+    elif 80 <= self.free_var["Startup lag"] < 230:
+        if self.free_var["Startup lag"] == 80:
+            self.free_var["Boost type"].append("Forward Boost")
+        # spawn fire
+        angle = self.free_var["Mech"].mech_parts["Arm L"]["Draw angle"] * -1 + self.free_var["Move angle"]
+        Bullets.spawn_bullet(
+            self, entities,
+            Bullets.Bullet,
+            Fun.move_with_vel_angle(Fun.move_with_vel_angle(self.pos, -27, self.free_var["Move angle"] + 90 + self.free_var["Mech"].mech_parts["Torso"]["Draw angle"] * -1), 20, angle),
+            angle + random.uniform(-2, 2),
+            [7, 50, 2, 10, {"Piercing": True, "Smoke": False}])
+
+    # if self.free_var["Startup lag"] == 1:
+    if not self.free_var["Mech"].mech_animations["Torso"] and animation:
+        # Load animations
+        # print("Loading animations")
+        self.free_var["Mech"].mech_animations["Torso"].append({"Time": 60, "Angle Speed": 1.2})
+        self.free_var["Mech"].mech_animations["Arm L"].append({"Time": 60, "Angle Speed": 1.2})
+
+        self.free_var["Mech"].mech_animations["Torso"].append({"Time": 80, "Angle Speed": -1.2})
+        self.free_var["Mech"].mech_animations["Arm L"].append({"Time": 80, "Angle Speed": -1.2})
+
+        self.free_var["Mech"].mech_animations["Torso"].append({"Time": 40, "Angle Speed": 1.2})
+        self.free_var["Mech"].mech_animations["Arm L"].append({"Time": 40, "Angle Speed": 1.2})
+
+        self.free_var["Mech"].mech_animations["Torso"].append({"Time": 40, "Angle Speed": -1.2})
+        self.free_var["Mech"].mech_animations["Arm L"].append({"Time": 40, "Angle Speed": -1.2})
+
+        self.free_var["Mech"].mech_animations["Torso"].append({"Time": 20, "Angle Speed": 1.2})
+        self.free_var["Mech"].mech_animations["Arm L"].append({"Time": 20, "Angle Speed": 1.2})
+
+
+def bloodhound_magma_blade(self, entities, level):
+    animation = True
+    if start_up_lag_handler(self, 120):
+        self.no_shoot_state = 10
+        self.free_var["Mech"].reset_animations()
+        self.free_var["Current attack"] = Fun.get_random_element_from_list(["Canon", "Canon", "Missile"])
+        animation = False
+
+    elif 80 < self.free_var["Startup lag"] < 110:
+        # spawn fire
+        angle = self.free_var["Mech"].mech_parts["Arm R"]["Draw angle"] * -1 + self.free_var["Move angle"]
+        Bullets.spawn_bullet(
+            self, entities,
+            Bullets.Napalm,
+            Fun.move_with_vel_angle(Fun.move_with_vel_angle(self.pos, 40, self.free_var["Move angle"] + 90 + self.free_var["Mech"].mech_parts["Torso"]["Draw angle"] * -1), 10, angle),
+            angle + random.uniform(-2, 2),
+            [2 + 4 * random.random(), 180 + random.randint(0, 100), 14,
+             20, {"Particle allowed": True,
+                  "Burn chance": 0.8,
+                  "Burn duration": 30,
+                  "Colour": Fun.FIRE,
+                  }])
+
+    # if self.free_var["Startup lag"] == 1:
+    if not self.free_var["Mech"].mech_animations["Torso"] and animation:
+        self.free_var["Boost type"].append(Fun.get_random_element_from_list(["Turn Boost L", "Turn Boost R"]))
+        # Load animations
+        self.free_var["Mech"].mech_animations["Torso"].append({"Time": 60, "Angle Speed": -1.2})
+        self.free_var["Mech"].mech_animations["Arm R"].append({"Time": 60, "Angle Speed": -1.2})
+
+        self.free_var["Mech"].mech_animations["Torso"].append({"Time": 40, "Angle Speed": 2.4})
+        self.free_var["Mech"].mech_animations["Arm R"].append({"Time": 40, "Angle Speed": 2.4})
+
+        self.free_var["Mech"].mech_animations["Torso"].append({"Time": 20, "Angle Speed": -1.2})
+        self.free_var["Mech"].mech_animations["Arm R"].append({"Time": 20, "Angle Speed": -1.2})
+
+
+def bloodhound_canon(self, entities, level):
+    if start_up_lag_handler(self, 120):
+        self.no_shoot_state = 10
+        self.free_var["Current attack"] = Fun.get_random_element_from_list(["Minigun", "Minigun", "Blade"])
+    elif self.free_var["Startup lag"] % 15 == 1:
+        angle = self.free_var["Move angle"] + random.uniform(-25, 25)
+        Bullets.spawn_bullet(
+            self, entities,
+            Bullets.Artillery,
+            Fun.move_with_vel_angle(self.pos, self.free_var["Startup lag"] * 4, angle),
+            angle,
+            [2, 60, 50,
+             30, {"Secondary explosion":{"Duration": 20, "Strength": 120, "Radius":64}, "Colour": Fun.DARK_RED, "Slowdown rate": 0.05}])
+    elif self.free_var["Startup lag"] == 2:
+        self.free_var["Boost type"] = ["Backward Boost"]
+
+
+def bloodhound_boost(self, entities, level):
+    if not self.free_var["Boost type"]:
+        return
+    # Side Boost R Side Boost L
+    # Turn Boost R Turn Boost L
+    # Forward Boost
+    # Backward Boost
+    if start_up_lag_handler(self, 30, key="Startup lag boost"):
+        print(self.free_var["Boost type"])
+        self.free_var["Boost type"].pop()
+        print(self.free_var["Boost type"])
+        self.free_var["Turn speed"] = 2
+        # self.free_var["Startup lag boost"] = -1
+    elif self.free_var["Startup lag boost"] > 2:
+        if "Turn" in self.free_var["Boost type"][0]:
+            if self.free_var["Boost type"][0] == "Turn Boost L":
+                self.input["Left"] = True
+                self.input["Right"] = False
+            if self.free_var["Boost type"][0] == "Turn Boost R":
+                self.input["Left"] = False
+                self.input["Right"] = True
+            return
+        self.input["Up"] = False
+        self.input["Down"] = False
+    elif self.free_var["Startup lag boost"] == 2:
+        if "Turn" in self.free_var["Boost type"][0]:
+            self.free_var["Turn speed"] = 6
+            return
+        angle = {
+            "Forward Boost": 0,
+            "Side Boost R": 90,
+            "Side Boost L": -90,
+            "Backward Boost": 180,
+        }[self.free_var["Boost type"][0]]
+        self.vel = Fun.move_with_vel_angle([0, 0], 25, angle + self.free_var["Move angle"])
+        if self.free_var["Boost type"][0] == "Backward Boost":
+            for x in [33, -33]:
+                for y in range(8):
+                    print(y)
+                    angle = self.free_var["Move angle"] + x + random.uniform(-7.5, 7.5)
+                    entities["particles"].append(Particles.RandomParticle2(
+                        Fun.move_with_vel_angle([self.pos[0], self.pos[1] + 28], 6, angle),
+                        Fun.ORANGE, 4, 10 + round(20 * random.random()), angle, size=8))
 
 
 # Attack Helicopter
@@ -5935,17 +6206,26 @@ enemy_repertory = {
          "faction": "FAC-3",
          "type": "Elite",
          "targeting range": R_MO, "targeting angle": D_HO, "stealth mod": S_LO, "stealth counter": C_MO,
-         "wall hack": False, "health": H_HO, "armour": round(A_HO * 1.5), "damage resistances": F3_RESIT_H,
-         "thickness": T_HO,
+         "wall hack": False, "health": H_HO * 24, "armour": 0, "damage resistances": F3_RESIT_H,
+         "thickness": 48,
          "vel max": V_LO * 0.8, "speed": V_LO * 0.8, "friction": V_LO * 0.8,
-         "weapon": "Bulwark Minigun",
+         "weapon": "Bloodhound Weaponry",
 
-         "func input": "enemy_input_faction_3_bulwark",
-         "func act": "enemy_act_type_1",
+         "func input": "bloodhound_input",
+         "func act": "bloodhound_act",
          "func draw": "bloodhound_draw",
          # "func draw": "enemy_draw_basic",
          "sprites": "Sprites/Enemies/Bulwark.png", "on death": "none",
-         "free var": {"IS BOSS": True, "Mech": MechRenderer.Mech(MechRenderer.bloodhound_mech, MechRenderer.bloodhound_palette, [0, -350])}
+         "free var": {
+             "IS BOSS": True,
+             "Mech": MechRenderer.Mech(MechRenderer.bloodhound_mech, MechRenderer.bloodhound_palette, [0, -350]),
+             "Move angle": -90,
+             "Turn speed": 2,
+             "Startup lag": 0,
+             "Startup lag boost": 0,
+             "Current attack": "Canon",
+             "Boost type": []
+         }
          },
     # Attack Helicopter
     "Attack Helicopter": {

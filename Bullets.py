@@ -760,10 +760,10 @@ class Bullet(BasicBullet):
                 if Fun.collision_rect_circle(collision.collision_box.left, collision.collision_box.top,
                                              collision.collision_box.width, collision.collision_box.height,
                                              self.pos[0], self.pos[1], self.radius):
-                    Fun.damage_calculation(collision, self.damage, self.damage_type, ignore_res=self.ignore_res, death_message="Is Swiss cheese")
+                    if Fun.damage_calculation(collision, self.damage, self.damage_type, ignore_res=self.ignore_res, death_message="Is Swiss cheese"):
+                        self.visual_effect(self, entities)
                     self.on_hit_handler(collision, entities, level)
 
-                    self.visual_effect(self, entities)
 
                     if not self.piercing:
                         self.duration = 0
@@ -810,10 +810,10 @@ class BulletSlowing(BasicBullet):
                 if Fun.collision_rect_circle(collision.collision_box.left, collision.collision_box.top,
                                              collision.collision_box.width, collision.collision_box.height,
                                              self.pos[0], self.pos[1], self.radius):
-                    Fun.damage_calculation(collision, self.damage, self.damage_type, death_message="Is Swiss cheese")
+                    if Fun.damage_calculation(collision, self.damage, self.damage_type, death_message="Is Swiss cheese"):
+                        self.visual_effect(self, entities)
                     self.on_hit_handler(collision, entities, level)
                     self.duration = 1
-                    self.visual_effect(self, entities)
 
             self.duration -= 1
 
@@ -858,10 +858,10 @@ class BulletDanmaku(BasicBullet):
                 if Fun.collision_rect_circle(collision.collision_box.left, collision.collision_box.top,
                                              collision.collision_box.width, collision.collision_box.height,
                                              self.pos[0], self.pos[1], self.radius):
-                    Fun.damage_calculation(collision, self.damage, self.damage_type, death_message="Got defeated by a Yokai")
+                    if Fun.damage_calculation(collision, self.damage, self.damage_type, death_message="Got defeated by a Yokai"):
+                        self.visual_effect(self, entities)
                     self.on_hit_handler(collision, entities, level)
 
-                    self.visual_effect(self, entities)
 
                     self.duration = 0
 
@@ -945,9 +945,8 @@ class BulletDanmaku2(BasicBullet):
                 if Fun.collision_rect_circle(collision.collision_box.left, collision.collision_box.top,
                                              collision.collision_box.width, collision.collision_box.height,
                                              self.pos[0], self.pos[1], self.radius):
-                    Fun.damage_calculation(collision, self.damage, self.damage_type, death_message="Got defeated by a Yokai")
-
-                    self.visual_effect(self, entities)
+                    if Fun.damage_calculation(collision, self.damage, self.damage_type, death_message="Got defeated by a Yokai"):
+                        self.visual_effect(self, entities)
 
                     self.duration = 0
 
@@ -1059,10 +1058,11 @@ class BulletDanmaku3(BasicBullet):
                 if Fun.collision_rect_circle(collision.collision_box.left, collision.collision_box.top,
                                              collision.collision_box.width, collision.collision_box.height,
                                              self.pos[0], self.pos[1], self.radius):
-                    Fun.damage_calculation(collision, self.damage, self.damage_type, death_message="Got defeated by a Yokai")
-                    self.on_hit_handler(collision, entities, level)
 
-                    self.visual_effect(self, entities)
+                    if Fun.damage_calculation(collision, self.damage, self.damage_type, death_message="Got defeated by a Yokai"):
+
+                        self.visual_effect(self, entities)
+                    self.on_hit_handler(collision, entities, level)
 
                     self.duration = 0
 
@@ -1202,10 +1202,11 @@ class Fire(BasicBullet):
                                              collision.collision_box.width, collision.collision_box.height,
                                              self.pos[0], self.pos[1], self.radius):
                     Fun.damage_calculation(collision, self.damage, self.damage_type, death_message="Burned to a crisp")
+                    self.visual_effect(self, entities)
                     self.on_hit_handler(collision, entities, level)
                     self.duration = 0
 
-                    self.visual_effect(self, entities)
+
 
                     if random.uniform(0, 1) < self.burn_chance:
                         collision.status["Burning"] = self.burn_duration
@@ -1262,8 +1263,9 @@ class Napalm(BasicBullet):
                                              collision.collision_box.width, collision.collision_box.height,
                                              self.pos[0], self.pos[1], self.radius):
                     Fun.damage_calculation(collision, self.damage, self.damage_type, death_message="Hates the smell of napalm")
-                    self.on_hit_handler(collision, entities, level)
                     self.visual_effect(self, entities)
+
+                    self.on_hit_handler(collision, entities, level)
                     if random.uniform(0, 1) < self.burn_chance:
                         collision.status["Burning"] = self.burn_duration
                     self.duration = 0
