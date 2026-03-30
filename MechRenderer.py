@@ -191,11 +191,12 @@ bloodhound_mech = [
     ]
 
 rigel_mech = [
-        # {"Type": "Leg", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/LR-Orion.png'), 26)},
-        # {"Type": "Torso", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/TO-Orion.png'), 64)},
-        # {"Type": "Head", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/HD-Orion.png'), 17)},
-        # {"Type": "Arm L", "Sprite": invert_sprite_stack('Sprites/Mech parts/AM-Rigel.png', 10)},
-        # {"Type": "Arm R", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/AM-Orion.png'), 27)},
+        {"Type": "Leg", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/LR-Orion.png'), 26)},
+        {"Type": "Torso", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/TO-Orion.png'), 64)},
+        {"Type": "Head", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/HD-Orion.png'), 17)},
+        {"Type": "Arm L", "Sprite": invert_sprite_stack('Sprites/Mech parts/AM-Rigel.png', 10)},
+        # Shoulder guns have a separate thing for draw
+        # {"Type": "Arm R", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/AW-BL-Bellatrix.png'), 27)},
     ]
 
 def make_part(sprite_list, part_palette, part_type, unbuilt_mech):

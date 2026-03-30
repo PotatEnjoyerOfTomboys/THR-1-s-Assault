@@ -3842,7 +3842,7 @@ UPGRADE_INFO = {
     'name': "Makoto", 'effect': 'effect_add_summon', 'trigger': 'trigger_when_loaded'},
 "Blue Ballin": {
     'Tier': 2, 'Cost': 1000, 'Owner': 'Vivianne', 'Icon': UPGRADE_SHEET.subsurface(360, 400, 40, 40),
-    'name': "Blue Ballin", 'effect': 'effect_none', 'trigger': 'trigger_when_loaded'},
+    'name': "Blue Ballin", 'effect': 'effect_skill_activate', 'trigger': 'trigger_when_loaded'},
 }
 
 

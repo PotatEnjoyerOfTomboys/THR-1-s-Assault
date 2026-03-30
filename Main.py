@@ -4,11 +4,10 @@ import random
 
 
 # Do a web version with pybag?
-
 # Get it done in a year
 # Music 7
-# 	1 menu track            (smooth jazz)
-# 	3 mission track (Like SMT3's normal battle theme, solos are different)
+# 	1 menu track            (grid room)
+# 	3 mission track         (Like SMT3's normal battle theme, solos are different)
 #       Industrial Park     ()
 #       Red Desert          ()
 #       Iron Mines          (The end is almost there)
@@ -46,7 +45,7 @@ import random
 # Version 1.0 - Final version
 #   Upgrades
 #       Colonist
-#           Vivianne    8   (Need to code all tomboys)
+#           Vivianne    3   (Need to code all tomboys)
 #   Bosses
 #       Armed Shield Generator  Tesla coil attack
 #       Rigel                   (Final boss)
@@ -65,11 +64,11 @@ import random
 #   Animated weapons. Mostly for the pile bunker
 #   Animated radio transmission portraits
 
-
 # Cut
 # 	Mission Modifiers
 #       Unknown Forces  (Opposite player team spawn)
 
+# Type 56 Carbine
 
 pg.mixer.pre_init()
 pg.init()
@@ -100,7 +99,6 @@ def main_game(party_info):
         "Missions completed": 0,
         "Time spend in mission": 0,
         "Mission historic": [],  # {"Name": <str>, "Faction": <int>}
-
         # "Funds": 0,
         "Upgrades": [],
         "Funds": 10000000000, # "Upgrades": [i for i in Fun.UPGRADE_INFO],    # Used for testing

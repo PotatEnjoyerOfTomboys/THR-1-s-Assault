@@ -11,6 +11,7 @@ import Skills
 import Particles
 import Weapons
 import MechRenderer
+import Items
 
 
 from Fun import none
@@ -198,7 +199,7 @@ class Entity:
 
     def act(self, entities, level):
         # Reset variables
-        self.shooting = False
+        # self.shooting = False
         self.crit = False
         self.bullets_shot = []
         self.func_act(self, entities, level)
@@ -470,12 +471,14 @@ def vivianne_act(self, entities, level):
     if self.free_var["Summon pool"]:
         if self.free_var["Summon cooldown"] == 0:
             if self.input["Interact"]:
+                print(self.free_var["Active summons"])
                 if len(self.free_var["Active summons"]) < self.free_var["Summon limit"]:
                     # Select summon to spawn
                     valid_pool = []
                     for summon in self.free_var["Summon pool"]:
                         if summon not in self.free_var["Active summons"]:
                             valid_pool.append(summon)
+
                     if valid_pool:
                         Particles.random_particle_2_circle(entities, self.pos, 2.3333333333333333333333333333333, 15, 18,
                                                      colour=Fun.YELLOW, size=5)
@@ -486,7 +489,7 @@ def vivianne_act(self, entities, level):
                                 pos=self.pos.copy(),
                                 start_angle=self.aim_angle
                             ))
-                        self.free_var["Active summons"].append(selected_summon)
+                        self.free_var["Active summons"].append(selected_summon["name"])
                         self.free_var["Summon cooldown"] = self.free_var["Summon cooldown time"]
                         entities["entities"][-1].owner = self
         else:
@@ -504,6 +507,7 @@ def vivianne_summons_act(self, entities, level):
     if self.no_shoot_state == 0:
         # Reset variables
         self.reloading = False
+        self.shooting = False
 
         # Alternative fire
         if self.input["Alt fire"]:
@@ -514,6 +518,7 @@ def vivianne_summons_act(self, entities, level):
             if self.weapon.ammo != 0 and self.shot_allowed:
                 # |Main fire|-------------------------------------------------------------------------------------------
                 self.shoot_bullet(entities, level)
+
                 # tell if the trigger was pressed
                 if not self.weapon.full_auto:
                     self.shot_allowed = False
@@ -542,6 +547,8 @@ def vivianne_summons_act(self, entities, level):
     self.force_draw = True
     if self.free_var["Life Limit"] == self.time:
         self.health = 0
+        # vivianne_summons_on_death(self, entities, level)
+
 
 
 def fortress_act(self, entities, level):
@@ -2457,12 +2464,18 @@ def vivianne_summons_input(self, entities, level):
         self.mouse_pos = aim_target.copy()
         self.angle = Fun.angle_between(aim_target, self.pos)
 
-        ALLY_FIRE_CONTROL["Vivianne"][self.weapon.name](self, entities, level, target, wall_in)
+        basic_fire_control(self, entities, level, target, wall_in)
         entity_dash_when_targeted(self)
         entity_move_toward_point(self, aim_target, self.weapon.range * 0.8)
 
     elif self.weapon.ammo < self.weapon.max_ammo and self.weapon.ammo_pool > 0:
             self.input["Reload"] = True
+    else:
+        move_target = universal_pathfinding(self, level, self.owner.pos)
+        aaa = bool(move_target)
+        if not move_target:
+            move_target = self.owner .pos
+        entity_move_toward_point(self, move_target, 48)
 
     # entity_spread_apart(self, entities)
     entity_dodge_bullets(self, entities, 32)
@@ -2470,6 +2483,144 @@ def vivianne_summons_input(self, entities, level):
     # Stunned status manager
     Fun.stunned_manager(self)
     return target, target_angle
+
+
+def m_input(self, entities, level):
+    # Input functions are the IA for an enemy
+    # better targeting system
+    target, target_angle, wall_in = entity_target_detection(self, entities, level)
+
+    if target:
+        aim_target = self.target.pos.copy()
+        # move_target = target.copy()
+        self.mouse_pos = aim_target.copy()
+        self.angle = Fun.angle_between(aim_target, self.pos)
+
+        basic_fire_control(self, entities, level, target, wall_in)
+        entity_dash_when_targeted(self)
+        entity_move_toward_point(self, aim_target, self.weapon.range * 0.8)
+
+    elif self.weapon.ammo < self.weapon.max_ammo and self.weapon.ammo_pool > 0:
+            self.input["Reload"] = True
+    else:
+        move_target = universal_pathfinding(self, level, self.owner.pos)
+        aaa = bool(move_target)
+        if not move_target:
+            move_target = self.owner .pos
+        entity_move_toward_point(self, move_target, 48)
+
+    # self.input["Alt fire"] = self.time > VIVIANNE_SUMMON_LIVE_TIME // 2
+    # self.input["Shoot"] = not self.input["Alt fire"] or self.input["Shoot"]
+    # print(self.input["Alt fire"])
+    # entity_spread_apart(self, entities)
+    self.input["Dash"] = Fun.find_closest_bullet_types_in_circle(self, entities, 32, (Bullets.Bullet, Bullets.Fire, Bullets.Missile, Bullets.Artillery))
+
+    # Stunned status manager
+    Fun.stunned_manager(self)
+    return target, target_angle
+
+
+def sierra_input(self, entities, level):
+    # Input functions are the IA for an enemy
+    # better targeting system
+    target, target_angle, wall_in = entity_target_detection(self, entities, level)
+
+    if target:
+        aim_target = self.target.pos.copy()
+        # move_target = target.copy()
+        self.mouse_pos = aim_target.copy()
+        self.angle = Fun.angle_between(aim_target, self.pos)
+
+        basic_fire_control(self, entities, level, target, wall_in)
+        entity_dash_when_targeted(self)
+        entity_move_toward_point(self, aim_target, self.weapon.range * 0.8)
+    else:
+        move_target = universal_pathfinding(self, level, self.owner.pos)
+        aaa = bool(move_target)
+        if not move_target:
+            move_target = self.owner.pos
+        entity_move_toward_point(self, move_target, 48)
+
+    if self.input["Reload"]:
+        # Switch gun
+        if self.weapon.name == "Anti-Material Rifle":
+            self.weapon = Weapons.BasicWeapon(Weapons.weapon_repertory["Shotgun"])
+            self.reloading = True
+            self.no_shoot_state = 30
+        elif self.weapon.name == "Shotgun":
+            self.weapon = Weapons.BasicWeapon(Weapons.weapon_repertory["Pistol"])
+            self.reloading = True
+            self.no_shoot_state = 30
+        else:
+            self.free_var["Life Limit"] = 10
+            self.no_shoot_state = 10
+
+
+    # entity_spread_apart(self, entities)
+    entity_dodge_bullets(self, entities, 32)
+    # Switch guns
+
+    # Stunned status manager
+    Fun.stunned_manager(self)
+    return target, target_angle
+
+
+def elektra_input(self, entities, level):
+    # Input functions are the IA for an enemy
+    # better targeting system
+    target, target_angle, wall_in = entity_target_detection(self, entities, level)
+
+    if target:
+        aim_target = self.target.pos.copy()
+        # move_target = target.copy()
+        self.mouse_pos = aim_target.copy()
+        self.angle = Fun.angle_between(aim_target, self.pos)
+
+        basic_fire_control(self, entities, level, target, wall_in)
+        # entity_dash_when_targeted(self)
+        # entity_move_toward_point(self, aim_target, self.weapon.range * 0.8)
+
+    elif self.weapon.ammo < self.weapon.max_ammo and self.weapon.ammo_pool > 0:
+            self.input["Reload"] = True
+
+    # entity_spread_apart(self, entities)
+    # entity_dodge_bullets(self, entities, 32)
+
+    # Stunned status manager
+    Fun.stunned_manager(self)
+    return target, target_angle
+
+
+def makoto_input(self, entities, level):
+    # Input functions are the IA for an enemy
+    # better targeting system
+    target, target_angle, wall_in = entity_target_detection(self, entities, level)
+
+    if target:
+        aim_target = self.target.pos.copy()
+        # move_target = target.copy()
+        self.mouse_pos = aim_target.copy()
+        self.angle = Fun.angle_between(aim_target, self.pos)
+
+        basic_fire_control(self, entities, level, target, wall_in)
+        entity_dash_when_targeted(self)
+        # entity_move_toward_point(self, aim_target, self.weapon.range * 0.8)
+
+    elif self.weapon.ammo < self.weapon.max_ammo and self.weapon.ammo_pool > 0:
+            self.input["Reload"] = True
+    move_target = universal_pathfinding(self, level, self.owner.pos)
+    aaa = bool(move_target)
+    if not move_target:
+        move_target = self.owner .pos
+    entity_move_toward_point(self, move_target, 48)
+
+    # entity_spread_apart(self, entities)
+    entity_dodge_bullets(self, entities, 32)
+
+    # Stunned status manager
+    Fun.stunned_manager(self)
+    return target, target_angle
+
 
 # |Ally Draw|-----------------------------------------------------------------------------------------------------------
 def player_draw(self, WIN, scrolling):
@@ -2487,6 +2638,90 @@ def player_draw(self, WIN, scrolling):
     WIN.blit(Fun.ENTITY_SHADOW, (self.pos[0] - 16 + scrolling[0], self.pos[1] + 11 + scrolling[1]),
              special_flags=pg.BLEND_RGBA_SUB)
     self.draw_player(scrolling, WIN, player_direction)
+
+    # Draw the weapon
+    draw_weapon(self, WIN, scrolling)
+
+
+def birna_draw(self, WIN, scrolling):
+    # Draw the colision box
+    # Get the sprite direction
+    player_direction = Fun.get_entity_direction(self.angle) % 6
+    weapon_angle = self.angle
+    if not self.standing_still:
+        player_direction = Fun.get_entity_direction(self.direction_angle) % 6
+
+    # Affect the placement of the second weapon
+    # weapon_x_mod, weapon_y_mod, weapon_angle_mod = 2, 4, 10
+
+    # Draws the player
+    WIN.blit(Fun.ENTITY_SHADOW, (self.pos[0] - 16 + scrolling[0], self.pos[1] + 11 + scrolling[1]),
+             special_flags=pg.BLEND_RGBA_SUB)
+
+    frame_to_get = 0
+    action_type = "Walk"
+    # Make the counters go up
+    for counter in self.animation_counter:
+        if action_type == counter:
+            self.animation_counter[counter] = 1
+        else:
+            self.animation_counter[counter] = 0
+    # p = round(3 * self.no_shoot_state / self.weapon.fire_rate)
+    # Sliding need a special case to handle its animation
+    # if self.no_shoot_state > 0 and not self.reloading:
+    # if self.shooting:
+        # print(player_direction)
+    #     frame_to_get = round(4 * (self.no_shoot_state / self.weapon.fire_rate)) % (
+    #              len(self.sprites[player_direction]["Walk"]) - 1) + 1
+        # frame_to_get = self.animation_counter[action_type] // 7 % (
+        #         len(self.sprites[player_direction][action_type]) - 1) + 1
+    frame_to_get = self.time // 7 % (len(self.sprites[player_direction][action_type]) - 1) + 1
+    # Draws the player
+    sprite_drawn = self.sprites[player_direction][action_type][frame_to_get]
+    WIN.blit(sprite_drawn, (
+    self.pos[0] - self.sprite_height // 2 + scrolling[0], self.pos[1] - self.sprite_height // 2 + scrolling[1]))
+
+    # Draw the weapon
+    draw_weapon(self, WIN, scrolling)
+
+
+def elektra_draw(self, WIN, scrolling):
+    # Draw the colision box
+    # Get the sprite direction
+    player_direction = Fun.get_entity_direction(self.angle) % 6
+    weapon_angle = self.angle
+    if not self.standing_still:
+        player_direction = Fun.get_entity_direction(self.direction_angle) % 6
+
+    # Affect the placement of the second weapon
+    # weapon_x_mod, weapon_y_mod, weapon_angle_mod = 2, 4, 10
+
+    # Draws the player
+    WIN.blit(Fun.ENTITY_SHADOW, (self.pos[0] - 16 + scrolling[0], self.pos[1] + 11 + scrolling[1]),
+             special_flags=pg.BLEND_RGBA_SUB)
+
+    frame_to_get = 0
+    action_type = "Walk"
+    # Make the counters go up
+    for counter in self.animation_counter:
+        if action_type == counter:
+            self.animation_counter[counter] = 1
+        else:
+            self.animation_counter[counter] = 0
+    p = round(3 * self.no_shoot_state / self.weapon.fire_rate)
+    # Sliding need a special case to handle its animation
+    # if self.no_shoot_state > 0 and not self.reloading:
+    if self.shooting:
+        # print(player_direction)
+        frame_to_get = round(4 * (self.no_shoot_state / self.weapon.fire_rate)) % (
+                 len(self.sprites[player_direction]["Walk"]) - 1) + 1
+        # frame_to_get = self.animation_counter[action_type] // 7 % (
+        #         len(self.sprites[player_direction][action_type]) - 1) + 1
+
+    # Draws the player
+    sprite_drawn = self.sprites[player_direction][action_type][frame_to_get]
+    WIN.blit(sprite_drawn, (
+    self.pos[0] - self.sprite_height // 2 + scrolling[0], self.pos[1] - self.sprite_height // 2 + scrolling[1]))
 
     # Draw the weapon
     draw_weapon(self, WIN, scrolling)
@@ -2596,6 +2831,14 @@ def vivianne_summons_on_death(self, entities, level):
         if active == self.name:
             self.owner.free_var["Active summons"].pop(count)
             break
+
+    # Blue Ballin upgrade
+    if "Blue Ballin" in self.owner.free_var:
+        # "Ballin"
+        Items.spawn_item(entities, "Ballin", Fun.move_with_vel_angle(self.pos, 20, self.aim_angle), self=self)
+        entities["items"][-1].free_var["Angle"] = Fun.angle_between(self.owner.pos, self.pos)
+        entities["items"][-1].free_var["True pos"] = self.pos
+        entities["items"][-1].owner = self.owner
 
 
 # |Enemy Input|---------------------------------------------------------------------------------------------------------
@@ -4420,8 +4663,8 @@ def bloodhound_hadean_missile(self, entities, level):
                                                                           "Growth": 2,
                                                                           "Damage mod": 0.75}}])
     elif self.free_var["Startup lag"] == 29:
-        for x in range(6):
-            self.free_var["Boost type"].append(Fun.get_random_element_from_list(["Side Boost L", "Side Boost R"]))
+        for x in ["Side Boost L", "Side Boost R", "Side Boost L", "Side Boost R", "Side Boost L", "Side Boost R"]:
+            self.free_var["Boost type"].append(x)
 
 
 def bloodhound_lopolith_minigun(self, entities, level):
@@ -4521,14 +4764,9 @@ def bloodhound_canon(self, entities, level):
 def bloodhound_boost(self, entities, level):
     if not self.free_var["Boost type"]:
         return
-    # Side Boost R Side Boost L
-    # Turn Boost R Turn Boost L
-    # Forward Boost
-    # Backward Boost
+
     if start_up_lag_handler(self, 30, key="Startup lag boost"):
-        print(self.free_var["Boost type"])
-        self.free_var["Boost type"].pop()
-        print(self.free_var["Boost type"])
+        self.free_var["Boost type"].pop(0)
         self.free_var["Turn speed"] = 2
         # self.free_var["Startup lag boost"] = -1
     elif self.free_var["Startup lag boost"] > 2:
@@ -4536,31 +4774,49 @@ def bloodhound_boost(self, entities, level):
             if self.free_var["Boost type"][0] == "Turn Boost L":
                 self.input["Left"] = True
                 self.input["Right"] = False
+                side = 90
             if self.free_var["Boost type"][0] == "Turn Boost R":
                 self.input["Left"] = False
                 self.input["Right"] = True
+                side = -90
+
+            for y in range(4):
+                angle = self.free_var["Move angle"] + side + random.uniform(-12.5, 12.5)
+                entities["particles"].append(Particles.FireParticle(
+                    Fun.move_with_vel_angle([self.pos[0], self.pos[1] + 28], random.uniform(7, 25), angle),
+                    colour=Fun.FIRE))
+
             return
         self.input["Up"] = False
         self.input["Down"] = False
+        self.input["Right"] = False
+        self.input["Left"] = False
     elif self.free_var["Startup lag boost"] == 2:
         if "Turn" in self.free_var["Boost type"][0]:
             self.free_var["Turn speed"] = 6
             return
-        angle = {
+        side = {
             "Forward Boost": 0,
             "Side Boost R": 90,
             "Side Boost L": -90,
             "Backward Boost": 180,
         }[self.free_var["Boost type"][0]]
-        self.vel = Fun.move_with_vel_angle([0, 0], 25, angle + self.free_var["Move angle"])
+        self.vel = Fun.move_with_vel_angle([0, 0], 25, side + self.free_var["Move angle"])
+
+        # Boost effects
         if self.free_var["Boost type"][0] == "Backward Boost":
             for x in [33, -33]:
-                for y in range(8):
-                    print(y)
+                for y in range(12):
                     angle = self.free_var["Move angle"] + x + random.uniform(-7.5, 7.5)
-                    entities["particles"].append(Particles.RandomParticle2(
-                        Fun.move_with_vel_angle([self.pos[0], self.pos[1] + 28], 6, angle),
-                        Fun.ORANGE, 4, 10 + round(20 * random.random()), angle, size=8))
+                    entities["particles"].append(Particles.FireParticle(
+                        Fun.move_with_vel_angle([self.pos[0], self.pos[1] + 28], random.uniform(6, 15), angle),
+                        colour=Fun.FIRE))
+
+            return
+
+        for y in range(28):
+            angle = self.free_var["Move angle"] + side + random.uniform(-9.5, 9.5)
+            entities["particles"].append(Particles.FireParticle(Fun.move_with_vel_angle([self.pos[0], self.pos[1] + 28], random.uniform(6, 15), angle), colour=Fun.FIRE))
 
 
 # Attack Helicopter
@@ -4822,6 +5078,120 @@ def attack_helicopter_draw(self, WIN, scrolling):
 #       Plasma
 #       Missile Circus          Spawn a large amount of missiles
 #       Raining hell            Shoots artillery around the boss
+def rigel_input(self, entities, level):
+    # Input functions are the IA for an enemy
+    # better targeting system
+    target, target_angle, wall_in = entity_target_detection(self, entities, level)
+
+    self.input = Fun.get_default_inputs()
+    if target:
+        aim_target, move_target, og_dist = entity_get_aim_move_target(self, target)
+        aim_target = self.target.pos.copy()
+
+        entity_shoot_with_startup_lag(self, og_dist, 320)
+
+    closest_target = Fun.find_closest_in_circle(self, entities, 512, "entities")
+    if closest_target:
+        fortress_move_toward_point(self, closest_target, 40 * 7)
+        fortress_move_away_point(self, closest_target, 25 * 7)
+
+        angle = Fun.angle_between(closest_target, self.pos)
+        self.input["Right"] = self.free_var["Move angle"] < angle
+        self.input["Left"] = self.free_var["Move angle"] > angle
+
+        if not -(180 - 4) + angle < self.free_var["Move angle"] < 180 - 4 + angle:
+            self.input["Right"] = self.free_var["Move angle"] > angle
+            self.input["Left"] = self.free_var["Move angle"] < angle
+
+    # Stunned status manager
+    # Fun.stunned_manager(self)
+    return target, target_angle
+
+
+def rigel_act(self, entities, level):
+    # |Movement Input|----------------------------------------------------------------------------------------------
+    self.running = False
+    self.walking = False
+
+    max_vel = self.vel_max
+
+    # Handle double speed and slowness status
+    if self.status["Slowness"]:
+        max_vel *= 0.5
+    if self.status["Double speed"]:
+        max_vel *= 2
+
+
+    # Quick boost
+    bloodhound_boost(self, entities, level)
+    # Checks for which direction the player must move
+    # Rework it so that you are not faster when walking in diagonal, this should be fixed now
+    if self.dash_cooldown <= 0:
+        allow_correction = False
+        speed = 0
+        if self.input["Up"]:
+            speed = 1
+            allow_correction = True
+        if self.input["Down"]:
+            speed = -1
+            allow_correction = True
+        if self.input["Left"]:
+            self.free_var["Move angle"] -= self.free_var["Turn speed"]
+        if self.input["Right"]:
+            self.free_var["Move angle"] += self.free_var["Turn speed"]
+        self.vel = Fun.move_with_vel_angle(self.vel, self.speed * speed, self.free_var["Move angle"])
+
+        if not Fun.check_point_in_circle(max_vel, 0, 0, self.vel[0], self.vel[1]) and allow_correction:
+            self.vel = Fun.move_with_vel_angle([0, 0], max_vel * speed, self.free_var["Move angle"])
+        self.walking = allow_correction
+
+        self.free_var["Move angle"] = Fun.angle_value_limiter(self.free_var["Move angle"])
+        self.aim_angle = Fun.angle_value_limiter(self.aim_angle)
+
+    self.standing_still = False
+    if self.vel == [0, 0]:
+        self.standing_still = True
+
+    # Fun.aim_system(self, self.weapon)
+    self.aim_angle = self.free_var["Move angle"]
+    # |Status effects|----------------------------------------------------------------------------------------------
+    # ha ha, Fun go brr
+    Fun.status_manager(self, entities)
+    if self.no_shoot_state == 0:
+        # Attack logic
+        {
+            "Missile": bloodhound_hadean_missile,
+            "Blade": bloodhound_magma_blade,
+            "Minigun": bloodhound_lopolith_minigun,
+            "Canon": bloodhound_canon
+        } [self.free_var["Current attack"]](self, entities, level)
+
+    else:
+        self.no_shoot_state -= 1
+        if self.no_shoot_state == 0:
+            self.free_var["Mech"].reset_animations()
+
+    # |Movement Output|---------------------------------------------------------------------------------------------
+    # Make the player move
+    Fun.movement_output(self, level)
+    damage = round(abs(self.vel[0]) + abs(self.vel[1])) * 2
+    if damage > 40:
+        damage = 40
+    for e in entities["entities"]:
+        if e == self: continue
+        if self.collision_box.colliderect(e.collision_box):
+            e.vel = Fun.move_with_vel_angle(e.vel, 2, Fun.angle_between(e.collision_box.center, self.pos))
+            if e.team != self.team:
+                Fun.damage_calculation(e, damage, "Melee", death_message="Ran over")
+            pass
+    if self.draw_aim_line or self.weapon.laser_sight:
+        entities["background particles"].append(Particles.LineParticle(
+            Fun.move_with_vel_angle(self.pos, 20, self.aim_angle), Fun.BLUE, 1, self.weapon.range-20, self.aim_angle, 2, 0))
+
+
+def rigel_draw(self, WIN, scrolling):
+    self.free_var["Mech"].pos = [self.pos[0] + scrolling[0], self.pos[1] + 28 + scrolling[1]]
+    self.free_var["Mech"].draw(WIN, self.free_var["Move angle"])
 
 
 # Curtis
@@ -5149,6 +5519,7 @@ LA_RESIT = {"Physical": 0.8,  "Fire": 0.8,  "Explosion": 0.9,  "Energy": 0.9,   
 MA_RESIT = {"Physical": 0.9,  "Fire": 0.8,  "Explosion": 0.9,  "Energy": 0.8,     "Melee": 1, "Healing": -1}   # M
 VI_RESIT = {"Physical": 0.9,  "Fire": 0.9,  "Explosion": 0.8,  "Energy": 0.8,     "Melee": 1, "Healing": -1}   # M
 
+VIVIANNE_SUMMON_LIVE_TIME = 800
 # HEALING_PRIORITY_LIST = {"Wizard": -1, "Emperor": 0, "Lord": 1, "Duke": 2, "Condor": 3, "Jester": 4, "Sovereign": 5}
 player_repertory = {
     # THR-1
@@ -5438,8 +5809,8 @@ player_repertory = {
     # Birna & Sardine
     "Birna & Sardine": {
         "name": "Birna & Sardine",
-        "health": 250, "armour": 0, "damage resistances": VI_RESIT,
-        "sprites": "Sprites/Player/Tomboy/Birna.png",
+        "health": 250, "armour": 1, "damage resistances": VI_RESIT,
+        "sprites": "Sprites/Player/Tomboy/Birna.png", "Sprite Height": 40,
 
         "thickness": 15,
         "vel max": 4.4,
@@ -5454,43 +5825,43 @@ player_repertory = {
         # AI
         "func input": vivianne_summons_input,
         "func act": vivianne_summons_act,
-        "func draw": player_draw,
+        "func draw": birna_draw,
         "on death": "vivianne_summons_on_death",
         "targeting range": 750,
         "targeting angle": 33,
         "wall hack": False,
-        "free var": {"Life Limit": 360}
+        "free var": {"Life Limit": VIVIANNE_SUMMON_LIVE_TIME, "NO DEATH MESSAGE": True}
     },
     # Elektra
     "Elektra": {
         "name": "Elecktra",
-        "health": 250, "armour": 0, "damage resistances": VI_RESIT,
+        "health": 250, "armour": 1, "damage resistances": VI_RESIT,
         "sprites": "Sprites/Player/Tomboy/Elektra.png",
 
         "thickness": 15,
         "vel max": 0,
         "speed": 0,
-        "friction": 2.5,
+        "friction": 5.5,
         "dash": {"speed": 8, "i-frames": 12, "charge": 35},
 
         # Weapons
-        "weapon": "Vivianne's Rifle",
+        "weapon": "Type 56 Carbine",
         "skills": [],
 
         # AI
-        "func input": vivianne_summons_input,
+        "func input": elektra_input,
         "func act": vivianne_summons_act,
-        "func draw": player_draw,
+        "func draw": elektra_draw,
         "on death": "vivianne_summons_on_death",
         "targeting range": 750,
-        "targeting angle": 33,
+        "targeting angle": 140,
         "wall hack": False,
-        "free var": {"Life Limit": 360}
+        "free var": {"Life Limit": 360, "NO DEATH MESSAGE": True}
     },
     # Agatha
     "Agatha": {
         "name": "Agatha",
-        "health": 250, "armour": 0, "damage resistances": VI_RESIT,
+        "health": 250, "armour": 1, "damage resistances": VI_RESIT,
         "sprites": "Sprites/Player/Tomboy/Agatha.png",
 
         "thickness": 15,
@@ -5509,14 +5880,14 @@ player_repertory = {
         "func draw": player_draw,
         "on death": "vivianne_summons_on_death",
         "targeting range": 750,
-        "targeting angle": 33,
+        "targeting angle": 140,
         "wall hack": False,
-        "free var": {"Life Limit": 360}
+        "free var": {"Life Limit": VIVIANNE_SUMMON_LIVE_TIME, "NO DEATH MESSAGE": True}
     },
     # Azura
     "Azura": {
         "name": "Azura",
-        "health": 250, "armour": 0, "damage resistances": VI_RESIT,
+        "health": 250, "armour": 1, "damage resistances": VI_RESIT,
         "sprites": "Sprites/Player/Tomboy/Azura.png",
 
         "thickness": 15,
@@ -5537,12 +5908,12 @@ player_repertory = {
         "targeting range": 750,
         "targeting angle": 33,
         "wall hack": False,
-        "free var": {"Life Limit": 360}
+        "free var": {"Life Limit": VIVIANNE_SUMMON_LIVE_TIME, "NO DEATH MESSAGE": True}
     },
     # M (Marisa)
     "M (Marisa)": {
         "name": "M (Marisa)",
-        "health": 250, "armour": 0, "damage resistances": VI_RESIT,
+        "health": 250, "armour": 1, "damage resistances": VI_RESIT,
         "sprites": "Sprites/Player/Tomboy/M.png",
 
         "thickness": 15,
@@ -5552,23 +5923,23 @@ player_repertory = {
         "dash": {"speed": 8, "i-frames": 12, "charge": 35},
 
         # Weapons
-        "weapon": "Vivianne's Rifle",
+        "weapon": "M's Spear",
         "skills": [],
 
         # AI
-        "func input": vivianne_summons_input,
+        "func input": m_input,
         "func act": vivianne_summons_act,
         "func draw": player_draw,
         "on death": "vivianne_summons_on_death",
         "targeting range": 750,
         "targeting angle": 33,
         "wall hack": False,
-        "free var": {"Life Limit": 360}
+        "free var": {"Life Limit": VIVIANNE_SUMMON_LIVE_TIME, "NO DEATH MESSAGE": True}
     },
     # Sierra
     "Sierra": {
         "name": "Sierra",
-        "health": 250, "armour": 0, "damage resistances": VI_RESIT,
+        "health": 250, "armour": 1, "damage resistances": VI_RESIT,
         "sprites": "Sprites/Player/Tomboy/Sierra.png",
 
         "thickness": 15,
@@ -5578,23 +5949,24 @@ player_repertory = {
         "dash": {"speed": 8, "i-frames": 12, "charge": 35},
 
         # Weapons
-        "weapon": "Vivianne's Rifle",
+        "weapon": "Anti-Material Rifle",
         "skills": [],
 
         # AI
-        "func input": vivianne_summons_input,
+        "func input": sierra_input,
         "func act": vivianne_summons_act,
         "func draw": player_draw,
         "on death": "vivianne_summons_on_death",
         "targeting range": 750,
-        "targeting angle": 33,
+        "targeting angle": 180,
         "wall hack": False,
-        "free var": {"Life Limit": 360}
+        "free var": {"Life Limit": VIVIANNE_SUMMON_LIVE_TIME * 1.75, "NO DEATH MESSAGE": True,
+                     "Ammo": {"Anti-Material Rifle": 5, "Shotgun": 8, "Pistol": 18}}
     },
     # Makoto
     "Makoto": {
         "name": "Makoto",
-        "health": 250, "armour": 0, "damage resistances": VI_RESIT,
+        "health": 250, "armour": 1, "damage resistances": VI_RESIT,
         "sprites": "Sprites/Player/Tomboy/Makoto.png",
 
         "thickness": 15,
@@ -5604,18 +5976,18 @@ player_repertory = {
         "dash": {"speed": 8, "i-frames": 12, "charge": 35},
 
         # Weapons
-        "weapon": "Vivianne's Rifle",
+        "weapon": "Iguana's tail",
         "skills": [],
 
         # AI
-        "func input": vivianne_summons_input,
+        "func input": makoto_input,
         "func act": vivianne_summons_act,
         "func draw": player_draw,
         "on death": "vivianne_summons_on_death",
         "targeting range": 750,
         "targeting angle": 33,
         "wall hack": False,
-        "free var": {"Life Limit": 360}
+        "free var": {"Life Limit": VIVIANNE_SUMMON_LIVE_TIME, "NO DEATH MESSAGE": True}
     }
 }
 
@@ -6202,7 +6574,7 @@ enemy_repertory = {
          "free var": {"IS BOSS": True}
          },
     "Fire Support Mech":
-        {"name": "Super Bulwark",
+        {"name": "Fire Support Mech",
          "faction": "FAC-3",
          "type": "Elite",
          "targeting range": R_MO, "targeting angle": D_HO, "stealth mod": S_LO, "stealth counter": C_MO,
@@ -6250,6 +6622,33 @@ enemy_repertory = {
 
     # |Others|----------------------------------------------------------------------------------------------------------
     # Rigel
+    "Rigel":
+        {"name": "Rigel",
+         "faction": "FAC-3",
+         "type": "Elite",
+         "targeting range": R_MO, "targeting angle": D_HO, "stealth mod": S_LO, "stealth counter": C_MO,
+         "wall hack": False, "health": H_HO * 24, "armour": 0, "damage resistances": F3_RESIT_H,
+         "thickness": 48,
+         "vel max": V_LO * 0.8, "speed": V_LO * 0.8, "friction": V_LO * 0.8,
+         "weapon": "Bloodhound Weaponry",
+
+         "func input": "rigel_input",
+         "func act": "rigel_act",
+         "func draw": "rigel_draw",
+         # "func draw": "enemy_draw_basic",
+         "sprites": "Sprites/Enemies/Bulwark.png", "on death": "none",
+         "free var": {
+             "IS BOSS": True,
+             "Mech": MechRenderer.Mech(MechRenderer.bloodhound_mech, MechRenderer.bloodhound_palette, [0, -350]),
+             "Move angle": -90,
+             "Turn speed": 2,
+             "Startup lag": 0,
+             "Startup lag boost": 0,
+             "Current attack": "Canon",
+             "Boost type": []
+         }
+         },
+    # Curtis
     "Curtis": {
         "name": "Curtis", "faction": "Zoar Colonists",
         "health": 200*4, "armour": 50, "damage resistances": CU_RESIT,

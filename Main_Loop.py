@@ -34,9 +34,9 @@ def main_loop(WIN, CLOCK, entities, level, party_info, scrolling, scrolling_targ
             if entity.health <= 0:
                 entity.death(entities, level, scrolling_target_entities)
                 if entity.health <= 0:  # Condor/Vincent's last stand skill forced me to do that
-                    if entity.team == "Players" and entity.name != "Doppelgänger":
+                    if entity.team == "Players" and "NO DEATH MESSAGE" not in entity.free_var:
                         party_info[entity.name]["Death message"] = entity.free_var["Death message"]
-                        print(party_info[entity.name]["Death message"])
+                        # print(party_info[entity.name]["Death message"])
                     entities["entities"].pop(count)
                     continue
 

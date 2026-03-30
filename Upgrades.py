@@ -681,6 +681,7 @@ def effect_lovers(self, entities, level):
 
     entities["entities"][1].pos = Fun.random_point_in_circle(self.owner.pos, 32)
     entities["entities"][1].free_var["Ally waypoint"] = self.owner
+    entities["entities"][1].free_var.update({"NO DEATH MESSAGE": True})
     entities["entities"][1].name = "Doppelgänger"
 
 

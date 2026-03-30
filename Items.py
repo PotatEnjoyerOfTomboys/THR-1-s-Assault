@@ -1,5 +1,6 @@
 import pygame as pg
 import random
+import math
 
 import Bullets
 import Fun
@@ -402,7 +403,6 @@ def dropped_weapon(self, entities, level):
         self.owner.weapon = self.free_var["Weapon"]
         self.owner.weapon_draw_dist = 0
         self.owner.draw_angle = 0
-        print("Weapon picked up")
         self.alive = False
 
 
@@ -491,6 +491,36 @@ def sardine_draw(self, WIN, scrolling):
     # 93, 167, 133
 
 
+
+def ballin(self, entities, level):
+    if not self.time_is_ticking():
+        # some particles
+        pass
+    # Move
+    speed_mod = self.life_time / 120
+    self.pos = Fun.move_with_vel_angle(self.free_var["True pos"], 3 * speed_mod, self.free_var["Angle"])
+    self.free_var["True pos"] = self.pos.copy()
+    self.pos[1] -= 4 * math.sin(self.time * speed_mod * 0.2)
+    self.collision_box = pg.Rect(self.pos[0] - self.thiccness / 2, self.pos[1] - self.thiccness / 2,
+                                 self.thiccness, self.thiccness)
+
+    # Spawn blue balls
+    if self.collision_box.colliderect(self.owner.collision_box):
+        for x in range(10):
+            Bullets.spawn_blue_balls(
+                self.owner, entities,
+                [self.owner.pos[0], self.owner.pos[1]],
+                self.free_var["Angle"] + 36 * x,
+                [4, 230, 7, 30, {"Colour": Fun.DARK_BLUE}])
+        self.life_time = 0
+        self.alive = False
+
+
+def ballin_draw(self, WIN, scrolling):
+    pg.draw.circle(WIN, Fun.ORANGE, [self.pos[0] + scrolling[0],
+                                      self.pos[1] + scrolling[1]], 4)
+
+
 def justice_homing(self, entities, level):
     self.alive = self.free_var["Bullet"].duration > 0
     manoeuvrability = 4
@@ -564,6 +594,18 @@ item_repertory = {
         "life time": 2,
         "free var": {
             "Sprite": 0,
+        }
+    },
+    "Ballin": {
+        "name": "Ballin",
+        "friction": 0, "thickness": 8,
+        "act": ballin,
+        "draw": ballin_draw,
+        "sprites": [],
+        "life time": 120,
+        "free var": {
+            "Angle": None,
+            "True pos": [0, 0]
         }
     },
     "Hunk of steel": {

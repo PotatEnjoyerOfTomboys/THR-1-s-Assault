@@ -721,6 +721,12 @@ def on_hit_hellfire(self, collision, entities, level):
         entities["particles"].append(Particles.FireParticle(collision.pos, self.owner.weapon.free_var["Colour"]))
 
 
+def on_hit_iguanas_tail(self, collision, entities, level):
+    if collision.damage_taken and collision.status["No damage"] == 8:
+        collision.status["Stunned"] += 15
+        # Particles.random_particle_2_circle(entities, collision.pos, 3, 25, 16, colour=Fun.YELLOW, size=3, angle_mod=180 * random.random())
+
+
 # |The simplest projectile|---------------------------------------------------------------------------------------------
 class Bullet(BasicBullet):
     def __init__(self, pos, angle, info, owner):
@@ -2953,7 +2959,7 @@ class RazorWind(BasicBullet):
         self.melee = False
 
         self.angle_modifier = info[4]["Angle modifier"]
-        self.segment = info[4]["Segment amount"]    # used for now
+        # self.segment = info[4]["Segment amount"]    # used for now
 
         self.points_to_check = []
         self.end_points = []
