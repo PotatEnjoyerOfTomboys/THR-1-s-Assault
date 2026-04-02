@@ -2379,6 +2379,14 @@ def attack_helicopter_weaponry_passive(self, entities, level):
         # Fun.play_sound("Chain click")s
     # variable_handling_rate(self, entities, level, rate=20, min_handle=0.5)
 
+def sardine_passive(self, entities, level):
+    if self.time % 90 == 89:
+        # Spawn Sardine
+        Items.spawn_item(entities, "Sardine", Fun.move_with_vel_angle(self.pos, 20, self.aim_angle), self=self)
+        entities["items"][-1].free_var["Angle"] = Fun.angle_between(self.owner.pos, self.pos)
+        entities["items"][-1].owner = self.owner
+
+
 def m_spear(self, entities, level):
     if self.no_shoot_state == 0:
         if self.input["Alt fire"]:
@@ -3746,6 +3754,35 @@ weapon_repertory = {
          "laser sight": False,
          "alt fire": "none",
          "passive": "none"},
+    "Sardine's Bucket":
+        {"name": "Sardine's Bucket",
+         "class": "Semi-auto",
+         "sprite": "Sprites/Weapon/Anime.png",
+         "gunshot sound": "Rifle 1 Shooting",
+         "reloading sound": "Reload Enemy 1",
+         "jamming sound": "Reload Enemy 1",
+         "sound level": 0,
+         "accuracy": 2,
+         "spread": 4,
+         "handle": 3,
+         "recoil": 0,
+         "full auto": True,
+         "fire rate": 8,
+         "reload time": 100,
+         "bullet type": "Bullet",
+         "bullets per shot": 0,
+         "ammo cost": 0,
+         "bullet info": [7, 50, 3, 50, {"Piercing": False, "Smoke": False}],
+         "max ammo": 100,
+         "ammo pool": 25000,
+         "crit rate": 0,
+         "crit multiplier": 2,
+         "jam rate": 0,
+         "jam duration": 0,
+         "laser sight": False,
+         "alt fire": "none",
+         "passive": "sardine_passive",
+         "agro": 0},
     # |Enemy weapons|---------------------------------------------------------------------------------------------------
     # |Circle|----------------------------------------------------------------------------------------------------------
     "Laser Carbine":  # Laser Rifle, Has a laser pointer.

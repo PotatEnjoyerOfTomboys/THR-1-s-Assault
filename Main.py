@@ -2,7 +2,6 @@ import pygame as pg
 import os
 import random
 
-
 # Do a web version with pybag?
 # Get it done in a year
 # Music 7
@@ -44,8 +43,7 @@ import random
 # TODO: fix enemy spawn in defense
 # Version 1.0 - Final version
 #   Upgrades
-#       Colonist
-#           Vivianne    3   (Need to code all tomboys)
+#           Vivianne    2   (Need to code all tomboys)
 #   Bosses
 #       Armed Shield Generator  Tesla coil attack
 #       Rigel                   (Final boss)
@@ -58,8 +56,7 @@ import random
 #   Versus mode
 #       Balance changes (small ones)
 #   Character conversations
-#   Secret stage
-#       Gonna be like L4D2. Small anomalies just rushing you
+#   New party selection screen
 #   Encyclopedia
 #   Animated weapons. Mostly for the pile bunker
 #   Animated radio transmission portraits

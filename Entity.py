@@ -469,10 +469,10 @@ def vivianne_act(self, entities, level):
     # Summon mechanic
     # "Summon cooldown time": 360, "Summon cooldown": 0, "Summon limit": 1, "Summon pool": [], "Active summons": []
     if self.free_var["Summon pool"]:
+        summon_allowed = len(self.free_var["Active summons"]) < self.free_var["Summon limit"]
         if self.free_var["Summon cooldown"] == 0:
             if self.input["Interact"]:
-                print(self.free_var["Active summons"])
-                if len(self.free_var["Active summons"]) < self.free_var["Summon limit"]:
+                if summon_allowed:
                     # Select summon to spawn
                     valid_pool = []
                     for summon in self.free_var["Summon pool"]:
@@ -494,6 +494,29 @@ def vivianne_act(self, entities, level):
                         entities["entities"][-1].owner = self
         else:
             self.free_var["Summon cooldown"] -= 1
+        # Draw shit
+        # "UI particles"    square, colour, growth, duration
+        entities["UI particles"].append(Particles.Square([self.pos[0]+16, self.pos[1] - 8, 1, 4], Fun.DARK, 1))
+        entities["UI particles"].append(Particles.Square([self.pos[0]+16, self.pos[1] - 4, 4, 4], Fun.DARK, 1))
+        entities["UI particles"].append(Particles.Square([self.pos[0]+16, self.pos[1], 3, 4], Fun.DARK, 1))
+        entities["UI particles"].append(Particles.Square([self.pos[0]+16, self.pos[1] + 4, 4, 4], Fun.DARK, 1))
+        cooldown_time = 32 - round(32 * self.free_var["Summon cooldown"] / self.free_var["Summon cooldown time"])
+
+        col = Fun.GRAY
+        if summon_allowed:
+            col = Fun.LIGHT_GRAY
+        for x in range(4):
+            p = cooldown_time - 4
+            if p < 0:
+                p += abs(p)
+            dif = cooldown_time - p
+            cooldown_time = p
+            print(dif)
+            entities["UI particles"].append(Particles.Square([
+                self.pos[0] + 16,
+                self.pos[1] + [-8, -4, 0, 4][x],
+                [1, 4, 3, 4][x],
+                dif], col, 1))
 
 
 def vivianne_summons_act(self, entities, level):
@@ -2479,6 +2502,78 @@ def vivianne_summons_input(self, entities, level):
 
     # entity_spread_apart(self, entities)
     entity_dodge_bullets(self, entities, 32)
+
+    # Stunned status manager
+    Fun.stunned_manager(self)
+    return target, target_angle
+
+
+def birna_input(self, entities, level):
+    # Input functions are the IA for an enemy
+    # better targeting system
+    target, target_angle, wall_in = entity_target_detection(self, entities, level)
+
+    if target:
+        aim_target = self.target.pos.copy()
+        # move_target = target.copy()
+        self.mouse_pos = aim_target.copy()
+        self.angle = Fun.angle_between(aim_target, self.pos)
+
+        # basic_fire_control(self, entities, level, target, wall_in)
+        entity_dash_when_targeted(self)
+        entity_move_toward_point(self, aim_target, self.weapon.range * 0.8)
+
+    elif self.weapon.ammo < self.weapon.max_ammo and self.weapon.ammo_pool > 0:
+            self.input["Reload"] = True
+    else:
+        move_target = universal_pathfinding(self, level, self.owner.pos)
+        # aaa = bool(move_target)
+        if not move_target:
+            move_target = self.owner .pos
+        entity_move_toward_point(self, move_target, 48)
+
+    # entity_spread_apart(self, entities)
+    # entity_dodge_bullets(self, entities, 32)
+
+    # Stunned status manager
+    Fun.stunned_manager(self)
+    return target, target_angle
+
+
+def agatha_input(self, entities, level):
+    # Input functions are the IA for an enemy
+    # better targeting system
+    target, target_angle, wall_in = entity_target_detection(self, entities, level)
+
+    if target:
+        aim_target = self.target.pos.copy()
+        # move_target = target.copy()
+        self.mouse_pos = aim_target.copy()
+        self.angle = Fun.angle_between(aim_target, self.pos)
+
+        basic_fire_control(self, entities, level, target, wall_in)
+        entity_dash_when_targeted(self)
+        entity_move_toward_point(self, aim_target, self.weapon.range * 0.8)
+
+    elif self.weapon.ammo < self.weapon.max_ammo and self.weapon.ammo_pool > 0:
+            self.input["Reload"] = True
+    else:
+        move_target = universal_pathfinding(self, level, self.owner.pos)
+        if not move_target:
+            move_target = self.owner .pos
+        entity_move_toward_point(self, move_target, 48)
+
+    # entity_spread_apart(self, entities)
+    look_range, bullets_to_dodge = 64, (Bullets.Bullet, Bullets.Fire, Bullets.Missile, Bullets.Artillery)
+    bullet_to_dodge = Fun.find_closest_bullet_types_in_circle(self, entities, look_range, bullets_to_dodge)
+    if bullet_to_dodge:
+    # dodge_pos = Fun.move_with_vel_angle(self.pos, bullet_to_dodge.radius, bullet_to_dodge.angle  - 75)
+        dodge_pos = bullet_to_dodge.pos
+
+        self.input["Right"] = self.pos[0] > dodge_pos[0]
+        self.input["Left"] = self.pos[0] < dodge_pos[0]
+        self.input["Down"] = self.pos[1] > dodge_pos[1]
+        self.input["Up"] = self.pos[1] < dodge_pos[1]
 
     # Stunned status manager
     Fun.stunned_manager(self)
@@ -5073,9 +5168,9 @@ def attack_helicopter_draw(self, WIN, scrolling):
 #       Shoulder Bash           Charge forwards, hit box on whole body
 #           Lance Swipe         Large swipe with lance
 #               Giga Thrust     Charge with lance, disjointed attack
-#       Laser barrage
+#       Laser barrage           Shoots lots of lasers
 #       Quick Turn
-#       Plasma
+#       Plasma                  Creates a big bullet with limited homing
 #       Missile Circus          Spawn a large amount of missiles
 #       Raining hell            Shoots artillery around the boss
 def rigel_input(self, entities, level):
@@ -5816,14 +5911,14 @@ player_repertory = {
         "vel max": 4.4,
         "speed": 2.2,
         "friction": 1.5,
-        "dash": {"speed": 8, "i-frames": 12, "charge": 35},
+        "dash": {"speed": 12, "i-frames": 20, "charge": 25},
 
         # Weapons
-        "weapon": "Vivianne's Rifle",
+        "weapon": "Sardine's Bucket",
         "skills": [],
 
         # AI
-        "func input": vivianne_summons_input,
+        "func input": birna_input,
         "func act": vivianne_summons_act,
         "func draw": birna_draw,
         "on death": "vivianne_summons_on_death",
@@ -5875,7 +5970,7 @@ player_repertory = {
         "skills": [],
 
         # AI
-        "func input": vivianne_summons_input,
+        "func input": agatha_input,
         "func act": vivianne_summons_act,
         "func draw": player_draw,
         "on death": "vivianne_summons_on_death",

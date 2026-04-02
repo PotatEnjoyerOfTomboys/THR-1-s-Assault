@@ -321,6 +321,7 @@ sounds_dict = {
     # ||
     "Explosion": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Explosion.ogg')), "Volume": 0.125},
     "Fire 1": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Fire_1.ogg')), "Volume": 0.05},
+    "Sardine Blows Up": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Sardine_Blows_Up.ogg')), "Volume": 0.6},
 
     # Electricity
     "Electricity 1": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Electricity_1.ogg')), "Volume": 0.5},
@@ -3458,7 +3459,7 @@ UPGRADE_INFO = {
     'Icon': UPGRADE_SHEET.subsurface(200, 480, 40, 40), 'name': 'Anti Laser Coating', 'effect': 'effect_anti_laser_coating', 'trigger': 'trigger_when_loaded'},
 
 "Breaking Limits": {
-    'Tier': 3, 'Cost': COST_H, 'Owner': 'Party', 'Icon': UPGRADE_SHEET.subsurface(120, 560, 40, 40),
+    'Tier': 3, 'Cost': COST_H * 1.5, 'Owner': 'Party', 'Icon': UPGRADE_SHEET.subsurface(240, 480, 40, 40),
     'name': 'Breaking Limits', 'effect': 'effect_none', 'trigger': 'trigger_when_loaded'},
 
 "Skill Issue": {
@@ -4183,7 +4184,7 @@ def shop_menu(WIN, CLOCK, party_info, run_info):
 
                 elif p["Value"] == "Other services":
                     shop_display.blit(services_icon, (32 + offset[count][0], 32 + offset[count][1]))
-                    shop_display.blit(temp_ui_font_2.render(f"Full Heal", True, AMBER),
+                    shop_display.blit(temp_ui_font_2.render(f"Services", True, AMBER),
                                       (32 + offset[count][0] - 4, 32 + offset[count][1] + 44))
                 else:
                     shop_display.blit(exit_icon, (32 + offset[count][0], 32 + offset[count][1]))

@@ -313,11 +313,11 @@ class Mech:
             if new_layer:
                 self.mech_sprite_stack.append(new_layer)
         self.pos = pos
-        for p in self.mech_parts:
-            print(p)
-            for pp in self.mech_parts[p]:
-                print(pp)
-                print(self.mech_parts[p][pp])
+        # for p in self.mech_parts:
+        #     print(p)
+        #     for pp in self.mech_parts[p]:
+        #         print(pp)
+        #         print(self.mech_parts[p][pp])
 
         # {"Time": 0, "Angle Speed": 0}
         self.mech_animations = {

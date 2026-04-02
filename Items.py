@@ -482,14 +482,49 @@ def payload_stun(self):
 
 
 def sardine(self, entities, level):
+    self.time_is_ticking()
     # Follow target, when in range, starts blow up animation
-    pass
+    if self.free_var["Blow up counter"] == -1:
+        target = Bullets.missile_seek(self, entities, 360, self.free_var["Angle"], 75)
+        if target:
+            self.free_var["Angle"] = Fun.angle_between(target.pos, self.pos)
+            self.vel = Fun.move_with_vel_angle([0, 0], 3, self.free_var["Angle"])
+            if Fun.distance_between(target.pos, self.pos) < 32:
+                self.free_var["Blow up counter"] = 24
+        if self.time > self.life_time - 24:
+            self.free_var["Blow up counter"] = 24
+
+        # Add some goo
+        if self.time % 2 == 0:
+            entities["background particles"].append(
+                Particles.SquareTransparent([self.pos[0], self.pos[1], random.randint(5, 10), random.randint(1, 3)], (93, 167, 133),
+                                            self.life_time, random.randint(64, 160), centered=True)
+            )
+        # self.animation_counter = self.time // 4 % 4
+        self.animation_counter = self.time // 4 % 3
+    else:
+        # Countdown and boom
+        self.animation_counter = self.free_var["Blow up counter"] // 8 % 3
+        self.free_var["Blow up counter"] -= 1
+        if self.free_var["Blow up counter"] == 0:
+            # Sound effects
+            Fun.play_sound("Sardine Blows Up")
+            Bullets.spawn_bullet(self, entities, Bullets.Melee3, self.pos, 0,
+                                 [0, 7, 2, 30, {"Colour": (93, 167, 133), "Growth": 8}])
+            self.alive = False
 
 
 def sardine_draw(self, WIN, scrolling):
-    pass
-    # 93, 167, 133
 
+    # pg.draw.circle(WIN, (93, 167, 133), [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]], 4)
+    # 93, 167, 133
+    # self.animation_counter = 0
+    # enemy_direction = Fun.get_entity_direction(self.free_var["Angle"])
+    WIN.blit(
+        self.sprites[Fun.get_entity_direction(self.free_var["Angle"])]["Walk"][self.animation_counter],
+        (self.pos[0] - 4 + scrolling[0],
+         self.pos[1] - 4+ scrolling[1])
+    )
 
 
 def ballin(self, entities, level):
@@ -556,6 +591,10 @@ def justice_homing(self, entities, level):
             entities["particles"].append(Particles.FireParticle(Fun.move_with_vel_angle(pos, self.thiccness * 1.25, 360 * random.random()), Fun.YELLOW))
 
 
+# print("Sardine")
+# for p in Fun.desheetator(Fun.get_image("Sprites/Player/Tomboy/Sardine.png"), 8):
+#     print(p)
+#     print(len(p))
 item_repertory = {
     # |Cover|-----------------------------------------------------------------------------------------------------------
     # |Skill|-----------------------------------------------------------------------------------------------------------
@@ -594,6 +633,18 @@ item_repertory = {
         "life time": 2,
         "free var": {
             "Sprite": 0,
+        }
+    },
+    "Sardine": {
+        "name": "Sardine",
+        "friction": 1, "thickness": 8,
+        "act": sardine,
+        "draw": sardine_draw,
+        "sprites": Fun.desheetator(Fun.get_image("Sprites/Player/Tomboy/Sardine.png"), 8),
+        "life time": 120,
+        "free var": {
+            "Angle": 0,
+            "Blow up counter": -1
         }
     },
     "Ballin": {

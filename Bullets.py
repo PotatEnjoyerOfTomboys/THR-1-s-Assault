@@ -2511,7 +2511,7 @@ class Melee3(BasicBullet):  # Loses speed like a grenade
 
     def draw(self, win, scrolling):
         if self.duration > 0:
-            pg.draw.circle(win, self.colour, [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]], self.radius, 2)
+            pg.draw.circle(win, self.colour, [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]], self.radius, round(self.radius//3 + 0.2))
 
 
 # The electric projectile is a small segment.

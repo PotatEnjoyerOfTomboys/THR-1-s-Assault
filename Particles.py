@@ -575,6 +575,35 @@ class CrippleLaddieUI:
             self.duration -= 1
 
 
+class Square:
+    def __init__(self, square, colour, duration, centered=False, thiccness=0):
+        self.survive_wipe = False
+
+        pos = [square[0], square[1]]
+        width = square[2]
+        height = square[3]
+
+        self.pos = pos
+        self.colour = colour
+        self.duration = duration
+        self.width = width
+        self.height = height
+        self.thiccness = thiccness
+
+        self.centered = centered
+        self.offset = [0, 0]
+        if self.centered:
+            self.offset = [self.width // 2, self.height // 2]
+
+    def draw(self, WIN, scrolling):
+        if self.duration > 0:
+            pg.draw.rect(WIN, self.colour, [self.pos[0] + scrolling[0] + self.offset[0],
+                                            self.pos[1] + scrolling[1] + self.offset[1],
+                                            self.width,
+                                            self.height], self.thiccness)
+            self.duration -= 1
+
+
 class GrowingSquare:
     def __init__(self, square, colour, growth, duration, centered=False, thiccness=0):
         self.survive_wipe = False
@@ -672,6 +701,39 @@ class GrowingSquareTransparent:
 
             if self.centered:
                 self.offset = [self.width // 2, self.height // 2]
+
+
+class SquareTransparent:
+    def __init__(self, square, colour, duration, alpha, centered=False):
+        self.survive_wipe = False
+
+        pos = [square[0], square[1]]
+        width = square[2]
+        height = square[3]
+
+        self.pos = pos
+        self.colour = colour
+        self.duration = duration
+        self.width = width
+        self.height = height
+        self.alpha = alpha
+
+        self.centered = centered
+        self.offset = [0, 0]
+        if self.centered:
+            self.offset = [self.width // 2, self.height // 2]
+
+    def draw(self, WIN, scrolling):
+        if self.duration > 0:
+            draw_transparent_rect(WIN, [self.pos[0] + scrolling[0] + self.offset[0],
+                                        self.pos[1] + scrolling[1] + self.offset[1],
+                                        self.width,
+                                        self.height],
+                                  self.colour,
+                                  self.alpha)
+
+            self.duration -= 1
+
 
 
 class SolidColourOverlay:
