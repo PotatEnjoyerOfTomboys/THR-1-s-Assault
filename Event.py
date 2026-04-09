@@ -144,7 +144,7 @@ def spawn_ally(entities, ally: str, pos: [int, int], angle: int):
         entities["entities"].append(Entity.Entity(Entity.player_repertory[ally], pos=pos, start_angle=angle))
         # info, team="Players", pos=[0, 0], start_angle=0
         return
-    print(f"Error {ally} does not exist")
+    Fun.print_to_error_stream(f"Error {ally} does not exist")
 
 
 # The event system work by using triggers to check if the event should happen and effects that are what the event cause
@@ -397,7 +397,7 @@ def skip_mission(self, entities, bullets, level, time_passed, screen, CLOCK):
         if e.team == "Players":
             e.status["No damage"] = 300
             e.health = e.max_health
-            print(e.health)
+            # print(e.health)
     #
 
 
@@ -663,7 +663,7 @@ def landmines(self, entities, bullets, level, time_passed, screen, CLOCK):
 def ambush(self, entities, bullets, level, time_passed, screen, CLOCK):
     for x in range(3):
         spawn_enemy_squad(entities, level, entities["entities"][0].pos, dist_mod=5)
-        print([entities["scrolling"][0] * -1, entities["scrolling"][1] * -1])
+        # print([entities["scrolling"][0] * -1, entities["scrolling"][1] * -1])
 
 
 # Versus

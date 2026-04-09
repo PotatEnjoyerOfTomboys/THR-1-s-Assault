@@ -2374,10 +2374,12 @@ def hover_tank_cannon_passive(self, entities, level):
 
 
 def attack_helicopter_weaponry_passive(self, entities, level):
-    self.status["Visible"] = 2
+    pass
+    # self.status["Visible"] = 2
     # if self.vel != [0, 0] and self.time % 8 == 0:
         # Fun.play_sound("Chain click")s
     # variable_handling_rate(self, entities, level, rate=20, min_handle=0.5)
+
 
 def sardine_passive(self, entities, level):
     if self.time % 90 == 89:
@@ -2408,6 +2410,102 @@ def m_spear(self, entities, level):
 
     # if self.draw_angle > 0:
     #     self.draw_angle -= 10
+
+
+def agatha_passive(self, entities, level):
+    if self.no_shoot_state != 0:
+        return
+
+    if self.input["Alt fire"]:
+        self.draw_angle = 90
+        self.draw_rotated_dist = 14
+        self.weapon_draw_dist = 8
+        if self.weapon.free_var["Charge cooldown"] > 0:
+            self.weapon.free_var["Charge cooldown"] -= 1
+        return
+    # self.draw_angle = 0
+
+    key_released, weapon_info = melee_system(self, entities, level,
+                                             basic_attacks=[agatha_combo_1,
+                                                            agatha_combo_2,
+                                                            agatha_combo_3
+                                                            ],
+                                             charged_attack=Fun.none,
+                                             basic_threshold=[32, 32, 96], charged_threshold=200)
+
+    # entities["particles"].append(Fun.LineParticle(self.pos, Fun.GREEN, 1, 6 * 80, self.weapon.free_var["Sword target angle"] + self.angle))
+
+    # allow_angle_change = True
+    # if self.weapon.free_var["Angle ref"]:
+        # self.aim_angle = self.weapon.free_var["Angle ref"].angle + 90 * self.weapon.free_var["Mod"] - self.weapon.free_var["Angle ref"].angle_deviation * self.weapon.free_var["Mod"] # reverse this on second combo stage
+    #     if self.weapon.free_var["Angle ref"].duration == 0:
+    #         self.weapon.free_var["Angle ref"] = False
+    #     allow_angle_change = False
+
+    # if weapon_info["Press time"] > 0 and not key_released:
+    #     if weapon_info["Combo stage"] in [0, 1] and allow_angle_change:
+    #         self.draw_angle = weapon_info["Press time"] * [1, -1][weapon_info["Combo stage"]] * 2
+            # self.weapon.free_var["Sword target angle"] = weapon_info["Press time"] * [1, -1][weapon_info["Combo stage"]] * 2.5
+            # print(self.draw_angle)
+    #     if weapon_info["Combo stage"] == 2:
+     #        self.weapon_draw_dist = -weapon_info["Press time"] * 0.5
+
+
+def agatha_combo_1(self, entities, level):
+    self.vel = Fun.move_with_vel_angle([0, 0], 2, self.aim_angle + 15)
+
+    # Bullets.spawn_bullet(
+    #     self, entities, Bullets.LaserDanmaku2, self.pos, self.aim_angle - 180,
+    #     [0, 10, 60, 250, {"Colour": Fun.WHITE, "Angle deviation": deviation, "Damage type": "Melee"}])
+    Bullets.spawn_bullet(
+        self, entities,
+        Bullets.RazorWind,
+        Fun.move_with_vel_angle(self.pos, 25, self.aim_angle),
+        self.aim_angle,
+        [6, 7, 30, 125,
+         {"Colour": Fun.WHITE, "Angle modifier": 100, "Segment amount": 1, "Damage type": "Melee"}])
+    self.weapon.free_var["Angle ref"] = entities["bullets"][-1]
+
+    Fun.play_sound("Hitting 1", "SFX")
+
+
+def agatha_combo_2(self, entities, level):
+    self.vel = Fun.move_with_vel_angle([0, 0], 2, self.aim_angle - 15)
+
+    # Bullets.spawn_bullet(
+    #     self, entities, Bullets.LaserDanmaku2, self.pos, self.aim_angle + 180,
+    #     [0, 10, 60, 250, {"Colour": Fun.WHITE, "Angle deviation": deviation, "Damage type": "Melee"}])
+    Bullets.spawn_bullet(
+        self, entities,
+        Bullets.RazorWind,
+        Fun.move_with_vel_angle(self.pos, 25, self.aim_angle),
+        self.aim_angle,
+        [6, 7, 30, 125,
+         {"Colour": Fun.WHITE, "Angle modifier": 100, "Segment amount": 1, "Damage type": "Melee"}])
+    Fun.play_sound("Hitting 1", "SFX")
+
+
+def agatha_combo_3(self, entities, level):
+    self.vel = Fun.move_with_vel_angle([0, 0], 8, self.aim_angle)
+    # self.status["Low friction"] += 25
+    # self.weapon_draw_dist = 30
+    Bullets.spawn_bullet(
+        self, entities,
+        Bullets.RazorWind,
+        Fun.move_with_vel_angle(self.pos, 25, self.aim_angle),
+        self.aim_angle,
+        [6, 7, 30, 125,
+         {"Colour": Fun.WHITE, "Angle modifier": 100, "Segment amount": 1, "Damage type": "Melee"}])
+
+    Fun.play_sound("Hitting 2")
+
+
+def azura_passive(self, entities, level):
+    if self.input["Dash"] and self.dash_cooldown <= self.dash_charge_time:
+        print("Does this shit work")
+        Items.spawn_item(entities, "M3-D1C OUT OF MY WAY", self.pos.copy(), self=self)
+        entities["items"][-1].life_time = abs(self.dash_cooldown)
+
 
 # |Weapon Repertories|--------------------------------------------------------------------------------------------------
 weapon_repertory = {
@@ -3783,6 +3881,68 @@ weapon_repertory = {
          "alt fire": "none",
          "passive": "sardine_passive",
          "agro": 0},
+    "Agatha's Fist":
+        {"name": "Agatha's Fist",
+         "description": "",
+         "class": "Blunt",
+         "sprite": "Sprites/Weapon/Anime.png",
+         "gunshot sound": "Silence",
+         "reloading sound": "Silence",
+         "jamming sound": "Silence",
+         "sound level": 0,
+         "accuracy": 0,
+         "spread": 0,
+         "handle": 6,
+         "recoil": 0,
+         "full auto": True,
+         "fire rate": 0,
+         "reload time": 1,
+         "bullet type": "Melee",
+         "bullets per shot": 0,
+         "ammo cost": 0,
+         "bullet info": [0, 2, 25, 70, {}],
+         "range": 6 * 7,
+         "max ammo": 1,
+         "ammo pool": 0,
+         "crit rate": 0.25,
+         "crit multiplier": 2,
+         "jam rate": 0,
+         "jam duration": 0,
+         "laser sight": False,
+         "alt fire": "none",
+         "passive": "agatha_passive",
+         "free var": {"Angle ref": False, "Mod": 1, "Charge cooldown": 0}},
+    "Azura's Fist":
+        {"name": "Azura's Fist",
+         "description": "",
+         "class": "Blunt",
+         "sprite": "Sprites/Weapon/Anime.png",
+         "gunshot sound": "Silence",
+         "reloading sound": "Silence",
+         "jamming sound": "Silence",
+         "sound level": 0,
+         "accuracy": 0,
+         "spread": 0,
+         "handle": 6,
+         "recoil": 0,
+         "full auto": True,
+         "fire rate": 0,
+         "reload time": 1,
+         "bullet type": "Melee",
+         "bullets per shot": 0,
+         "ammo cost": 0,
+         "bullet info": [0, 2, 25, 70, {}],
+         "range": 6 * 7,
+         "max ammo": 1,
+         "ammo pool": 0,
+         "crit rate": 0.25,
+         "crit multiplier": 2,
+         "jam rate": 0,
+         "jam duration": 0,
+         "laser sight": False,
+         "alt fire": "none",
+         "passive": "azura_passive",
+         "free var": {"Angle ref": False, "Mod": 1, "Charge cooldown": 0}},
     # |Enemy weapons|---------------------------------------------------------------------------------------------------
     # |Circle|----------------------------------------------------------------------------------------------------------
     "Laser Carbine":  # Laser Rifle, Has a laser pointer.
@@ -4600,47 +4760,31 @@ weapon_repertory = {
          "free var": {"Peace angle": 0, "War angle": 0}},
 }
 
-for e in weapon_repertory:
-    print(f'"{e}"')
+# for e in weapon_repertory:
+#     print(f'"{e}"')
 
 # Encyclopedia notes
-# GunBlade
-#   Manufacturer: DIC TEC||Caliber: 10mm & 20 Gauge||||This
-# St-Maurice Youth model
+# St-Maurice Youth Model
 #   Manufacturer: Compagnie d'Fusils Chasses d'3 Rivières
 #   Caliber: 22lr, 6.5mm Creemoore, 5.56, 7.62x39mm, 7.62x52mm, .303, .308, .410, 20 Gauge
 #   Production dates: June 2041 - Present (certain calibers have been discontinued)
 #   The youth model of the St-Maurice. The only real difference, is the shorter stock and barrel.
-#   Corrine used a left-handed model, although she's right-handed
+#   Corrine used a left-handed model, although she's right-handed.
 
 # St-Maurice
 #   Manufacturer: Compagnie d'Fusils Chasses d'3 Rivières
-#   This rifle became a must-have for any shooter in North America. It has great precision, very simple to maintain and
-#   build, came in almost any caliber imaginable and most importantly, cheap. Some started to call it "the standard rifle"
-#   because of how wide-spread it is and ubiquitous it became with bolt action rifles.
-
-# St-Laurent Gen 1
-#   Manufacturer: Compagnie d'Fusils Chasses d'3 Rivières
-#   Caliber: .50 BMG
-#   Production dates: December 2099 - end of production announced for January 2106
-#   There's no way to go around it, this is an anti-material rifle disguised as a big game hunting rifle. And no one can
-#   argue that it doesn't get the job done. The model was finished just in time for it to get used during the Solar War.
-
-# Corrine's Hands
-#   Manufacturer: Her mother.
-#   I don't understand why a report is needed for this, that's just the pair of hands of some girl that's almost an
-#   adult. What do you want me to say? They don't have much stopping power. And... Look I don't know what else to say.
-#   She's not a brawler, so she shouldn't be using them in the first place? Also based on what Vincent is saying, she
-#   has big hands for a girl her age. Are you still transcrib END OF TRANSCRIPTION
+#   A very simple bolt action rifle. Thanks to advances in manufacturing, this rifle can be sold for the price of older entry level rifle with the performances of a high end rifle
 
 # Type 23 Shotgun
-#   Manufacturer: Novak & Boyko||Caliber: 4 Gauge Shells||Production dates:
+#   Manufacturer: Novak & Boyko||Caliber: 4 Gauge||Production dates:
 #   A
 # Standard Shotgun
+#   Manufacturer: Compagnie d'Fusils Chasses d'3 Rivières||Caliber: 12 Gauge
 # Cowboy's Repeater
+#   Manufacturer: Old West Firearms & Replicas||Caliber: .30-30||Production dates: 2077 - Present||||
+#   This is the first gun Old West Firearms & Replicas
+
 # Mark's Rifle
-# Vivianne's Rifle
-# Vivianne's Shotgun
 
 # Laser Rifle
 # Heavy Laser
@@ -4648,20 +4792,17 @@ for e in weapon_repertory:
 # Missile Pod
 # Marker Laser
 # ARWS
-# Manufacturer: Unknown||Caliber: ||||
+#   Manufacturer: Unknown||Caliber: Unknow||||The All Range Weapon System is name given to an add-on to the
 
 
-#   "Weapon-Rifle-Corrine's Old Rifle": "",
+#   "Weapon-Rifle-St-Maurice Youth Model": "",
 # 	"Weapon-Rifle-St-Maurice": "",
-# 	"Weapon-Rifle-St-Laurent Gen 1": "",
 # 	"Weapon-Rifle-Cowboy's Repeater": "",
 # 	"Weapon-Rifle-Mark's Rifle": "",
 # 	"Weapon-Rifle-Type 30 Rifle": "",
-# 	"Weapon-Rifle-Vivianne's Rifle": "",
 # 	"Weapon-Rifle-Combat Rifle": "",
 # 	"Weapon-Shotgun-Type 23 Shotgun": "",
 # 	"Weapon-Shotgun-Standard Shotgun": "",
-# 	"Weapon-Shotgun-Vivianne's Shotgun": "",
 # 	"Weapon-Shotgun-Desert Shotgun": "",
 # 	"Weapon-Energy-Laser Carbine": "",
 # 	"Weapon-Energy-Laser Rifle": "",
@@ -4671,10 +4812,11 @@ for e in weapon_repertory:
 # 	"Weapon-Energy-Plasma Rifle": "",
 # 	"Weapon-Energy-Laser Shotgun": "",
 # 	"Weapon-Melee-Oversized stun baton": "",
-# 	"Weapon-Melee-Unarmed": "",
 # 	"Weapon-Melee-Hook Swords": "",
 # 	"Weapon-Melee-Hunk of Steel": "",
-# 	"Weapon-Melee-Gun Hammer": "",
+# 	"Weapon-Melee-Gun Hammer": "
+#       Manufacturer: Unknown||Caliber: 40mm||||
+# 	",
 # 	"Weapon-Melee-Pile Bunker": "",
 # 	"Weapon-Combo-Gun and Ballistic Knife": "Manufacturer: Novak & Boyko||",
 # 	"Weapon-Combo-Captain's Axe & Blunderbuss": "",
@@ -4685,7 +4827,7 @@ for e in weapon_repertory:
 # 	"Weapon-Heavy-Flamethrower": "",
 # 	"Weapon-Heavy-Napalm Grenade Launcher": "",
 # 	"Weapon-Heavy-Bulwark Minigun": "",
-#
+
 # 	"Weapon-Gear-Crippled Laddie FCS Radio": "",
 # 	"Weapon-Gear-Mk16 Flare Mortar": "Manufacturer: Toolkit Manufacturing||||Documentation concerning this product was lost during the Solar War. It's said it was originally ",
 # 	"Weapon-Gear-Nihilist Stretcher": "",

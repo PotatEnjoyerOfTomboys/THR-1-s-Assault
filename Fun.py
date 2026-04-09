@@ -951,7 +951,7 @@ class PseudoPlayer:
 class UniversalMenuLogic:
     def __init__(self, options, width=1, key_binds={"Select Up": "Up", "Select Down": "Down",
                                            "Select Left": "Left", "Select Right": "Right",
-                                           "Confirm": "Interact", "Return": "Reload"}):
+                                           "Confirm": "Interact", "Return": "Reload"}, default_return=-1):
         self.key_pressed = DEFAULT_KEY_PRESSED
         self.key_cooldown = DEFAULT_KEY_COOLDOWN
         self.controller = PseudoPlayer()
@@ -979,6 +979,7 @@ class UniversalMenuLogic:
         self.colour_med_vis = UI_COLOUR_NEW_BACKDROP
         self.colour_controls = UI_COLOUR_TUTORIAL
         self.colour_low_vis = UI_COLOUR_NEW_BACKGROUND
+        self.default_return = default_return
 
     def cooldown(self):
         self.key_pressed = self.key_cooldown
@@ -1022,7 +1023,7 @@ class UniversalMenuLogic:
             self.menu_mode = selected_option_data["On select"]
             self.key_pressed = self.key_cooldown
         if self.controller.input[self.key_binds["Return"]]:
-            return self.options[-1]["Value"]
+            return self.options[self.default_return]["Value"]
         return False
 
     def menu_mode_slider(self, WIN, CLOCK):
@@ -1423,15 +1424,18 @@ def main_menu(WIN, CLOCK):
         do_shit = menu_logic.act(WIN, CLOCK)
         if do_shit:
             if do_shit == "Start":
-                player_party = confirmation_popup(WIN, CLOCK, [350, 100], [
-                    {"Name": "THR-1", "Value": "THR-1", "On select": "Return", "Render func": "Text only"},
-                    {"Name": "Zoar Colonists", "Value": "Zoar Colonists", "On select": "Return", "Render func": "Text only"},
-                    {"Name": "Cancel", "Value": "Return", "On select": "Return", "Render func": "Text only"},
-                ], text="Choose party")
+                player_party = party_selection_menu(WIN, CLOCK)
+                # confirmation_popup(WIN, CLOCK, [350, 100], [
+                    # {"Name": "THR-1", "Value": "THR-1", "On select": "Return", "Render func": "Text only"},
+                    # {"Name": "Zoar Colonists", "Value": "Zoar Colonists", "On select": "Return", "Render func": "Text only"},
+                    # {"Name": "Cancel", "Value": "Return", "On select": "Return", "Render func": "Text only"},
+                # ], text="Choose party")
                 if player_party != "Return":
                     # return_value = do_shit
                     return_value = player_party
                     break
+                win_copy = WIN.copy()
+                transition, frame_1 = menu_transition_start(WIN)
             if do_shit == "Versus":
                 return_value = "Versus"
                 break
@@ -1440,6 +1444,8 @@ def main_menu(WIN, CLOCK):
                 settings_menu(WIN, CLOCK)
             if do_shit == "Credits":
                 game_credits(WIN, CLOCK)
+                win_copy = WIN.copy()
+                transition, frame_1 = menu_transition_start(WIN)
             if do_shit == "Databank":
                 encyclopedia_menu(WIN, CLOCK)
                 pg.mixer.music.pause()
@@ -1475,6 +1481,79 @@ def main_menu(WIN, CLOCK):
         CLOCK.tick(60)
 
     return return_value
+
+
+def party_selection_menu(WIN, CLOCK):
+    # Choose which input to modify
+    transition = True
+    frame_1 = some_bullshit_for_transitions(WIN)
+    win_copy = WIN.copy()
+    menu_overlay = pg.image.load(os.path.join("Sprites/UI/Overlay.png")).convert_alpha()
+    thr1_sprite = pg.image.load(os.path.join("Sprites/UI/Party Selection/THR-1.png")).convert_alpha()
+    thr1_sprite_unselected = pg.image.load(os.path.join("Sprites/UI/Party Selection/THR-1.png")).convert_alpha()
+    thr1_sprite_unselected.set_alpha(128)
+    zoar_sprite = pg.image.load(os.path.join("Sprites/UI/Party Selection/Zoar.png")).convert_alpha()
+    zoar_sprite_unselected = pg.image.load(os.path.join("Sprites/UI/Party Selection/Zoar.png")).convert_alpha()
+    zoar_sprite_unselected.set_alpha(128)
+
+    menu_sprite = pg.image.load(os.path.join("Sprites/UI/Selection Screen.png")).convert_alpha()
+
+    options = [
+        {"Name": "THR-1", "Value": "THR-1", "On select": "Return", "Render func": "Text only"},
+        {"Name": "Return", "Value": "Return", "On select": "Return", "Render func": "Text only"},
+        {"Name": "Zoar", "Value": "Zoar Colonists", "On select": "Return", "Render func": "Text only"},
+    ]
+
+    menu_logic = UniversalMenuLogic(options, key_binds={"Select Up": "Left", "Select Down": "Right",
+                                           "Select Left": "Left", "Select Right": "Right",
+                                           "Confirm": "Interact", "Return": "Reload"}, width=2, default_return=1)
+    x_mod = 0
+    draw = True
+    while True:
+        # Select
+        do_shit = menu_logic.act(WIN, CLOCK)
+        if do_shit:
+            return do_shit
+
+        # |Draw|--------------------------------------------------------------------------------------------------------
+        if draw:
+            width, height = 630, 450
+            frame = pg.Surface((630, 450))
+            surface_to_draw = frame
+            WIN.fill(BLACK)
+
+            surface_to_draw.fill(UI_COLOUR_BACKGROUND)
+            surface_to_draw.blit(menu_sprite, [x_mod, 0])
+
+            thr1 = thr1_sprite_unselected
+            if menu_logic.options[menu_logic.selected_option]["Value"] == "THR-1":
+                thr1 = thr1_sprite
+            surface_to_draw.blit(thr1, [0+8, 450-296-96])
+
+            col = (AMBER[0]//2, AMBER[1]//2, AMBER[2]//2)
+            if menu_logic.options[menu_logic.selected_option]["Value"] == "Return":
+                col = AMBER
+            temp_ui_font = create_temp_font_1(height)
+
+            text = temp_ui_font.render(write_textline("Party Select Screen return"), True, BLACK)
+            rect_width, rect_height = text.get_width() * 1.5, text.get_height() * 1.5
+            x, y = 315, 340
+            pg.draw.rect(surface_to_draw, col, (x - rect_width // 2, y - rect_height // 2, rect_width, rect_height))
+            surface_to_draw.blit(text, (x - text.get_width() // 2, y - text.get_height() // 2))
+
+            zoar = zoar_sprite_unselected
+            if menu_logic.options[menu_logic.selected_option]["Value"] == "Zoar Colonists":
+                zoar = zoar_sprite
+            surface_to_draw.blit(zoar, [630-192-8, 450-296-96])
+            surface_to_draw.blit(menu_overlay, [0, 0])
+            # Add controls
+            crt(surface_to_draw)
+            scale_render(WIN, surface_to_draw, CLOCK)
+            if transition:
+                transition = False
+                menu_transition_doom_screen_melt(WIN, CLOCK, WIN, win_copy)
+            pg.display.update()
+        CLOCK.tick(60)
 
 
 def settings_menu(WIN, CLOCK, also_pause=False):
@@ -6713,7 +6792,7 @@ def map_generator(current_mission, testing=False, defense_mode=False):
                 if y == map_height-1:
                     bottom_side = full_wall
             except IndexError:
-                print(rows)
+                # print(rows)
                 quit()
             # get_image_colour_list(get_seg_side())
 
@@ -7226,11 +7305,7 @@ def level_generator(possible_levels, party_info, run_info, current_mission=1, mi
             else:
                 # Get mission name
                 if level['name'] == write_textline("Finale 1"): # Load Rigel
-                    for x in ["Lord", "Emperor", "Wizard", "Sovereign", "Duke", "Condor", "Jester"]:
-                        enemy_spawns.append(
-                            {"Pos": random_point_in_circle([commander_spawn.centerx, commander_spawn.centery], 48),
-                             "Type": x})
-                    # enemy_spawns.append({"Pos": [commander_spawn.centerx, commander_spawn.centery], "Type": "Rigel"})
+                    enemy_spawns.append({"Pos": [commander_spawn.centerx, commander_spawn.centery], "Type": "Rigel"})
                 if level['name'] == write_textline("Finale 2"): # Load Curtis
                     enemy_spawns.append({"Pos": [commander_spawn.centerx, commander_spawn.centery], "Type": "Curtis"})
                 if level['name'] == write_textline("Finale 3"): # Load THR-1 team

@@ -3,7 +3,6 @@ import os
 import random
 
 # Do a web version with pybag?
-# Get it done in a year
 # Music 7
 # 	1 menu track            (grid room)
 # 	3 mission track         (Like SMT3's normal battle theme, solos are different)
@@ -42,30 +41,25 @@ import random
 
 # TODO: fix enemy spawn in defense
 # Version 1.0 - Final version
-#   Upgrades
-#           Vivianne    2   (Need to code all tomboys)
 #   Bosses
 #       Armed Shield Generator  Tesla coil attack
-#       Rigel                   (Final boss)
-
+#       Rigel                   (Final boss)    attacks
 #       Fire Support Mech       Boost effects
 #       THR-1 Boss fight        (Alt Final boss - Zoar route)   (Figure how to make it playable)
 #       AA Site - Drone builder (animations)
 #       Gilgamesh               (animations)
-
 #   Versus mode
 #       Balance changes (small ones)
 #   Character conversations
 #   New party selection screen
 #   Encyclopedia
-#   Animated weapons. Mostly for the pile bunker
 #   Animated radio transmission portraits
 
 # Cut
+#   Animated weapons. Mostly for the pile bunker
 # 	Mission Modifiers
 #       Unknown Forces  (Opposite player team spawn)
 
-# Type 56 Carbine
 
 pg.mixer.pre_init()
 pg.init()
@@ -90,7 +84,7 @@ import Main_Loop
 
 def main_game(party_info):
     big_game_loop = True
-    current_mission = 1
+    current_mission = 15
     run_info = {
         "Player party": player_party,
         "Missions completed": 0,

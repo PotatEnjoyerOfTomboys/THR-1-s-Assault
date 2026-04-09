@@ -12,6 +12,7 @@
 	"Main title": "Main Menu",
 	"Mission title": "Mission Selection",
 	"Loading screen": "Generating missions.",
+	"Party Select Screen return": "Return",
 		
 	"Version": "Version",
     "Pause Menu": "Pause Menu",      "Start Game": "Start Game",
@@ -593,8 +594,8 @@
 
 	"Upgrade-Desc-Birna & Sardine": "Vivianne can now call-in Birna & Sardine, Birna drops Sardine and Sardine WILL BLOW UP. Press the interact key to call in.",
 	"Upgrade-Desc-Elektra": "Vivianne can now call-in Elektra, she stand stills and shoot at nearby enemeies. Press the interact key to call in.",
-	"Upgrade-Desc-Agatha": "WIP",
-	"Upgrade-Desc-Azura": "WIP",
+	"Upgrade-Desc-Agatha": "Vivianne can now call-in Agatha, Agatha rushes into melee to attack enemies. Press the interact key to call in.",
+	"Upgrade-Desc-Azura": "Vivianne can now call-in Azura, Azura dashes into people to deal damage. Press the interact key to call in.",
 	"Upgrade-Desc-M (Marisa)": "Vivianne can now call-in M, she will try and stab enemies with her spear. Press the interact key to call in.",
 	"Upgrade-Desc-Sierra": "Vivianne can now call-in Sierra, she follows Vivianne and switch guns instead of reloading. Press the interact key to call in.",
 	"Upgrade-Desc-Speed Dial": "The cooldown between Vivianne spawning summons is reduced.",
@@ -626,14 +627,14 @@
 	"Weapon-Handgun-Big Iron": "Manufacturer: Old West Firearms & Replicas||Caliber: .700 Nitro Express||Production dates: December 2093 - Present (custom order only)||||Considered to be the most impractical handgun ever produced. The Big Iron has gained the reputation to shatter foreheads and break wrists.||||The manufacturer quickly stopped large scale production after terrible sales. But kept it as a custom order item.||||It's a popular choice with the reckless overconfident mercenaries who got the money.||||Leopold LORD Storch uses High Explosive rounds with his.",
 	"Weapon-Handgun-War and Peace": "Manufacturer: Unknown||Caliber: .45 ACP||||The following information comes form intercepted radio transmissions.||||Curtis reported finding the 2 handguns after defeating a leader of the unknown group. Vivianne asked some questions to try and identify them.||||Based on these answers she could tell that these were some 1911 variant that were heavily customized. Both feature some gold-plated accents and custom grip plates.||||They have different finish, the one with the word war engraved on it used some kind of bluing and the other, with peace engraved used a nickel finish||||These are likely a reference to the book by Leo Tolstoy.",
 	
-	"Weapon-Rifle-Corrine's Old Rifle": "",
+	"Weapon-Rifle-St-Maurice Youth Model": "",
 	"Weapon-Rifle-St-Maurice": "",
-	"Weapon-Rifle-St-Laurent Gen 1": "",
+	"Weapon-Rifle-St-Laurent Gen 1": "Manufacturer: Compagnie d'Fusils Chasses d'3 Rivières||Caliber: .50 BMG||Production dates: December 2099 - end of production announced for January 2106||||There's no way to go around it, this is an anti-material rifle disguised as a big game hunting rifle. And no one can argue that it doesn't get the job done. The model was finished just in time for it to get used during the Solar War. A new iteration of the design is set to enter the market soon.|||| Also some dude in Victo makes a 12 gauge conversion kit for it.",
 	"Weapon-Rifle-Type 47 Rifle": "Manufacturer: Novak & Boyko|| ||This product of a long tradition in eastern europe, the 'Type 47 Rifle' is a modernized version of the AK-47. The main upgrade with this version comes from new materials and building processes. It doesn't use te same cartridge of the original since surplus is no longer existent and newer, better ammo exists.",
 	"Weapon-Rifle-Cowboy's Repeater": "",
 	"Weapon-Rifle-Mark's Rifle": "",
 	"Weapon-Rifle-Type 30 Rifle": "",
-	"Weapon-Rifle-Vivianne's Rifle": "",
+	"Weapon-Rifle-Vivianne's Rifle": "Manufacturer: Vivianne||Caliber: 5.56mm||Production dates: ~2103||||Most of the intel we have on this gun comes from Vivianne herself.||||The receiver was milled by her, a good amount of parts came from various incomplete parts kit. She didn't order many parts.||||She is very proud of it.",
 	"Weapon-Rifle-Combat Rifle": "",
 	
 	"Weapon-Sub Machine Gun-Type 41 SMG": "Manufacturer: Novak & Boyko|| ||The concept of SMGs were thought to be obsolete for a long while. Designers at Novak & Boyko realized that like melee weapons, SMGs could find a niche for defense against pirates. Typically loaded with low penetration rounds, it's a somewhat common weapon for security details on larger spaceships. || ||Competitors outshine it nowadays. An unknown group is said to use them for space borne operations.",
@@ -641,7 +642,7 @@
 	"Weapon-Shotgun-Jeanne's Family Shotgun": "Manufacturer: Original unknown, modified by Jeanne's father and Jeanne||Caliber: 10 Gauge shells|| ||This shotgun has been modified so much that it has almost nothing to do with the original model. It was given to Jeanne by her father when she officially joined THR-1. She's very protective about it and refuses to get another shotgun.",
 	"Weapon-Shotgun-Type 23 Shotgun": "",
 	"Weapon-Shotgun-Standard Shotgun": "",
-	"Weapon-Shotgun-Vivianne's Shotgun": "",
+	"Weapon-Shotgun-Vivianne's Shotgun": "Manufacturer: Vivianne||Caliber: 20 Gauge||Production dates: ~2104||||Most of the intel we have on this gun comes from Vivianne herself.||||She says she built the gun to deal with critters that kept sneaking into her store. Curtis opposed the idea after seeing the gun and the big hole in the floor.||||She says that she designed the gun as a bolt action to challenge herself.",
 	"Weapon-Shotgun-Desert Shotgun": "",
 
 	"Weapon-Energy-Custom Mk18 Laser cutter": "Manufacturer: Toolkit Manufacturing, modified by Jeanne|| ||This is a laser cutter used for work in space. But Jeanne modified some components to turn the 2- hour battery into a 2-second battery. The upside is that it turns the mediocre laser cutter designed to cut sheet metal into one that cuts people in half.",
@@ -654,7 +655,7 @@
 	"Weapon-Energy-Laser Shotgun": "",
 
 	"Weapon-Melee-Oversized stun baton": "",
-	"Weapon-Melee-Unarmed": "",
+	"Weapon-Melee-Corrine's Hands": "||<!> Obsolete report: further edits are blocked <!>||||Manufacturer: Her mother|||| This report is entirely unnecessary and I won't be putting much effort in it. These are straight up, just the hands of some girl in her late teens. It poses NO threat to anyone in Nest.||||Addendum 1:||To whoever wrote this failure of a report: report immediately to the intel chief and stop messing with the logs||||Addendum 2:||To whoever has the whole janitor's closet up his ass: LALALALa No I won't do it LALALALA you can eat my shorts LALALALA||||",
 	"Weapon-Melee-Chain Axe": "Manufacturer: Unknown|| ||It's an axe connected by a chain to a brass knuckle. Zander uses them like a meteor hammer.|| ||It doesn't look like an effective weapon. Zander has found ways to use it outside of combat.",
 	"Weapon-Melee-Hook Swords": "",
 	"Weapon-Melee-Hunk of Steel": "",
@@ -662,7 +663,7 @@
 	"Weapon-Melee-Gun Hammer": "",
 	"Weapon-Melee-Pile Bunker": "",
 
-	"Weapon-Combo-GunBlade": "Manufacturer: Unknown (likely a DIC TEC prototype)||Caliber: 10mm & 20 Gauge|| ||",
+	"Weapon-Combo-GunBlade": "Manufacturer: DIC TEC||Caliber: 10mm & 20 Gauge||||This weapon is a saber fitted with the firing mechanism of a 20 gauge shotgun on the blade's spine and a 10mm pistol built into the handle and guard.|||| It seems to be an early production model or prototype that was given to Kai as payment for a contrat. DIC TEC have a habit of offering early production models as part of payment in contracts. Usually a clause is added that require the mercenary to give detailed feedback after a period of time. DIC TEC's designs are very unusual and greatly benefit from on field-testing.",
 	"Weapon-Combo-Gun and Ballistic Knife": "Manufacturer: Novak & Boyko||",
 	"Weapon-Combo-Lawrence's Cutlass & Flintlock": "Manufacturer: Unsure (read desc.)||Caliber: .58 Lead ball||||Both the cutlass and flintlock appear to have been made by hand and do not have any markings to identify the manufacturer.||||Vivianne claims she has serviced the flintlock a few times and thinks it could have been made by Old English Armoury but Old West Firearms is more likely.||||More importantly, WHO USES A FLINTLOCK IN 2106?",
 	"Weapon-Combo-Captain's Axe & Blunderbuss": "",

@@ -196,7 +196,7 @@ rigel_mech = [
         {"Type": "Head", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/HD-Orion.png'), 17)},
         {"Type": "Arm L", "Sprite": invert_sprite_stack('Sprites/Mech parts/AM-Rigel.png', 10)},
         # Shoulder guns have a separate thing for draw
-        # {"Type": "Arm R", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/AW-BL-Bellatrix.png'), 27)},
+        {"Type": "Arm R", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/AW-BL-Bellatrix.png'), 58)},
     ]
 
 def make_part(sprite_list, part_palette, part_type, unbuilt_mech):

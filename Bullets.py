@@ -599,7 +599,6 @@ def on_hit_stun_strike(self, collision, entities, level):
     if collision.status["Stunned"] <= mod:
         collision.status["Stunned"] = mod
     Particles.random_particle_2_circle(entities, self.pos, 3, 25, 16, colour=Fun.YELLOW, size=6, angle_mod=180 * random.random())
-
     if "Concussion" in self.owner.free_var:
         self.owner.agro -= 1
 
@@ -627,9 +626,8 @@ def on_hit_poison_strike(self, collision, entities, level):
                 entities["particles"].append(
                     Particles.RandomParticle1(pos, Fun.DARK_RED, -2, round(10 + 10 * random.random()), size=(2, 4)))
 
-        # "Infection": {"Neurotoxin"
     Particles.random_particle_2_circle(entities, self.pos, 3, 25, 16, colour=Fun.DARK_TEAL, size=6, angle_mod=180 * random.random())
-    print("Poison")
+
 
 
 def on_hit_weaken(self, collision, entities, level):
