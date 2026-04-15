@@ -11,7 +11,7 @@ import random
 #       Iron Mines          (The end is almost there)
 # 	1 THR-1 boss track      ()
 # 	1 Curtis boss theme	    (Confidant)
-# 	1 final boss track      (SHIT IS ABOUT TO END!!!)
+# 	1 final boss track      (Seed fall upon a barren land)
 
 # Secret level?
 
@@ -51,14 +51,11 @@ import random
 #   Versus mode
 #       Balance changes (small ones)
 #   Character conversations
-#   New party selection screen
 #   Encyclopedia
 #   Animated radio transmission portraits
 
 # Cut
 #   Animated weapons. Mostly for the pile bunker
-# 	Mission Modifiers
-#       Unknown Forces  (Opposite player team spawn)
 
 
 pg.mixer.pre_init()

@@ -1425,11 +1425,6 @@ def main_menu(WIN, CLOCK):
         if do_shit:
             if do_shit == "Start":
                 player_party = party_selection_menu(WIN, CLOCK)
-                # confirmation_popup(WIN, CLOCK, [350, 100], [
-                    # {"Name": "THR-1", "Value": "THR-1", "On select": "Return", "Render func": "Text only"},
-                    # {"Name": "Zoar Colonists", "Value": "Zoar Colonists", "On select": "Return", "Render func": "Text only"},
-                    # {"Name": "Cancel", "Value": "Return", "On select": "Return", "Render func": "Text only"},
-                # ], text="Choose party")
                 if player_party != "Return":
                     # return_value = do_shit
                     return_value = player_party
@@ -2521,8 +2516,9 @@ def mission_menu(WIN, CLOCK, missions_to_choose, party_info, run_info):
                 surface_to_draw.blit(temp_ui_font.render(mission_details['level']["name"], True, AMBER),
                                      (info_zero[0], info_zero[1]))
                 if mission_details["level"]['modifiers'] != ["Skip mission"]:
-                    surface_to_draw.blit(temp_ui_font.render(f"{mission_details['level']['faction']}", True, AMBER),
+                    surface_to_draw.blit(temp_ui_font.render(write_textline(f"FACTION_{mission_details['level']['faction']}"), True, AMBER),
                                          (info_zero[0], info_zero[1] + 20))
+
                     surface_to_draw.blit(temp_ui_font.render(mission_details["level"]['objective'], True, AMBER),
                                          (info_zero[0], info_zero[1] + 40))
                     enemy_count = len(mission_details["extra info"]['Enemy spawns'])
@@ -7308,9 +7304,11 @@ def level_generator(possible_levels, party_info, run_info, current_mission=1, mi
                     enemy_spawns.append({"Pos": [commander_spawn.centerx, commander_spawn.centery], "Type": "Rigel"})
                 if level['name'] == write_textline("Finale 2"): # Load Curtis
                     enemy_spawns.append({"Pos": [commander_spawn.centerx, commander_spawn.centery], "Type": "Curtis"})
+                    level['faction'] = 4
                 if level['name'] == write_textline("Finale 3"): # Load THR-1 team
                     for x in ["Lord", "Emperor", "Wizard", "Sovereign", "Duke", "Condor", "Jester"]:
                         enemy_spawns.append({"Pos": [commander_spawn.centerx, commander_spawn.centery], "Type": x})
+                    level['faction'] = 5
 
             level['objective points'].append([commander_spawn.centerx, commander_spawn.centery])
             # Add event to check for commander death
