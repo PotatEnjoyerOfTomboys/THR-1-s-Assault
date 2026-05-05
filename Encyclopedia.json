@@ -3,6 +3,7 @@
 		"2100": ["Solar War | January - April", "Solar War | May - August", "Solar War | Setptember - December"],
 		"2101": ["Solar War | January - April", "Solar War | May - August", "Solar War | Setptember - December"],
 		"2102": ["End of the Solar War"],
+		"2103": ["umans Move to Zoar"],
 		"2105": ["Pirate attack on Zoar"]
 	},
 	"Enemies": {
@@ -46,9 +47,9 @@
 	},
 	"Geography": [],
 	"Organizations": {
-		"Armed groups": [],
+		"Armed groups": ["Asset Protecting & Collection Dept.", "Burning Winds Band", "C8 Mercenary Army"],
 		"Mercenary Teams": {
-			"THR-1": ["Overview", "Leopld LORD Storch", "Jeanne WIZARD McNeil", "M4-D1C Jester"], 
+			"THR-1": ["Overview", "Leopold LORD Storch", "Jeanne WIZARD McNeil", "M4-D1C JESTER"], 
 			"Zoar Colony's Gun Shop": ["Overview", "Curtis Miller", "Vivianne Miller", "Lawrence Reed", "Mark"]
 			},
 		"Weapon Manufacturer": ["Old West Firearms & Replicas",
@@ -71,6 +72,6 @@
 		"Melee": ["Oversized stun baton", "Corrine's Hands", "Chain Axe", "Hook Swords", "Hunk of Steel", "Vivianne's Leg", "Gun Hammer", "Pile Bunker"],
 		"Combo": ["GunBlade", "Gun and Ballistic Knife", "Lawrence's Cutlass & Flintlock", "Captain's Axe & Blunderbuss"],
 		"Heavy": ["Saloum Mk-2", "GMG-04B", "Fortress Machine Gun", "Musket .360", "Buggy Gun", "Missile Pod", "ARWS", "Flamethrower", "Napalm Grenade Launcher", "Bulwark Minigun"],
-		"Gear": ["Crippled Laddie FCS Radio", "Mk16 Flare Mortar", "Epicurean Medic Rifle", "Nihilist Stretcher", "Stoic Shield generator", "C4", "Binoculars", "Radar", "Smoke Dispenser", "Artillery Radio"]
+		"Gear": ["Crippled Laddie FCS Radio", "Mk16 Flare Mortar", "Epicurean Medic Rifle", "Nihilist Stretcher", "Stoic Shield generator", "C4", "Radar", "Smoke Dispenser", "Binoculars", "Artillery Radio"]
 	}
 }

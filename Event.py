@@ -342,6 +342,7 @@ def mission_start(self, entities, bullets, level, time_passed, screen, CLOCK):
             "BOSS-NAME-ATTACK-HELICOPTER"
         ][level['faction']]
     if level["mission number"] == 15:
+        # Fun.play_music("Dracula")
         # Additional stuff for final boss
         if level['name'] == Fun.write_textline("Finale 3"):
             for e in entities["entities"]:

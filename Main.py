@@ -2,6 +2,7 @@ import pygame as pg
 import os
 import random
 
+
 # Do a web version with pybag?
 # Music 7
 # 	1 menu track            (grid room)
@@ -53,6 +54,8 @@ import random
 #   Character conversations
 #   Encyclopedia
 #   Animated radio transmission portraits
+
+#   End mission money bonuses
 
 # Cut
 #   Animated weapons. Mostly for the pile bunker
@@ -310,14 +313,17 @@ def main_game(party_info):
                     big_game_loop = False
 
         # Story stuff
+        # Start
+        # THR-1         Secretary contacts Lord and Emperor asking them if they can do an urgent job.
+        # Zoar          Shortly after dealing with the Nest and the entity Betelgeuse, Curtis kept getting headaches and visions of a salt lake in the desert. Makoto tells them that a few armed groups have arrived at the planet and seem to be searching for one too
         # Story Beat 1
-        # THR-1
+        # THR-1         Emperor asks Lord if he finds the job strange, as last time Secretary claimed that she wouldn't ever work with them again. Lord does agree that it's strange but doesn't question it much, the pay is very good. Emperor thinks it's too good
         # Zoar
         # Story Beat 2
         # THR-1
         # Zoar
         # Endings
-        # THR-1 Good    THR-1 gets paid, but Emperor presses on Secretary to tell him what that mission was about. She mentions a project but that's it.
+        # THR-1 Good    THR-1 gets paid, but Emperor presses on Secretary to tell him what that mission was about. She says that they just helped her client get something needed for project Orion but that's all she knows.
         # THR-1 Bad     Secretary says that they failed the mission, but she can still manage to salvage the situation. They don't get paid as much as promised.
         # Zoar Good     Curtis
         # Zoar Bad      Curtis

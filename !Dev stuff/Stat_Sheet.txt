@@ -135,6 +135,7 @@ Jeanne's				Weapons created or modified by Jeanne				Describe the effects the we
 X Weapons RnD Division			X manifacturer. Specialise in energy and missile		MID-W-<Poduct model ID(8 digits)> (Model ID-)
 Steel Wings				Tailurian manifacturer. Specialises in ship but make some guns 	Ortologists last names
 
+Not treated like an afterthought
 
 
 17507916760

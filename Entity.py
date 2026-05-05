@@ -5155,7 +5155,6 @@ def attack_helicopter_draw(self, WIN, scrolling):
 #       Quick Turn
 #       Plasma                  Creates a big bullet with limited homing
 #       Missile Circus          Spawn a large amount of missiles
-#       Raining hell            Shoots artillery around the boss
 def rigel_input(self, entities, level):
     # Input functions are the IA for an enemy
     # better targeting system
@@ -5281,6 +5280,7 @@ def rigel_on_death(self, entities, level):
         self.status["No debuff"] = 60 * 3
         self.no_shoot_state = 180
         # self.status["Last Stand"] = 0
+        self.free_var["History limit"] = 5
 
         number_of_particle = 18
         for particles_to_add in range(360 // number_of_particle):
@@ -5324,12 +5324,51 @@ def rigel_giga_thrust(self, entities, level):
 
 def rigel_laser_barrage(self, entities, level):
     animation = True
-    if start_up_lag_handler(self, 30):
+    if start_up_lag_handler(self, 90):
         self.free_var["Current attack"] = Fun.get_random_element_from_list(["Missile Circus", "Raining Hell"])
         animation = False
+    elif self.free_var["Startup lag"] == 1:
+        # Initialize the attack
+        self.free_var["Pos history"] = {
+                 "1": {"Target": None, "History": []},
+                 "2": {"Target": None, "History": []},
+                 "3": {"Target": None, "History": []},
+             }
+        count = 1
+        for e in entities["entities"]:
+            if self.team == e.team:
+                continue
+            self.free_var["Pos history"][f"{count}"]["Target"] = e
+            self.free_var["Pos history"][f"{count}"]["History"].append(e.pos.copy())
+            count += 1
+            if count == 3:
+                break
 
-    if not self.free_var["Mech"].mech_animations["Torso"] and animation:
-        pass
+    else:
+        for l in self.free_var["Pos history"]:
+            if self.free_var["Pos history"][l]["Target"] is None:
+                continue
+            laser = self.free_var["Pos history"][l]      # {"Target": None, "History": []}
+            laser["History"].append(laser["Target"].pos.copy())
+
+            # Make laser
+            pos = [self.pos[0], self.pos[1] - 10 * int(l)]
+            angle = Fun.angle_between(laser["History"][0], pos)
+            self.free_var["Draw angle"] = angle
+            dist = Fun.distance_between(pos, laser["History"][0]) - laser["Target"].thiccness//2
+            Bullets.spawn_bullet(self, entities, Bullets.Laser, pos,
+                                    angle, [0, 12, dist, 2, {"Colour": (107, 153, 165)}])
+            entities["particles"].append(Particles.FireParticle(
+                Fun.move_with_vel_angle(pos, dist, angle),
+                colour=(107, 153, 165)))
+
+            if len(laser["History"]) > self.free_var["History limit"]:
+                laser["History"].pop(0)
+            if len(laser["History"]) >= self.free_var["History limit"]:
+                laser["History"].pop(0)
+
+    # if not self.free_var["Mech"].mech_animations["Torso"] and animation:
+    #     pass
 
 
 def rigel_plasma(self, entities, level):
@@ -6837,7 +6876,13 @@ enemy_repertory = {
              "Current attack": "Shoulder Bash",
              "Phase": 1,
              "Boost type": [],
-             "Missile Circus": 0
+             "Pos history": {
+                 "1": {"Target": None, "History": []},
+                 "2": {"Target": None, "History": []},
+                 "3": {"Target": None, "History": []},
+             },
+             "Missile Circus": 0,
+             "History limit": 15
          }
          },
     # Curtis

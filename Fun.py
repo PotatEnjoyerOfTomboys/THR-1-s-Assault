@@ -239,6 +239,7 @@ CURRENT_TRACK_VOLUME = [0]
 music_dict = {
     "Template": {"Music": '', "Volume": 1, "Author": "", "Name": ""},
     "Template Intro": {"Music": '', "Volume": 1, "Author": "", "Name": ""},
+    # "Dracula": {"Music": 'Sounds/Music/Dracula_Flow_3_x_All_Star.mp3', "Volume": 1, "Author": "", "Name": ""},
 }
 
 
@@ -623,7 +624,8 @@ def swap(swap_img, old_colour, new_colour):
 
 
 def get_outline(sprite: pg.Surface, colour=BLACK):
-    # TODO: Optimize this when possible, something could be done in the sprite to help
+    # Optimize this when possible, something could be done in the sprite to help
+    # Yeah I am not doing that
     sprite = sprite.copy()
     mask = pg.mask.from_surface(sprite)
     outline = mask.outline()
@@ -2370,8 +2372,6 @@ def game_credits(WIN, clock):
         # |Draw|--------------------------------------------------------------------------------------------------------
         if draw:
             # This is to make it scale
-            # win_width, win_height = width, height
-            width, height = 630, 450
             frame = pg.Surface((630, 450))
             surface_to_draw = frame
             WIN.fill(BLACK)
@@ -2406,7 +2406,7 @@ def game_credits(WIN, clock):
             scale_render(WIN, surface_to_draw, clock)
             pg.display.update()
         clock.tick(60)
-    stop_music()
+    # stop_music()
 
 
 def mission_menu(WIN, CLOCK, missions_to_choose, party_info, run_info):

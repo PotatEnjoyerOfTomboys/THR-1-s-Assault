@@ -1333,14 +1333,17 @@ class Flare(BasicBullet):
         if self.duration == 0:
             # Explode here
             for x in range(self.secondary_explosion["Amount of Bullets"]):
-                entities["bullets"].append(Fire(
+
+                spawn_bullet(
+                    self.owner, entities,
+                    ExplosionSecondary,
                     [self.pos[0], self.pos[1]],
                     self.angle + (360 / self.secondary_explosion["Amount of Bullets"] * x),
                     [self.speed * self.secondary_explosion["Speed mod"],
                      round(self.og_info[1] * self.secondary_explosion["Duration mod"]),
                      self.radius * self.secondary_explosion["Radius mod"],
                      round(self.damage * self.secondary_explosion["Damage mod"]),
-                     self.secondary_explosion["Fire property"]], self.owner))
+                     self.secondary_explosion["Fire property"]])
 
 
 # |Explosion based projectiles|-----------------------------------------------------------------------------------------
@@ -1385,9 +1388,6 @@ class ExplosionPrimaryType1(BasicBullet):
             self.duration -= 1
         if self.duration == 0:
             # Explode here
-            # entities["bullets"].append(ExplosionSecondary(self.pos, self.angle,
-            #                                                       [0, 5, self.radius,
-            #                                                        self.damage, self.secondary_explosion], self.owner))
             spawn_bullet(
                 self.owner, entities,
                 ExplosionSecondary,
@@ -1476,9 +1476,12 @@ class Missile(BasicBullet):
             self.damage_type = "Explosion"
 
     def payload(self, collision, entities, level):
-        entities["bullets"].append(ExplosionSecondary(self.pos, self.angle,
-                                                      [0, 5, self.radius,
-                                                       self.damage, self.secondary_explosion], self.owner))
+        spawn_bullet(
+            self.owner, entities,
+            ExplosionSecondary,
+            self.pos,
+            self.angle,
+            [0, 5, self.radius, self.damage, self.secondary_explosion])
 
     def act(self, entities, level):
         if self.duration > 0:
@@ -1617,7 +1620,6 @@ class GrenadeType0(BasicBullet):
         pass
 
 
-# TODO: Make sure explosive bullets uses spawn_bullet to spawn bullets.
 class GrenadeType1(BasicBullet):
     def __init__(self, pos, angle, info, owner):
         BasicBullet.__init__(self, pos, angle, info, owner)
@@ -1642,10 +1644,12 @@ class GrenadeType1(BasicBullet):
         if self.duration == 0:
             # Explode here
             self.duration -= 1
-            entities["bullets"].append(ExplosionSecondary(self.pos, self.angle,
-                                                                  [0, self.secondary_explosion["Duration"],
-                                                                   self.radius,
-                                                                   self.damage, self.secondary_explosion], self.owner))
+            spawn_bullet(
+                self.owner, entities,
+                ExplosionSecondary,
+                self.pos,
+                self.angle,
+                [0, self.secondary_explosion["Duration"], self.radius, self.damage, self.secondary_explosion])
 
     def draw(self, win, scrolling):
         if self.duration > 0:
@@ -1685,14 +1689,18 @@ class GrenadeType2(BasicBullet):
             Fun.play_sound("Grenade 2", "SFX")
             for x in range(self.secondary_explosion["Amount of Bullets"]):
                 angle = 360 * x / self.secondary_explosion["Amount of Bullets"]
-                entities["bullets"].append(Napalm(
+
+                spawn_bullet(
+                    self.owner, entities,
+                    Napalm,
                     Fun.move_with_vel_angle(self.pos, self.secondary_explosion["Speed"] * 2, angle),
                     self.angle + (360 / self.secondary_explosion["Amount of Bullets"] * x),
                     [self.secondary_explosion["Speed"],
                      self.secondary_explosion["Duration"],
                      self.secondary_explosion["Radius"],
                      self.secondary_explosion["Damage"],
-                     self.secondary_explosion["Fire property"]], self.owner))
+                     self.secondary_explosion["Fire property"]])
+
 
     def draw(self, win, scrolling):
         if self.duration > 0:
@@ -1844,14 +1852,18 @@ class GrenadeType5(BasicBullet):
             Fun.play_sound("Explosion")
             for x in range(self.secondary_explosion["Amount of Bullets"]):
                 angle = 360 * x / self.secondary_explosion["Amount of Bullets"]
-                entities["bullets"].append(Bullet(
+                spawn_bullet(
+                    self.owner, entities,
+                    Bullet,
                     Fun.move_with_vel_angle(self.pos, self.secondary_explosion["Speed"] * 2, angle),
                     self.angle + (360 / self.secondary_explosion["Amount of Bullets"] * x),
                     [self.secondary_explosion["Speed"] * random.random() + 1,
                      self.secondary_explosion["Duration"] * random.random() + 1,
                      self.secondary_explosion["Radius"] * random.random() + 1,
                      self.secondary_explosion["Damage"],
-                     self.secondary_explosion["Bullet property"]], self.owner))
+                     self.secondary_explosion["Bullet property"]])
+
+
 
     def draw(self, win, scrolling):
         if self.duration > 0:
@@ -1895,10 +1907,12 @@ class GrenadeType6(BasicBullet):
         if self.duration == -900:
             # Explode here
             self.duration -= 1
-            entities["bullets"].append(ExplosionSecondary(self.pos, self.angle,
-                                                                  [0, self.secondary_explosion["Duration"],
-                                                                   self.radius,
-                                                                   self.damage, self.secondary_explosion], self.owner))
+            spawn_bullet(
+                self.owner, entities,
+                ExplosionSecondary,
+                self.pos,
+                self.angle,
+                [0, self.secondary_explosion["Duration"], self.radius, self.damage, self.secondary_explosion])
 
     def draw(self, win, scrolling):
         if self.duration > 0:
@@ -1993,10 +2007,12 @@ class C4(BasicBullet):
         if self.duration == 0:
             # Explode here
             self.duration -= 1
-            entities["bullets"].append(ExplosionSecondary(self.pos, self.angle,
-                                                                  [0, self.secondary_explosion["Duration"],
-                                                                   self.radius,
-                                                                   self.damage, self.secondary_explosion], self.owner))
+            spawn_bullet(
+                self.owner, entities,
+                ExplosionSecondary,
+                self.pos,
+                self.angle,
+                [0, self.secondary_explosion["Duration"], self.radius, self.damage, self.secondary_explosion])
 
     def draw(self, win, scrolling):
         if self.duration > 0:
@@ -2724,12 +2740,15 @@ class SplittingElectric(BasicBullet):
                 # Feel cute
                 # might add a limit
                 if random.randint(0, self.split_rate) == 0:
-                    entities["bullets"].append(Electric(
-                        [self.pos[0], self.pos[1]], self.electric_angle,
+                    spawn_bullet(
+                        self.owner, entities,
+                        Electric,
+                        [self.pos[0], self.pos[1]],
+                        self.electric_angle,
                         [self.speed, self.duration, self.radius, self.damage,
                          {"Angle modifier": self.angle_modifier,
                           "Split rate": self.split_rate,
-                          "Colour": self.colour}], self.owner))
+                          "Colour": self.colour}])
                 # Update the hit scan
                 self.points_to_check = []
                 for i in range(self.radius):
@@ -3064,9 +3083,13 @@ class Gas(BasicBullet):
                 if not (b.fire or b.explosion):
                     continue
                 if Fun.collision_circle_circle(self.pos, self.radius, b.pos, b.radius):
-                    entities["bullets"].append(ExplosionSecondary(self.pos, self.angle,
-                                                                          [0, 5, self.radius,
-                                                                            self.damage, self.secondary_explosion], self.owner))
+
+                    spawn_bullet(
+                        self.owner, entities,
+                        ExplosionSecondary,
+                        self.pos,
+                        self.angle,
+                        [0, 5, self.radius, self.damage, self.secondary_explosion])
                     # Remove the gas
                     self.duration = 0
                     break

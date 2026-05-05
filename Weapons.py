@@ -4761,65 +4761,22 @@ weapon_repertory = {
 }
 
 # Encyclopedia notes
-# St-Maurice Youth Model
-#   Manufacturer: Compagnie d'Fusils Chasses d'3 Rivières
-#   Caliber: 22lr, 6.5mm Creemoore, 5.56, 7.62x39mm, 7.62x52mm, .303, .308, .410, 20 Gauge
-#   Production dates: June 2041 - Present (certain calibers have been discontinued)
-#   The youth model of the St-Maurice. The only real difference, is the shorter stock and barrel.
-#   Corrine used a left-handed model, although she's right-handed.
+# 	"Weapon-Rifle-Mark's Rifle": "",
 
-# St-Maurice
-#   Manufacturer: Compagnie d'Fusils Chasses d'3 Rivières
-#   A very simple bolt action rifle. Thanks to advances in manufacturing, this rifle can be sold for the price of older entry level rifle with the performances of a high-end rifle
-
-# Standard Shotgun
-#   Manufacturer: Compagnie d'Fusils Chasses d'3 Rivières||Caliber: 12 Gauge||Production dates: 1950 – Present
-#   Originally it was manufactured by another company that went bankrupt. CFCR bought the tooling off of them and restarted production as it was and still is a very popular shotgun model.||||It's still one of the cheapest and most reliable shotguns on the market.
-# Cowboy's Repeater
-#   Manufacturer: Old West Firearms & Replicas||Caliber: .30-30||Production dates: 2077 - Present||||
-#   This is one of the first gun Old West Firearms & Replicas produced
-
-# Mark's Rifle
-
-# Laser Carbine
+# 	"Weapon-Energy-Laser Carbine": "",
 #   Manufacturer: 2nd Weapons RnD Division||Power Supply: ?????||||A variant of the <laser rifle>. It is still an experimental design but testing shows promising results.||||The goal of this design is to reduce overall length while retaining capabilities. If successful, it might very well become a replacement to the original.
-# Heavy Laser
-#   Manufacturer: 2nd Weapons RnD Division||Power Supply: ?????||||An upgraded version of the <laser rifle>. Due to its increased production cost, it only gets assigned to troops with
-# Marker Laser
-#   Manufacturer: 2nd Weapons RnD Division||Power Supply: ?????||||Another variant of the <laser rifle>. Based on analysis of a captured example, we know that it the beam causes a form of radiation to makes most materials glow.||||The way the weapon is fielded implies that it's used to mark tactically significant targets for elimination.
-# ARWS
-#   Manufacturer: 1st and 3rd Weapons RnD Division||Caliber: ?????||||The All Range Weapon System is name given to an add-on to the
-
-
-#   "Weapon-Rifle-St-Maurice Youth Model": "",  .
-# 	"Weapon-Rifle-St-Maurice": "",              .
-# 	"Weapon-Rifle-Cowboy's Repeater": "",       .
-# 	"Weapon-Rifle-Mark's Rifle": "",            .
-# 	"Weapon-Rifle-Type 30 Rifle": "",           .
-# 	"Weapon-Shotgun-Standard Shotgun": "",      Remington 870 produced by a new company
-
-# 	"Weapon-Shotgun-Desert Shotgun": "",        Old rifle re-barreled to shoot shotgun shells
-# 	"Weapon-Energy-Laser Carbine": "",          Laser rifle variant
 # 	"Weapon-Energy-Heavy Laser": "",
+#   Manufacturer: 2nd Weapons RnD Division||Power Supply: ?????||||An upgraded version of the <laser rifle>. Due to its increased production cost, it only gets assigned to troops with
 # 	"Weapon-Energy-Marker Laser": "",
-# 	"Weapon-Energy-Plasma Spray": "",           plasma rifle modified to fire a stream of plasma
-# 	"Weapon-Energy-Plasma Rifle": "",
-# 	"Weapon-Energy-Laser Shotgun": "",          Based on a laser rifle with defect causes multiple weaker beams to be shot. Copies include that defect
+#   Manufacturer: 2nd Weapons RnD Division||Power Supply: ?????||||Another variant of the <laser rifle>. Based on analysis of a captured example, we know that it the beam causes a form of radiation to makes most materials glow.||||The way the weapon is fielded implies that it's used to mark tactically significant targets for elimination.
 
-# 	"Weapon-Melee-Hook Swords": "",             Made by Old English Armoury for kung fu practitioners
-
-# 	"Weapon-Melee-Gun Hammer": "",
-#       Manufacturer: Unknown||Caliber: 40mm||||
-# 	"Weapon-Melee-Pile Bunker": "",
-
-# 	"Weapon-Combo-Gun and Ballistic Knife": "Manufacturer: Novak & Boyko||",
 # 	"Weapon-Combo-Captain's Axe & Blunderbuss": "",
-# 	"Weapon-Heavy-Musket .360": "",
 
 # 	"Weapon-Heavy-ARWS": "",
+#   Manufacturer: 1st and 3rd Weapons RnD Division||||The All Range Weapon System is name given to an add-on to the
 # 	"Weapon-Heavy-Flamethrower": "",
+#   Manufacturer: Steel Wings Heavy Ind.||Fuel: XM-80GB pattern fuel||||Normally, flamethrowers are a specialized tool for the military. But the C8 Mercenary Army uses them as a
 # 	"Weapon-Heavy-Napalm Grenade Launcher": "",
-# 	"Weapon-Gear-Binoculars": "There are binoculars. Binoculars makes it easier to see things from far away. They are used by spotters to help artillerymen find and hit their targets.",
-# 	"Weapon-Gear-Smoke Dispenser": "",
+#   Manufacturer: Steel Wings Heavy Ind.||Caliber: 50mm Grenade||||
 # 	"Weapon-Gear-Artillery Radio": "",
-
+#   Manufacturer: Steel Wings Heavy Ind.||||
