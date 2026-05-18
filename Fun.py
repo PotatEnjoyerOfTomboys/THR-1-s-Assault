@@ -422,6 +422,7 @@ sounds_dict = {
     "Rifle 1 Shooting": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Rifle_1.ogg')), "Volume": 0.8},
     "Rifle 2 Shooting": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Rifle_2.ogg')), "Volume": 1},
     "Safety": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Safety_Click.ogg')), "Volume": 0.4},
+    "Hover Tank Canon": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Hover Tank Cannon.ogg')), "Volume": 1.2},
     # "Shot gun 2 Shooting": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Shotgun.ogg')), "Volume": 0.8},
 }
 
@@ -1239,7 +1240,7 @@ class UniversalMenuLogic:
 
 
 class UICommunicationLog:
-    def __init__(self, comms, pos, speed=3, offset=20, text_offset=60):
+    def __init__(self, comms, pos, speed=3, offset=20, text_offset=60, font_func=create_temp_font_2):
         self.pos = pos
         self.elements_to_show = comms
         # {"Sender": "THR-1", "Message": str_to_list("I AM MAKING MAC AND CHEESE AND NOBODY CAN STOP ME!")},
@@ -1247,7 +1248,7 @@ class UICommunicationLog:
         self.offset = offset
         self.text_offset = text_offset
         self.transmission_list = []
-        self.font_func = create_temp_font_2
+        self.font_func = font_func
         self.font = self.font_func(450, font_name="Sprites/JetBrainsMono-SemiBold.ttf")
         self.cooldown = 0
         self.font_colour = AMBER
@@ -2516,7 +2517,7 @@ def mission_menu(WIN, CLOCK, missions_to_choose, party_info, run_info):
                 surface_to_draw.blit(temp_ui_font.render(mission_details['level']["name"], True, AMBER),
                                      (info_zero[0], info_zero[1]))
                 if mission_details["level"]['modifiers'] != ["Skip mission"]:
-                    surface_to_draw.blit(temp_ui_font.render(write_textline(f"FACTION_{mission_details['level']['faction']}"), True, AMBER),
+                    surface_to_draw.blit(temp_ui_font.render(write_textline(f"FACTION_{mission_details['level']['faction']+1}"), True, AMBER),
                                          (info_zero[0], info_zero[1] + 20))
 
                     surface_to_draw.blit(temp_ui_font.render(mission_details["level"]['objective'], True, AMBER),
@@ -3454,13 +3455,56 @@ def versus_character_menu(WIN, CLOCK, missions_to_choose, player_party, mission_
 
 def versus_end_menu(WIN, CLOCK, party_info, status):
     b = "Secretary" # use a bird name, she is part of the Nest but
-    end_menu(WIN, CLOCK,
-             [
+
+    elements_to_show = [
                  {"Sender": "SYS", "Message": str_to_list(f"FIGHT IS OVER.")},
-                 {"Sender": "SYS", "Message": str_to_list(f"FTL transmission from user '{b}' to user group 'THR-1'")}
              ]
-    )
-    # popups here when you unlock shit
+    elements_to_show_2 =[]
+    menu_overlay = pg.image.load(os.path.join("Sprites/UI/Overlay.png")).convert_alpha()
+    key_pressed = DEFAULT_KEY_PRESSED * 4
+
+    frame_1 = some_bullshit_for_transitions(WIN)
+    transition = True
+    win_copy = WIN.copy()
+    controller = PseudoPlayer()
+
+    menu_render = UICommunicationLog(elements_to_show, [15, 300], speed=1)
+    menu_render_2 = UICommunicationLog(elements_to_show_2, [280, 280], speed=1)
+    end_timer = 60 * 60
+    while end_timer > 0:
+        frame = pg.Surface((630, 450))
+        surface_to_draw = frame
+        WIN.fill(BLACK)
+        surface_to_draw.fill(UI_COLOUR_BACKGROUND)
+        menu_render.act()
+        menu_render.draw(surface_to_draw)
+        menu_render_2.act()
+        menu_render_2.draw(surface_to_draw)
+        # Let the player skip
+        keys = pg.key.get_pressed()
+        needed_in_menu_and_game(WIN, keys)
+        controller.get_input(keys)
+        no_input = True
+        for i in controller.input:
+            if controller.input[i]:
+                no_input = False
+                break
+        if key_pressed == 0:
+            if not no_input:
+                break
+        elif no_input:
+            key_pressed -= 1
+        pg.draw.rect(surface_to_draw, AMBER_LIGHT, (12, 450 - 40, 606 * (end_timer / (60 * 60)), 4))
+        crt(surface_to_draw)
+        surface_to_draw.blit(menu_overlay, [0, 0])
+        scale_render(WIN, surface_to_draw, CLOCK)
+
+        if transition:
+            transition = False
+            menu_transition_doom_screen_melt(WIN, CLOCK, WIN, win_copy)
+        pg.display.update()
+        CLOCK.tick(60)
+        end_timer -= 1
 
 
 UPGRADE_SHEET = get_image('Sprites/UI/Upgrades Sheet.png')
@@ -4351,7 +4395,7 @@ def shop_menu(WIN, CLOCK, party_info, run_info):
     return run_info
 
 
-def end_menu(WIN, CLOCK, elements_to_show):
+def end_menu(WIN, CLOCK, status_line, elements_to_show, comment_line, elements_to_show_2=[{"Sender": "", "Message": str_to_list("")}]):
     menu_overlay = pg.image.load(os.path.join("Sprites/UI/Overlay.png")).convert_alpha()
     key_pressed = DEFAULT_KEY_PRESSED * 4
 
@@ -4360,15 +4404,44 @@ def end_menu(WIN, CLOCK, elements_to_show):
     win_copy = WIN.copy()
     controller = PseudoPlayer()
 
-    menu_render = UICommunicationLog(elements_to_show, [20, 300], speed=1)
-    end_timer = 60 * 60
-    while elements_to_show or end_timer > 0:
+    status = UICommunicationLog(status_line, [-30, 60], speed=5, font_func=create_temp_font_3)
+    menu_render = UICommunicationLog(elements_to_show, [15, 300], speed=1)
+    menu_render_2 = UICommunicationLog(elements_to_show_2, [280, 280], speed=1)
+    comments = UICommunicationLog(comment_line, [15, 330], speed=3, font_func=create_temp_font_1, text_offset=100)
+    end_timer_start_value = 60*30
+    end_timer = end_timer_start_value
+    # Give it something other than text to show
+    bonuses_window = False
+    bonuses_window_width = 3
+    bonuses_window_height = 0
+    while end_timer > 0:
         frame = pg.Surface((630, 450))
         surface_to_draw = frame
         WIN.fill(BLACK)
         surface_to_draw.fill(UI_COLOUR_BACKGROUND)
-        menu_render.act()
-        menu_render.draw(surface_to_draw)
+        if bonuses_window:
+            if bonuses_window != 200:
+                bonuses_window += 1
+            if bonuses_window < 100:
+                bonuses_window_width += 3
+            if 200 > bonuses_window > 100 and bonuses_window_height < len(elements_to_show_2)*20:
+                bonuses_window_height += 4
+
+            pg.draw.rect(surface_to_draw, AMBER_LIGHT, (275, 274-bonuses_window_height, bonuses_window_width, bonuses_window_height), width=2)
+
+        if menu_render.transmission_list and not bonuses_window and elements_to_show_2:
+            bonuses_window = 1
+        for count, ass in enumerate([status, menu_render, menu_render_2, comments]):
+            if count > 0 and status.elements_to_show:  # make the mission/contract status render first
+                continue
+            if count == 2 and bonuses_window != 200: # make the window render first
+                continue
+            if count == 3 and menu_render.elements_to_show: # make comment render last
+                continue
+
+            ass.act()
+            ass.draw(surface_to_draw)
+
         # Let the player skip
         keys = pg.key.get_pressed()
         needed_in_menu_and_game(WIN, keys)
@@ -4383,6 +4456,7 @@ def end_menu(WIN, CLOCK, elements_to_show):
                 break
         elif no_input:
             key_pressed -= 1
+        pg.draw.rect(surface_to_draw, AMBER_LIGHT, (12, 450-40, 606 * (end_timer / end_timer_start_value), 4))
         crt(surface_to_draw)
         surface_to_draw.blit(menu_overlay, [0, 0])
         scale_render(WIN, surface_to_draw, CLOCK)
@@ -4395,16 +4469,17 @@ def end_menu(WIN, CLOCK, elements_to_show):
         end_timer -= 1
 
 
-def end_mission_menu(WIN, CLOCK, party_info, status):
-    # temp_ui_font =  create_temp_font_2(450, font_name="Sprites/JetBrainsMono-SemiBold.ttf")
+def end_mission_menu(WIN, CLOCK, party_info, status, run_info, extra_info, deployed_team, surviving_deployed_team, entities, time_spent):
     b = "Secretary" # use a bird name, she is part of the Nest but
+    if "Curtis" in party_info:
+        b = "Big_Scaly_6"
 
     p1 = {
         "Win": "COMPLETED",
         "Loss": "FAILED"
     }[status]
     elements_to_show =[
-        {"Sender": "SYS", "Message": str_to_list(f"MISSION STATUS: {p1}")},
+        {"Sender": "SYS", "Message": str_to_list(f"PARTY STATUS")},
     ]
     for x in party_info:
         p_diddy = party_info[x]
@@ -4414,16 +4489,73 @@ def end_mission_menu(WIN, CLOCK, party_info, status):
         elements_to_show.append(
             {"Sender": f"{p_diddy['Name']}", "Message": str_to_list(message)}
         )
-    elements_to_show.append(
-        {"Sender": "SYS", "Message": str_to_list(f"FTL transmission from user '{b}' to user group 'THR-1'")},
-    )
+    # elements_to_show.append(
+    #     {"Sender": "SYS", "Message": str_to_list(f"FTLT '{b}' to 'THR-1'")},
+    # )
     extra_message = {
-        "Win": "Objective completed, funds have been transferred.",
-        "Loss": "I expected better of you. Get lost."
-    }[status]
-    elements_to_show.append({"Sender": f"{b}", "Message": str_to_list(f"{extra_message}")})
+            "Big_Scaly_6": {
+                "Win": "Good job, you're getting closer to the anomaly!",
+                "Loss": "Sad but we can't win all the time..."}[status],
+            "Secretary": {
+                "Win": "Objective completed, funds are transferred.",
+                "Loss": "I expected better of you. Get lost."
+            }[status]
+        }[b]
 
-    end_menu(WIN, CLOCK, elements_to_show)
+    end_mission_bonuses = []
+    if status != "Loss":
+        # Bonus
+        mod = 0
+        # No lost team member
+        if len(deployed_team) == len(surviving_deployed_team):
+            end_mission_bonuses.append(
+                {"Sender": "SYS", "Message": str_to_list(f"Bonus Reward - No casualties, x 0.1")},
+            )
+            mod += 0.1
+
+        # No spent ammo
+        no_spent_ammo = 0
+        for x in surviving_deployed_team:
+            for y in entities["entities"]:
+                if y.name == x and y.team == "Players":
+                    if y.weapon.ammo + y.weapon.ammo_pool == y.weapon.max_ammo_pool + y.weapon.max_ammo:
+                        no_spent_ammo += 1
+                    break
+        if no_spent_ammo > 0:
+            end_mission_bonuses.append(
+                {"Sender": "SYS", "Message": str_to_list(f"Bonus Reward - Unused ammo, x {no_spent_ammo * 0.1}")},
+            )
+            mod += no_spent_ammo * 0.1
+
+        # Time
+        time_to_beat = {
+            "Defeat Elite Unit": 90,
+            "Capture":  40 * (round(extra_info["Current mission"]*0.30) + 1) + 30,
+            "Seek and Destroy": round(len(extra_info["Enemy spawns"]) * 7.5),
+            "Eliminate Commander": 40 * (round(extra_info["Current mission"]*0.30) + 1) + 30,
+            "Defense": 1,
+            "Escort": extra_info["Current mission"]
+        }[extra_info["Type"]] * 60
+
+        if time_spent < time_to_beat:
+            end_mission_bonuses.append(
+                {"Sender": "SYS", "Message": str_to_list(f"Bonus Reward - Quick completion, x 0.3")},
+            )
+            mod += 0.3
+
+        # Give total modifier
+        if mod > 0:
+            end_mission_bonuses.append(
+                {"Sender": "SYS", "Message": str_to_list(f"Total bonus modifier, x {mod}")},
+            )
+        run_info["Funds"] += extra_info["Mission Reward"] * mod
+        run_info["Funds"] = round(run_info["Funds"])
+        end_mission_bonuses.append(
+            {"Sender": "SYS", "Message": str_to_list(f"Payout, {extra_info['Mission Reward']} + {extra_info['Mission Reward'] * mod} bonus")},
+        )
+
+    end_menu(WIN, CLOCK, [{"Sender": " ", "Message": str_to_list(f"MISSION STATUS: {p1}")}], elements_to_show,
+             [{"Sender": f"{b}", "Message": str_to_list(f"{extra_message}")}], end_mission_bonuses)
     # popups here when you unlock shit
 
 
@@ -4431,6 +4563,8 @@ def end_run_menu(WIN, CLOCK, run_info, party_info, status):
     # temp_ui_font =  create_temp_font_2(450, font_name="Sprites/JetBrainsMono-SemiBold.ttf")
 
     b = "Secretary" # use a bird name, she is part of the Nest but
+    if "Curtis" in party_info:
+        b = "Big_Scaly_6"
     p1 = {'Win': 'COMPLETED', 'Loss': 'FAILED'}[status]
     if status == "Loss":
         run_info['Funds'] = 0
@@ -4439,18 +4573,25 @@ def end_run_menu(WIN, CLOCK, run_info, party_info, status):
         if party_info[x]['Health'] > 0:
             alive_count += 1
     elements_to_show =[
-        {"Sender": "SYS", "Message": str_to_list(f"CONTRACT STATUS   : {p1}")},
+
         {"Sender": "SYS", "Message": str_to_list(f"HEALTHY MEMBERS   : {alive_count}/{len(party_info)}")},
         {"Sender": "SYS", "Message": str_to_list(f"MISSION COMPLETED : {run_info['Missions completed']}")},
         {"Sender": "SYS", "Message": str_to_list(f"TOTAL EARNINGS    : {run_info['Funds']}")},
         {"Sender": "SYS", "Message": str_to_list(f"UPGRADES BOUGHT   : {len(run_info['Upgrades'])}")},
-        {"Sender": f"{b}", "Message": str_to_list(
-            {
-                "Win": "Contract completed. The reward is being delivered to the agreed upon location",
-                "Loss": "I expected better, get lost."
-            }[status])}]
+]
 
-    end_menu(WIN, CLOCK, elements_to_show)
+    end_menu(WIN, CLOCK, [{"Sender": " ", "Message": str_to_list(f"CONTRACT STATUS: {p1}")}], elements_to_show, [        {"Sender": f"{b}", "Message": str_to_list(
+
+        {
+            "Big_Scaly_6": {
+                "Win": "Great, you're all done! Let's celebrate at the bar!",
+                "Loss": "Sad but we can't win all the time..."}[status],
+            "Secretary": {
+                "Win": "Contract completed. Delivering reward.",
+                "Loss": "I expected better, get lost."
+            }[status]
+        }[b]
+    )}])
 
 
 # ???
@@ -7396,7 +7537,7 @@ def level_generator(possible_levels, party_info, run_info, current_mission=1, mi
     # Add noise
 
     # |Compile extra info|----------------------------------------------------------------------------------------------
-    extra_info = {"Spawn": spawn_point, "Enemy spawns": enemy_spawns, "Mission Reward": round(mission_reward)}
+    extra_info = {"Spawn": spawn_point, "Enemy spawns": enemy_spawns, "Mission Reward": round(mission_reward), "Type": level["objective"], "Current mission": current_mission}
 
     return level, extra_info
 
@@ -7497,7 +7638,7 @@ def versus_level_generator(possible_levels, party_info, map_name, current_missio
     # Add noise
 
     # |Compile extra info|----------------------------------------------------------------------------------------------
-    extra_info = {"Spawn": possible_spawn_points, "Enemy spawns": enemy_spawns, "Mission Reward": round(0)}
+    extra_info = {"Spawn": possible_spawn_points, "Enemy spawns": enemy_spawns, "Mission Reward": round(0), "Type": level["objective"], "Current mission": current_mission}
 
     return level, extra_info
 

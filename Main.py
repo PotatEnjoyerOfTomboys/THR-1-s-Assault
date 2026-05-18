@@ -53,12 +53,9 @@ import random
 #       Balance changes (small ones)
 #   Character conversations
 #   Encyclopedia
-#   Animated radio transmission portraits
 
 #   End mission money bonuses
-
-# Cut
-#   Animated weapons. Mostly for the pile bunker
+#   New end mission screen
 
 
 pg.mixer.pre_init()
@@ -84,7 +81,7 @@ import Main_Loop
 
 def main_game(party_info):
     big_game_loop = True
-    current_mission = 15
+    current_mission = 1
     run_info = {
         "Player party": player_party,
         "Missions completed": 0,
@@ -302,7 +299,7 @@ def main_game(party_info):
                                 party_info[e.name]["Health"] = e.health
                 if end_status == "Win":
                     run_info["Funds"] += extra_info["Mission Reward"]
-                    Fun.end_mission_menu(WIN, CLOCK, party_info, end_status)
+                    Fun.end_mission_menu(WIN, CLOCK, party_info, end_status, run_info, extra_info, deployed_team, surviving_deployed_team, entities, time_spent)
                     run_info["Missions completed"] += 1
                     run_info["Mission historic"].append({
                         "Name": level["name"], "Mission": current_mission, "Faction": level["faction"],

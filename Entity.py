@@ -4331,6 +4331,9 @@ def hover_tank_act(self, entities, level):
     if self.draw_aim_line or self.weapon.laser_sight:
         entities["background particles"].append(Particles.LineParticle(
             Fun.move_with_vel_angle(self.pos, 20, self.aim_angle), Fun.BLUE, 1, self.weapon.range-20, self.aim_angle, 2, 0))
+# Cannon        DA DUM *big shot sound*, GET SOME *big shot sound*
+# Grenades      EAT THAT, TAKE THAT
+# Run over      GET IN THE WAY, IN THE WAY
 
 
 def hover_tank_draw(self, WIN, scrolling):
@@ -4344,6 +4347,10 @@ def hover_tank_draw(self, WIN, scrolling):
 
 
 # Gilgamesh
+# Desert Dune
+# Desert Flower
+# Divorce Spiral
+# Reversed Divorce Spiral
 def gilgamesh_input(self, entities, level):
     # Input functions are the IA for an enemy
     # better targeting system
@@ -4602,10 +4609,11 @@ def gilgamesh_wall(self, entities, level):
 
 
 # Fire Support Mech
-#       Quick Boost             Cardinal directions or rotate
-#       Napalm sword            Generates a wave of napalm
+#       Quick Boost
+#       Napalm sword
 #       Cannon
 #       Minigun
+#       Missile
 def bloodhound_input(self, entities, level):
     # Input functions are the IA for an enemy
     # better targeting system
@@ -4898,6 +4906,10 @@ def bloodhound_boost(self, entities, level):
 
 
 # Attack Helicopter
+# TODO: Make missile types behave more differently, add pattern
+# Incendiary    .
+# HE            .
+# Shrapnel      .
 def attack_helicopter_input(self, entities, level):
     # Input functions are the IA for an enemy
     # better targeting system
@@ -5247,6 +5259,19 @@ def rigel_act(self, entities, level):
 
     # Handle Missile Circus
     if self.free_var["Missile Circus"] > 0:
+        if self.free_var["Missile Circus"] % 4 == 0:
+            angle = self.angle - 180 - random.uniform(-45, 45)
+            Bullets.spawn_bullet(
+                self, entities,
+                Bullets.Missile,
+                Fun.move_with_vel_angle(self.pos, 20, angle),
+                angle,
+                [2 + 3 * random.random(), 180, 4, 3, {"Targeting range": 512,
+                                 "Targeting angle": 60,
+                                 "Target": "enemies",
+                                 "Secondary explosion": {"Duration": 5,
+                                                         "Growth": 2,
+                                                         "Damage mod": 0.75}}])
         self.free_var["Missile Circus"] -= 1
 
     # |Movement Output|---------------------------------------------------------------------------------------------

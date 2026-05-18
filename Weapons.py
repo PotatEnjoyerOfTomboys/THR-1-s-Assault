@@ -4609,7 +4609,7 @@ weapon_repertory = {
          "description": "",
          "class": "Semi-auto",
          "sprite": "Sprites/Enemies/Weapons/Bulwark Minigun.png",
-         "gunshot sound": "Small arms",
+         "gunshot sound": "Hover Tank Canon",
          "reloading sound": "Reload Pistol 1",
          "jamming sound": "Jamming",
          "sound level": 0.75,
@@ -4761,8 +4761,6 @@ weapon_repertory = {
 }
 
 # Encyclopedia notes
-# 	"Weapon-Rifle-Mark's Rifle": "",
-
 # 	"Weapon-Energy-Laser Carbine": "",
 #   Manufacturer: 2nd Weapons RnD Division||Power Supply: ?????||||A variant of the <laser rifle>. It is still an experimental design but testing shows promising results.||||The goal of this design is to reduce overall length while retaining capabilities. If successful, it might very well become a replacement to the original.
 # 	"Weapon-Energy-Heavy Laser": "",
@@ -4770,12 +4768,8 @@ weapon_repertory = {
 # 	"Weapon-Energy-Marker Laser": "",
 #   Manufacturer: 2nd Weapons RnD Division||Power Supply: ?????||||Another variant of the <laser rifle>. Based on analysis of a captured example, we know that it the beam causes a form of radiation to makes most materials glow.||||The way the weapon is fielded implies that it's used to mark tactically significant targets for elimination.
 
-# 	"Weapon-Combo-Captain's Axe & Blunderbuss": "",
-
 # 	"Weapon-Heavy-ARWS": "",
 #   Manufacturer: 1st and 3rd Weapons RnD Division||||The All Range Weapon System is name given to an add-on to the
-# 	"Weapon-Heavy-Flamethrower": "",
-#   Manufacturer: Steel Wings Heavy Ind.||Fuel: XM-80GB pattern fuel||||Normally, flamethrowers are a specialized tool for the military. But the C8 Mercenary Army uses them as a
 # 	"Weapon-Heavy-Napalm Grenade Launcher": "",
 #   Manufacturer: Steel Wings Heavy Ind.||Caliber: 50mm Grenade||||
 # 	"Weapon-Gear-Artillery Radio": "",
