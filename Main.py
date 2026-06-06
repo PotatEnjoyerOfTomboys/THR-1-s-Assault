@@ -1,25 +1,25 @@
 import pygame as pg
 import os
 import random
+# Cool video https://www.youtube.com/watch?v=2Yj5mmKWukw
 
-
-# Do a web version with pybag?
-# Music 7
-# 	1 menu track            (grid room)
-# 	3 mission track         (Like SMT3's normal battle theme, solos are different)
-#       Industrial Park     ()
-#       Red Desert          ()
-#       Iron Mines          (The end is almost there)
-# 	1 THR-1 boss track      ()
-# 	1 Curtis boss theme	    (Confidant)
-# 	1 final boss track      (Seed fall upon a barren land)
-
-# Secret level?
+# Music 5/7
+# 	1 menu track            (Grid room - Armored Core 4             )
+#           bassline
+# 	1/3 mission track       (The Rock Drill - Armored Core 4        X is a base, do different solos like in SMT3, drums and other instruments more prominent, Synth?)
+#                            I Hate - Metal Wolf Chaos (the riff)
+#       Industrial Park     (Viper - Armored Core For Answer        Guitar at the start)
+#       Red Desert          (SMT3 Normal battle theme               Guitar Solo 4)
+#       Iron Mines          (The Fog - Persona 4                    Solo at 0:50)
+#           short notes into a long note
+# 	1 THR-1 boss track      (Vulture - Armored Core V,              more synth/violin thing)
+# 	1 Curtis boss theme	    (Scorcher - Armored Core For Answer     Tom drums)
+#                            Metal Fighter - Metal Wolf Chaos
+# 	1 final boss track      (Fall - Armored Core 4                  use same bass line as menu track)
+#                            Machine - Metal Wolf Chaos
+#           constant base, switches between 2 instruments (guitar, synth?). Use the menu bassline
 
 # Unlock tree
-# Second weapon choice      Character must be alive after beating a stage 5 boss
-# Third weapon choice       Character must be alive after beating a stage 10 boss
-# Zoar Colonists            Beat a stage 15 boss
 # Encyclopedia entries
 #   Enemies                 Finish missions (faction affects which are unlocked)
 #       Grunt               Finish 3 mission against the faction
@@ -29,33 +29,22 @@ import random
 #       Specialist 2        Finish 36 mission against the faction
 #       Elite               Finish 45 mission against the faction
 #       VIP                 Finish eliminate VIP
-#   Bosses                  Beat the boss (Zoar Colonists and THR-1 have special boss entries)
+#   Bosses                  Beat the boss
 #   Weapon                  When the weapon is unlocked
-#   Mercenary group
-#       Team info           When unlocking the group
-#       Team members        When unlocking the group
 #   Background info
 #       Manufacturer        When a weapon they made is unlocked.
 #       Enemy groups        Unlocked by default
-#       Solar War           Unlocked by default (journalistic reports)
-#       Events of NNTSS     Unlocked by default (presented in the form of rapports made by the Nest)
+#       Solar War           Unlocked by default
+#       Events of NNTSS     Unlocked by default
 
 # TODO: fix enemy spawn in defense
 # Version 1.0 - Final version
 #   Bosses
-#       Armed Shield Generator  Tesla coil attack
-#       Rigel                   (Final boss)    attacks
-#       Fire Support Mech       Boost effects
-#       THR-1 Boss fight        (Alt Final boss - Zoar route)   (Figure how to make it playable)
+#       Rigel                   (Final boss)    attacks, leg animations
+#       Fire Support Mech       Boost effects, leg animations
 #       AA Site - Drone builder (animations)
-#       Gilgamesh               (animations)
-#   Versus mode
-#       Balance changes (small ones)
-#   Character conversations
-#   Encyclopedia
-
-#   End mission money bonuses
-#   New end mission screen
+#   Character conversations & Encyclopedia
+#   SOUNDTRACK
 
 
 pg.mixer.pre_init()
@@ -101,7 +90,6 @@ def main_game(party_info):
         if Fun.UPGRADE_INFO[upgrade]["Owner"] not in names and not Fun.UPGRADE_INFO[upgrade]["Owner"] == "Party":
             continue
         run_info["Upgrade pool"].append(upgrade)
-    # run_info["Available upgrades"] = (
     Fun.update_available_upgrades(run_info)
     # add upgrades to the upgrade pool
     end_status = "Loss"
@@ -144,6 +132,7 @@ def main_game(party_info):
             #     text="Game is about to crash out"
             # )
         if load_level:
+            level.update({"Player party": player_party})
             entities = {"entities": [], "items": [], "sounds": [], "bullets": [],
                         "background particles": [], "particles": [], "UI particles": [], "screen shake": [],
                         "cutscene stage": 0, "shadows": [], "scrolling": [], "scrolling target": []}
@@ -299,7 +288,7 @@ def main_game(party_info):
                                 party_info[e.name]["Health"] = e.health
                 if end_status == "Win":
                     run_info["Funds"] += extra_info["Mission Reward"]
-                    Fun.end_mission_menu(WIN, CLOCK, party_info, end_status, run_info, extra_info, deployed_team, surviving_deployed_team, entities, time_spent)
+                    Fun.end_mission_menu(WIN, CLOCK, party_info, end_status, run_info, level, extra_info, deployed_team, surviving_deployed_team, entities, time_spent)
                     run_info["Missions completed"] += 1
                     run_info["Mission historic"].append({
                         "Name": level["name"], "Mission": current_mission, "Faction": level["faction"],
@@ -436,6 +425,7 @@ def versus_mode(party_info):
             last_added_entity.armour *= 5
             last_added_entity.targeting_angle = 180
             last_added_entity.targeting_range = 1280
+            last_added_entity.free_var.update({"IS VERSUS": True})
 
         # Load events
         new_events = []
@@ -479,6 +469,121 @@ def versus_mode(party_info):
         if big_game_loop:
             Fun.versus_end_menu(WIN, CLOCK, party_info, end_status)
 
+
+# Might never finish this
+def tutorials():
+    while True:
+        # Menus
+        Fun.loading_screen(WIN, CLOCK)
+
+        possible_levels = []
+
+        # Modified mission selection menu to let choose between versus maps
+        level, extra_info, party_info, out_party, give_up = Fun.versus_arena_menu(WIN, CLOCK, possible_levels, party_info)
+
+        if give_up:
+            return
+
+        # Load level
+        entities = {"entities": [], "items": [], "sounds": [], "bullets": [],
+                    "background particles": [], "particles": [], "UI particles": [], "screen shake": [],
+                    "cutscene stage": 0, "shadows": [], "scrolling": [], "scrolling target": []}
+
+        scrolling_target_entities = []  # Use that
+        # Load up the party
+        player_count = 0
+        for count, player_to_add in enumerate(out_party):
+            name = player_to_add[0]
+            input_method = player_to_add[1]
+            info = party_info[name]["Info"].copy()
+
+            # Manage input functions, default is AI
+            if input_method == "Keyboard & Mouse":
+                info["func input"] = Entity.player_input_keyboard
+
+            elif input_method in ["Controller 1", "Controller 2", "Controller 3", "Controller 4"]:
+                info["func input"] = {
+                    "Controller 1": Entity.player_input_controller_1,
+                    "Controller 2": Entity.player_input_controller_2,
+                    "Controller 3": Entity.player_input_controller_3,
+                    "Controller 4": Entity.player_input_controller_4
+                }[input_method]
+                info["Input mode"] = "Controller"
+
+            # Change weapons
+            info["weapon"] = player_to_add[2]
+
+            # Add outline based on position number and players in
+            info["free var"].update({"Outline": Fun.PLAYER_OUTLINE_COLOUR[player_count]})
+            entities["entities"].append(Entity.Entity(info))
+            last_added_entity = entities["entities"][-1]
+            scrolling_target_entities.append(last_added_entity)
+
+            player_count += 1
+            last_added_entity.team = f"Player {player_count}"
+
+            if input_method != "COM":
+                # New AI for COM?
+                last_added_entity.is_player = True
+
+            # Handle spawn points
+            num = random.randint(0, len(extra_info["Spawn"])-1)
+            last_added_entity.pos = extra_info["Spawn"][num]
+            extra_info["Spawn"].pop(num)
+
+            # Reset the name to the correct one
+            last_added_entity.name = name
+            last_added_entity.ai_state = "Attack"
+            last_added_entity.force_draw = True
+            last_added_entity.max_health *= 5
+            last_added_entity.health *= 5
+            last_added_entity.max_armour *= 5
+            last_added_entity.armour *= 5
+            last_added_entity.armour *= 5
+            last_added_entity.targeting_angle = 180
+            last_added_entity.targeting_range = 1280
+
+        # Load events
+        new_events = []
+        for events_to_load in level["events"]:
+            event_name = events_to_load[0]
+            event_trigger = Event.get_event_trigger(events_to_load[1])
+            # event_functions = Event.get_event_function(events_to_load[3])
+            event_functions = []
+            for funcs in events_to_load[3]:
+                event_functions.append(getattr(Event, funcs))
+                # "Name", Event.relevant trigger, single use, Event.effects
+            free_var = {}
+            if len(events_to_load) == 5:
+                free_var = events_to_load[4]
+
+            new_events.append(
+                Event.MissionEvent(event_name, event_trigger, events_to_load[2], event_functions,
+                                   free_var=free_var))
+        level["events"] = new_events
+
+        # Scrolling
+        scrolling_target = Fun.find_scrolling_target(scrolling_target_entities)
+        scrolling = scrolling_target
+        entities["scrolling"] = scrolling
+
+        # |Main game loop|------------------------------------------------------------------------------------------
+        go_to_hub = False,  # mission_end_screen = False, True
+
+        frame_2 = WIN.copy()
+        Render.draw(WIN, CLOCK, 0, scrolling, scrolling_target, level, entities, 1)
+        Fun.menu_transition_doom_screen_melt(WIN, CLOCK, WIN.copy(), frame_2)
+
+        checked_time = False
+        end_status, mission_end_screen, big_game_loop, party_info, time_spent = Main_Loop.main_loop(WIN, CLOCK, entities, level,
+                                                                                        party_info, scrolling,
+                                                                                        scrolling_target_entities,
+                                                                                        end_with_main_player=False)
+
+        pg.mixer.music.fadeout(60)
+        # |Mission end screen|----------------------------------------------------------------------------------
+        if big_game_loop:
+            Fun.versus_end_menu(WIN, CLOCK, party_info, end_status)
 
 # for p in range(1000):
 #     Fun.level_generator([], current_mission=1, mission_type="", faction=0)
@@ -552,6 +657,8 @@ if __name__ == "__main__":
 
         if player_party == "Versus":
             versus_mode(party_info)
+        elif player_party == "Tutorials":
+            tutorials()
         else:
             main_game(party_info)
         #

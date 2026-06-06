@@ -349,6 +349,17 @@ def mission_start(self, entities, bullets, level, time_passed, screen, CLOCK):
                 if e.team == "Player":
                     continue
                 e.weapon.fire_rate *= 2
+                e.vel_max *= 0.8
+                e.pos = Fun.random_point_in_circle(e.pos, 32)
+                e.free_var.update({"IS VERSUS": True})
+                if e.name == "Lord":
+                    e.weapon.bullet_info[0] = 6
+                    e.weapon.bullet_info[3] = round(e.weapon.bullet_info[3] * 0.5)
+                    e.weapon.bullet_info[4]["Manoeuvrability"] = 1
+            level["events"].append(
+                MissionEvent('Ambush', {"rects": [], "Conditions": trigger_check_under_specified_amount_enemies}, True, [thr_1],
+                 free_var={"Specified amount": 3})
+            )
     # Use the old boss thing for Curtis?
     for e in entities["entities"]:
         if e.team == "Player":
@@ -366,15 +377,19 @@ def mission_start(self, entities, bullets, level, time_passed, screen, CLOCK):
 
 
 def win(self, entities, bullets, level, time_passed, screen, CLOCK):
+    # SPRITE_RADIO_MAKOTO
+    # "THR-1": "Fortress", "Zoar Colonists"
     level["events"].append(MissionEvent("Finishing", trigger_timer, False, [finish_mission], free_var={"Timer": 60 * 5}))
-    radio_handler(entities, [
-        [Fun.SPRITE_RADIO_EMPLOYER[0], "Objective completed. ", Fun.AMBER, 300]
-    ])
+    radio_handler(entities,
+                  {
+                      "THR-1": [[Fun.SPRITE_RADIO_EMPLOYER[0], "Objective completed.", Fun.AMBER, 300]],
+                      "Zoar Colonists": [[Fun.SPRITE_RADIO_MAKOTO[0], "Mission complete!", Fun.AMBER, 300]],
+                  }[level["Player party"]]
+                  )
     for e in entities["entities"]:
         if e.team == "Players":
             e.status["No damage"] = 300
     #
-
 
 
 def loss(self, entities, bullets, level, time_passed, screen, CLOCK):
@@ -382,18 +397,20 @@ def loss(self, entities, bullets, level, time_passed, screen, CLOCK):
     for e in entities["entities"]:
         if e.team != "Players":
             e.status["No damage"] = 300
-    radio_handler(entities, [
-        [Fun.SPRITE_RADIO_EMPLOYER[0], "Squad leader is down, retreat at once.", Fun.AMBER, 300]
-    ])
+    radio_handler(entities,
+                  {
+                      "THR-1": [[Fun.SPRITE_RADIO_EMPLOYER[0], "Squad leader is down, retreat at once.", Fun.AMBER, 300]],
+                      "Zoar Colonists": [[Fun.SPRITE_RADIO_MAKOTO[0], "We failed get out of there!", Fun.AMBER, 300]],
+                  }[level["Player party"]]
+
+                  )
     level["free var"].update({"Loss": True})
     #
 
 
 def skip_mission(self, entities, bullets, level, time_passed, screen, CLOCK):
     level["events"].append(MissionEvent("Finishing", trigger_timer, False, [finish_mission], free_var={"Timer": 60 * 5}))
-    # radio_handler(entities, [
-    #     [Fun.SPRITE_RADIO_EMPLOYER[0], "Objective completed. ", Fun.AMBER, 300]
-    # ])
+
     for e in entities["entities"]:
         if e.team == "Players":
             e.status["No damage"] = 300
@@ -404,9 +421,11 @@ def skip_mission(self, entities, bullets, level, time_passed, screen, CLOCK):
 
 def loss_of_apc(self, entities, bullets, level, time_passed, screen, CLOCK):
     level["events"].append(MissionEvent("Finishing", trigger_timer, False, [finish_mission], free_var={"Timer": 60 * 5}))
-    radio_handler(entities, [
-        [Fun.SPRITE_RADIO_EMPLOYER[0], "You lost the APC. Mission failed.", Fun.AMBER, 300]
-    ])
+    radio_handler(entities,
+                  {
+                      "THR-1": [[Fun.SPRITE_RADIO_EMPLOYER[0], "You lost the APC. Mission failed.", Fun.AMBER, 300]],
+                      "Zoar Colonists": [[Fun.SPRITE_RADIO_MAKOTO[0], "We just finished paying it off... come back to the colony.", Fun.AMBER, 300]],
+                  }[level["Player party"]])
     level["free var"].update({"Loss": True})
     #
 
@@ -557,10 +576,17 @@ def capture_zone(self, entities, bullets, level, time_passed, screen, CLOCK):
                                 level['objective points'].pop(count)
                                 break
                         point["Captured"] = True
-                        radio_handler(entities, [
+                        radio_handler(entities, {
+                      "THR-1": [
                             [Fun.SPRITE_RADIO_EMPLOYER[0], f"Point {Fun.PHONETIC_ALPHABET[i % 26]} captured", Fun.AMBER, 300],
                             [Fun.SPRITE_RADIO_EMPLOYER[0], "Move to the next one.", Fun.AMBER, 180]
-                        ])
+                        ],
+                      "Zoar Colonists": [
+                            [Fun.SPRITE_RADIO_MAKOTO[0], f"Point {Fun.JUST_THE_ALPHABET[i % 26]} is under our control", Fun.AMBER, 300],
+                            [Fun.SPRITE_RADIO_MAKOTO[0], "Get the next one", Fun.AMBER, 180]
+                        ],
+                  }[level["Player party"]]
+                                      )
                     elif point["Cap gauge"] % 20 == 0 and num_increase > 0:
                         spawn_enemy_squad(entities, level, point["Pos"])
                 if point["Cap gauge"] < 0:
@@ -643,7 +669,6 @@ def sandstorm(self, entities, bullets, level, time_passed, screen, CLOCK):
                                                              duration, 180, size=random.randint(2, 5)))
 
 
-
 def landmines(self, entities, bullets, level, time_passed, screen, CLOCK):
     for p in level["pathfinding"]['points']:
         if random.random() < 0.33:
@@ -665,6 +690,40 @@ def ambush(self, entities, bullets, level, time_passed, screen, CLOCK):
     for x in range(3):
         spawn_enemy_squad(entities, level, entities["entities"][0].pos, dist_mod=5)
         # print([entities["scrolling"][0] * -1, entities["scrolling"][1] * -1])
+
+
+def thr_1(self, entities, bullets, level, time_passed, screen, CLOCK):
+    # , "Sovereign", "Duke", "Condor
+    pos = entities["entities"][0].pos
+    dist_mod = 5
+        # print([entities["scrolling"][0] * -1, entities["scrolling"][1] * -1])
+    point = ""
+    for p in level["pathfinding"]["points"]:
+        if Fun.distance_between(level["pathfinding"]["points"][p], pos) < 64 * dist_mod:
+            point = p
+    # Error control
+    if point == "":
+        Fun.print_to_error_stream("Didn't find matching pathfinding waypoint. Aborting")
+        return
+    # Get a waypoint 2 waypoint away from the start one
+    no_go_points = [point]
+    for x in range(1):
+        waypoint_candidate = []
+        for c in level["pathfinding"]["connections"][no_go_points[-1]]:
+            if c in no_go_points:
+                continue
+            waypoint_candidate.append(c)
+        no_go_points.append(waypoint_candidate[random.randint(0, len(waypoint_candidate)-1)])
+    chosen_waypoint = level["pathfinding"]["points"][no_go_points[-1]]
+
+    angle = Fun.angle_between(pos, chosen_waypoint)
+    # Spawn enemies at the chosen way point
+    for e in ["Sovereign", "Duke", "Condor"]:
+        spawn_enemy(entities, e, Fun.random_point_in_donut(chosen_waypoint, (16, 32)), angle)
+        entities["entities"][-1].weapon.fire_rate *= 2
+        entities["entities"][-1].vel_max *= 0.8
+        # entities["entities"][-1].pos = Fun.random_point_in_circle(e.pos, 32)
+        entities["entities"][-1].free_var.update({"IS VERSUS": True})
 
 
 # Versus
@@ -689,28 +748,5 @@ def versus_every_frame(self, entities, bullets, level, time_passed, screen, CLOC
 
 
 import Entity
+from Entity import ENEMY_NO_OWNER
 
-
-ENEMY_NO_OWNER = Entity.Entity({"name": "Nest Trooper",
-         "faction": "FAC-1",
-         "type": "VIP",
-         "targeting range": 0,
-         "targeting angle": 0,
-         "wall hack": False,
-         "health": 1,
-         "armour": 0,
-         "damage resistances": {"Physical": 0, "Fire": 0, "Explosion": 0, "Energy": 0, "Melee": 0, "Healing": 0},
-         "thickness": 0,
-         "vel max": 0,
-         "speed": 0,
-         "friction": 0,
-         "weapon": "Unarmed",
-         "func input": "enemy_input_nest_trooper",
-         "func act": "enemy_act_type_1",
-         "func draw": "enemy_draw_basic",
-         "sprites": "Sprites/Enemies/Nest Commander.png",
-         "on death": "none",
-         "free var": {}
-         }, team="Enemies", pos=[0, 0], start_angle=0)
-
-# print([p for p in dir(ENEMY_NO_OWNER)])

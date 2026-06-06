@@ -158,6 +158,9 @@ def leopold_gauntlet_punch(self, skill, entities, level):
     entities["background particles"].append(Particles.TransparentPolygon(points_p2, Fun.DARK_RED, 1, 96))
 
     if mod == 1:
+        damage = 150
+        if "IS VERSUS" in self.free_var:
+            damage = 80
         entities["screen shake"] = [20, 5, self.aim_angle, 20]
         # TODO: Add visual effect
 
@@ -186,7 +189,7 @@ def leopold_gauntlet_punch(self, skill, entities, level):
             if Fun.distance_between(e.pos, self.pos) < 160:
                 e.target = self
             if Fun.check_point_in_rotated_rectangle([corner_1, corner_2, corner_3, corner_4], e.pos):
-                Fun.damage_calculation(e, 150, "Melee", death_message="Punched by Lord")
+                Fun.damage_calculation(e, damage, "Melee", death_message="Punched by Lord")
                 e.vel = Fun.move_with_vel_angle([0, 0], knockback, self.angle)
                 if "IS BOSS" in e.free_var:
                     e.status["Stunned"] += 90
@@ -241,12 +244,15 @@ def leopold_beast_mode(self, skill, entities, level):
 
 # |Emperor|-------------------------------------------------------------------------------------------------------------
 def kai_kick(self, skill, entities, level):
+    amount = 90
+    if "IS VERSUS" in self.free_var:
+        amount = 45
     point = Fun.move_with_vel_angle(self.pos, -16, self.angle)
     for e in entities["entities"]:
         if e.team == self.team:
             continue
         if Fun.check_point_in_cone(128, point[0], point[1], e.pos[0], e.pos[1], self.angle, 45):
-            e.status["Stunned"] += 90
+            e.status["Stunned"] += amount
             self.free_var["Kicked"] += 1
             if "Startup lag" in e.free_var:
                 e.free_var["Startup lag"] = 0
@@ -538,6 +544,8 @@ def corrine_cardboard_box(self, skill, entities, level):
 
     if skill.last_active_frame:
         self.func_draw = Entity.player_draw
+        if self.team != "Players":
+            self.func_draw = Entity.enemy_draw_basic
 
 
 def corrine_detect_targets(self, skill, entities, level):
@@ -608,6 +616,9 @@ def zander_smoke_screen(self, skill, entities, level):
 def m3d1c_discharge(self, skill, entities, level):
     # Stuns everybody around user and the user
     dist = 128
+    amount = 120
+    if "IS VERSUS" in self.free_var:
+        amount = 80
     for e in entities["entities"]:
         if Fun.distance_between(self.pos, e.pos) < dist:
             if "Power Boost" in self.free_var and e.team == self.team:
@@ -620,7 +631,7 @@ def m3d1c_discharge(self, skill, entities, level):
                 if sk_2.recharge > sk_2.recharge_max:
                     sk_2.recharge = sk_2.recharge_max
             else:
-                e.status["Stunned"] += 120
+                e.status["Stunned"] += amount
             if "Startup lag" in e.free_var:
                 e.free_var["Startup lag"] = 0
     if "Surge Protection" in self.free_var:
@@ -680,7 +691,9 @@ def m3d1c_robot_fuck_off(self, skill, entities, level):
 # |Condor|--------------------------------------------------------------------------------------------------------------
 def vincent_armour_breaker(self, skill, entities, level):
     point = Fun.move_with_vel_angle(self.pos, -16, self.angle)
-
+    amount = 60
+    if "IS VERSUS" in self.free_var:
+        amount = 30
     for e in entities["entities"]:
         if e.team == self.team:
             continue
@@ -691,7 +704,7 @@ def vincent_armour_breaker(self, skill, entities, level):
             continue
         e.armour -= e.max_armour // 3
         if e.armour < 0:
-            stun_time = abs(e.armour) * 60
+            stun_time = abs(e.armour) * amount
             if stun_time > 240:
                 stun_time = 240
             e.status["Stunned"] += stun_time

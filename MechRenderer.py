@@ -89,6 +89,19 @@ def paint_single_part(paint_mech, part_id, copied_mech):
                  [(0, 0, 0, 0), new_colours[0], new_colours[1], new_colours[2], new_colours[3], new_colours[4]])
         )
     paint_mech[part_id]["Sprite"] = new_layers
+    if copied_mech[part_id]["Animation"]:
+        all_animation = []
+        for animation_frame in copied_mech[part_id]["Animation"]:
+            empty_frame = []
+            for animation_layer in animation_frame:
+                empty_frame.append(
+                    swap(animation_layer.copy(),
+                         [(0, 0, 0), MECH_COL_1, MECH_COL_2, MECH_COL_3, MECH_ACCENT, MECH_LIGHT],
+                         [(0, 0, 0, 0), new_colours[0], new_colours[1], new_colours[2], new_colours[3], new_colours[4]])
+                )
+            all_animation.append(empty_frame.copy())
+        paint_mech[part_id]["Animation"] = all_animation
+
     return paint_mech
 
 
@@ -179,8 +192,21 @@ all_mech = [
         # {"Type": "Arm R", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/AM-Orion.png'), 27)},
         # {"Type": "Wpn R", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/BL-Magma.png'), 20)},
     ]
+
+
+def desheetator_mech_part(sprite_sheet, width):
+    height = sprite_sheet.get_height()
+    stand_still = sprite_sheet.subsurface((0, 0, width, height))
+    animation = []
+    for x in range((sprite_sheet.get_width()-width)//width):
+        animation.append(sprite_sheet.subsurface((width + width * x, 0, width, height)))
+    return stand_still, animation
+
+
+lb_mantle_sprite, lb_mantle_animation = desheetator_mech_part(get_image('Sprites/Mech parts/LB-Mantle.png'), 51)   # width 51
+list_sprite_stack = lambda img, height: [get_sprite_stack_list(stack, height=height) for stack in img]
 bloodhound_mech = [
-        {"Type": "Leg", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/LB-Mantle.png'), 26)},
+        {"Type": "Leg", "Sprite": get_sprite_stack_list(lb_mantle_sprite, 34), "Animation": list_sprite_stack(lb_mantle_animation, 34)},
         {"Type": "Torso", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/TO-Igneous.png'), 26)},
         {"Type": "Head", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/HD-Igneous.png'), 12)},
         {"Type": "Arm L", "Sprite": invert_sprite_stack('Sprites/Mech parts/AW-GT-Lopolith.png', 64)},
@@ -199,7 +225,7 @@ rigel_mech = [
         {"Type": "Arm R", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/AW-BL-Bellatrix.png'), 58)},
     ]
 
-def make_part(sprite_list, part_palette, part_type, unbuilt_mech):
+def make_part(sprite_list, part_palette, part_type, unbuilt_mech, animation):
     offset = [0, 0, 0]
     p = [0, 0, 0]
     draw_angle = 0
@@ -255,7 +281,8 @@ def make_part(sprite_list, part_palette, part_type, unbuilt_mech):
         offset = [p4[0] + p[0], p4[1] + p[1], p4[2] + p[2]]
         owner = "Torso"
 
-    return {"Sprite": sprite_list, 'h2': len(sprite_list), "offset": offset, "palette": part_palette.copy(), "Draw angle": draw_angle, "Owner": owner, "Child": []}
+    return {"Sprite": sprite_list, 'h2': len(sprite_list), "offset": offset, "palette": part_palette.copy(),
+            "Draw angle": draw_angle, "Owner": owner, "Child": [], "Animation": animation,"Animation state": -1}
 
 
 def blit_rotate(surf, image, pos, origin_pos, angle):
@@ -285,8 +312,11 @@ class Mech:
         self.mech_parts = {}
         self.mech_palette = mech_palette
         for part_to_add in mech_parts:
+            animation = False
+            if "Animation" in part_to_add:
+                animation = part_to_add["Animation"]
             self.mech_parts.update(
-                {part_to_add["Type"]: make_part(part_to_add["Sprite"], self.mech_palette[part_to_add["Type"]], part_to_add["Type"], self.mech_parts)})
+                {part_to_add["Type"]: make_part(part_to_add["Sprite"], self.mech_palette[part_to_add["Type"]], part_to_add["Type"], self.mech_parts, animation=animation)})
         for p in self.mech_parts:
             if self.mech_parts[p]["Owner"]:
                 self.mech_parts[self.mech_parts[p]["Owner"]]["Child"].append(p)
@@ -302,6 +332,7 @@ class Mech:
         for e in self.mech_parts:
             self.mech_parts = paint_single_part(self.mech_parts.copy(), e, self.backup_mech_copy .copy())
 
+
         self.mech_sprite_stack = []
         for i in range(MAX_MECH_HEIGHT):
             new_layer = []
@@ -309,7 +340,11 @@ class Mech:
                 if self.mech_parts[e]["offset"][2] <= i < self.mech_parts[e]["offset"][2] + self.mech_parts[e]["h2"]:
                     num = i - self.mech_parts[e]["offset"][2]
                     sprite = self.mech_parts[e]["Sprite"][num]
-                    new_layer.append([sprite, self.mech_parts[e]])
+                    alt_animation = False
+                    # This could be removed if all sprite stacks of a piece are stored together and a number is used to choose which we draw
+                    if "Animation" in self.mech_parts[e]:
+                        alt_animation = self.mech_parts[e]["Animation"]
+                    new_layer.append([sprite, self.mech_parts[e], alt_animation])
             if new_layer:
                 self.mech_sprite_stack.append(new_layer)
         self.pos = pos
@@ -381,6 +416,9 @@ class Mech:
             layer_surf = empty_mech_surf.copy()
             for layer_info in layer:
                 sprite = layer_info[0]
+                if layer_info[1]["Animation state"] > -1:
+                    sprite = layer_info[2][layer_info[1]["Animation state"]][count] # Count is a temporary measure
+
                 origin = [sprite.get_width() // 2 , sprite.get_height() // 2]
 
                 blit_rotate(layer_surf, sprite,

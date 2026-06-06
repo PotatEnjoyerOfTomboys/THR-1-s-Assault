@@ -49,19 +49,19 @@
 	"Organizations": {
 		"Armed groups": ["Asset Protecting & Collection Dept.", "Burning Winds Band", "C8 Mercenary Army", "Nest"],
 		"Mercenary Teams": {
-			"THR-1": ["Overview", "Leopold LORD Storch", "Jeanne WIZARD McNeil", "M4-D1C JESTER"], 
+			"THR-1": ["Overview", "Leopold LORD Storch", "Kai KAISER", "Jeanne WIZARD McNeil", "Corrine SOVEREIGN", "M4-D1C JESTER", "Vincent CONDOR Varga"], 
 			"Zoar Colony's Gun Shop": ["Overview", "Curtis Miller", "Vivianne Miller", "Lawrence Reed", "Mark"]
 			},
 		"Weapon Manufacturer": ["Old West Firearms & Replicas",
 								"Socrates",
 								"Factory Munition Ballistics",
 								"Novak & Boyko",
-								"Toolkit Manifacturing",
+								"Toolkit Manufacturing",
 								"CFCR",
 								"ASUM",
 								"Old English Armoury",
 								"Zoar Colony's Gun Shop",
-								"Dickinson Technologies"]
+								"Dickinson Technologies", "Manhunter Ammunitions"]
 	},
 	"Weapon": {
 		"Handgun": ["Big Iron", "War and Peace"],

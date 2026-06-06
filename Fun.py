@@ -4,6 +4,7 @@ import locale
 import pygame as pg
 import numpy
 import math
+from math import radians
 import random
 import os
 import json
@@ -674,6 +675,7 @@ PHONETIC_ALPHABET = [
     'November', 'Oscar', 'Papa', 'Québec', 'Romeo', 'Sierra', 'Tango', 'Uniform', 'Victor', 'Whiskey', 'X-Ray', 'Yanky',
     'Zulu'
 ]
+JUST_THE_ALPHABET = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 # Weapon selection sprites
 get_sprite_stack_list = lambda img, height: [img.subsurface((0, img.get_height() - height * (x + 1), img.get_width(), height)) for x in range(img.get_height()//height)]
 SPRITE_FORTRESS_APC = get_sprite_stack_list(get_image('Sprites/Vehicles/Fortress APC.png'), 86)
@@ -746,10 +748,13 @@ SPRITE_RADIO_DEV = pg.image.load(os.path.join("Sprites/Dev Comment.png")).conver
 SPRITE_SHEET_RADIO = pg.image.load(os.path.join("Sprites/Radio Portrait Sprite Sheet.png")).convert()
 
 # Allies and Curtis
+SPRITE_RADIO_MAKOTO = desheetator_radio(SPRITE_SHEET_RADIO, 768)
+
 SPRITE_RADIO_VIVIANNE = desheetator_radio(SPRITE_SHEET_RADIO, 0)
 SPRITE_RADIO_CURTIS = desheetator_radio(SPRITE_SHEET_RADIO, 64)
 SPRITE_RADIO_LAWRENCE = desheetator_radio(SPRITE_SHEET_RADIO, 128)
 SPRITE_RADIO_MARK = desheetator_radio(SPRITE_SHEET_RADIO, 128 + 64)
+
 SPRITE_RADIO_EMPLOYER = desheetator_radio(SPRITE_SHEET_RADIO, 256)
 
 SPRITE_RADIO_LORD = desheetator_radio(SPRITE_SHEET_RADIO, 256 + 64)
@@ -1412,6 +1417,7 @@ def main_menu(WIN, CLOCK):
     options = [
         {"Name": "Start Run", "Value": "Start", "On select": "Return", "Render func": "Text only"},
         {"Name": "Versus Mode", "Value": "Versus", "On select": "Return", "Render func": "Text only"},
+        # {"Name": "Tutorials", "Value": "Tutorials", "On select": "Return", "Render func": "Text only"},
         {"Name": "Options", "Value": "Options", "On select": "Return", "Render func": "Text only"},
         {"Name": "Credits", "Value": "Credits", "On select": "Return", "Render func": "Text only"},
         {"Name": "Databank", "Value": "Databank", "On select": "Return", "Render func": "Text only"},
@@ -4469,7 +4475,7 @@ def end_menu(WIN, CLOCK, status_line, elements_to_show, comment_line, elements_t
         end_timer -= 1
 
 
-def end_mission_menu(WIN, CLOCK, party_info, status, run_info, extra_info, deployed_team, surviving_deployed_team, entities, time_spent):
+def end_mission_menu(WIN, CLOCK, party_info, status, run_info, level, extra_info, deployed_team, surviving_deployed_team, entities, time_spent):
     b = "Secretary" # use a bird name, she is part of the Nest but
     if "Curtis" in party_info:
         b = "Big_Scaly_6"
@@ -4506,8 +4512,9 @@ def end_mission_menu(WIN, CLOCK, party_info, status, run_info, extra_info, deplo
     if status != "Loss":
         # Bonus
         mod = 0
+
         # No lost team member
-        if len(deployed_team) == len(surviving_deployed_team):
+        if len(deployed_team) == len(surviving_deployed_team) and len(deployed_team) > 1:
             end_mission_bonuses.append(
                 {"Sender": "SYS", "Message": str_to_list(f"Bonus Reward - No casualties, x 0.1")},
             )
@@ -4528,13 +4535,18 @@ def end_mission_menu(WIN, CLOCK, party_info, status, run_info, extra_info, deplo
             mod += no_spent_ammo * 0.1
 
         # Time
+        escort_time_to_beat = 0
+        if extra_info["Type"] == "Escort":
+            escort_time_to_beat = level['free var']['APC path'] * 2
         time_to_beat = {
             "Defeat Elite Unit": 90,
             "Capture":  40 * (round(extra_info["Current mission"]*0.30) + 1) + 30,
             "Seek and Destroy": round(len(extra_info["Enemy spawns"]) * 7.5),
             "Eliminate Commander": 40 * (round(extra_info["Current mission"]*0.30) + 1) + 30,
-            "Defense": 1,
-            "Escort": extra_info["Current mission"]
+            "Defense": [2, 2, 3, 3, 0,
+                          4, 4, 5, 5, 0,
+                          6, 6, 7, 7, 0][extra_info["Current mission"]-1]*50,
+            "Escort": escort_time_to_beat
         }[extra_info["Type"]] * 60
 
         if time_spent < time_to_beat:
@@ -4542,6 +4554,26 @@ def end_mission_menu(WIN, CLOCK, party_info, status, run_info, extra_info, deplo
                 {"Sender": "SYS", "Message": str_to_list(f"Bonus Reward - Quick completion, x 0.3")},
             )
             mod += 0.3
+
+        # Solo
+        if len(deployed_team) == 1:
+            end_mission_bonuses.append(
+                {"Sender": "SYS", "Message": str_to_list(f"Bonus Reward - Solo deployment, x 0.2")},
+            )
+            mod += 0.1
+
+        # Enemies wiped out
+        if extra_info["Type"] not in ["Seek and Destroy", "Defense", "Defeat Elite Unit"]:
+            allow_bonus = True
+            for e in entities:
+                if e.team != "Players":
+                    allow_bonus = False
+                    break
+            if allow_bonus:
+                end_mission_bonuses.append(
+                    {"Sender": "SYS", "Message": str_to_list(f"Bonus Reward - Hostiles wiped out, x 0.3")},
+                )
+                mod += 0.3
 
         # Give total modifier
         if mod > 0:
@@ -4857,6 +4889,29 @@ def draw_transparent_circle(WIN, circle, colour, alpha_level, width=0):
                    circle_radius, width=width)
     s.set_alpha(alpha_level)  # alpha level
     WIN.blit(s, (circle[0], circle[1]))
+
+
+def draw_arc(WIN, colour, pos, base_angle, length, half_of_angle_width, width=100000):
+    angle_1 = radians(base_angle * -1 - half_of_angle_width + 180)  # rad
+    angle_2 = radians(base_angle * -1 + half_of_angle_width + 180)
+    half_range = length / 2
+    arc_rect = (pos[0] - half_range, pos[1] - half_range, length, length)
+    pg.draw.arc(WIN, colour, arc_rect, angle_1, angle_2, width)
+
+
+def draw_transparent_arc(WIN, colour, pos, base_angle, length, half_of_angle_width, alpha_level, width=100000):
+    angle_1 = radians(base_angle * -1 - half_of_angle_width + 180)  # rad
+    angle_2 = radians(base_angle * -1 + half_of_angle_width + 180)
+    half_range = length / 2
+    arc_rect = (0, 0, length, length)
+    # arc_rect = (pos[0] - half_range, pos[1] - half_range, length, length)
+
+    s = pg.Surface((length, length)).convert_alpha()  # the diameter of the circle
+    s.fill([0, 0, 0, 0])
+    pg.draw.arc(s, colour, arc_rect, angle_1, angle_2, width)
+
+    s.set_alpha(alpha_level)  # alpha level
+    WIN.blit(s, (pos[0] - half_range, pos[1] - half_range))
 
 
 def draw_transparent_poly(WIN, points, colour, alpha_level, scrolling, width=0):
@@ -7142,6 +7197,7 @@ def level_generator(possible_levels, party_info, run_info, current_mission=1, mi
             name = write_textline(f"{level['objective']} Name {random.randint(0, 15)}")
         level["name"] = name
     else:
+        # if run_info["Time spend in mission"]/60/60 < 25 and False:
         if run_info["Time spend in mission"]/60/60 < 20:
             level["name"] = write_textline("Finale 1")
         else:
@@ -7447,7 +7503,7 @@ def level_generator(possible_levels, party_info, run_info, current_mission=1, mi
                     enemy_spawns.append({"Pos": [commander_spawn.centerx, commander_spawn.centery], "Type": "Curtis"})
                     level['faction'] = 4
                 if level['name'] == write_textline("Finale 3"): # Load THR-1 team
-                    for x in ["Lord", "Emperor", "Wizard", "Sovereign", "Duke", "Condor", "Jester"]:
+                    for x in ["Lord", "Emperor", "Wizard", "Jester"]:
                         enemy_spawns.append({"Pos": [commander_spawn.centerx, commander_spawn.centery], "Type": x})
                     level['faction'] = 5
 

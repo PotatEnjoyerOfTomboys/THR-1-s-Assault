@@ -1284,9 +1284,9 @@ def entity_find_main_group(self, entities, dist=128):
     return main_group
 
 
-def entity_find_teammate(self, entities, target="Sovereign"):
+def entity_find_teammate(self, entities, target="Sovereign", check_limit=3):
     for count, e in enumerate(entities["entities"]):
-        if count > 3: break
+        if count > check_limit: break
         if e.team != self.team: continue
         if e.name != target: continue
         return e.pos.copy()
@@ -1468,6 +1468,71 @@ def entity_target_detection_healer(self, entities, level):
             target_pos = results
             wall_in = True
 
+    return target_pos, target_angle, wall_in
+
+
+def entity_target_simple(self, entities, level):
+    # Used by the enemy AI able to find targets
+    # Might make them capable of patrolling
+
+    if self.time % 240 == 0 or not self.target:
+        self.is_target = False
+        self.target = False
+        target_check = self.targeting_range
+        # I might have to remake the whole targeting system
+        control_agro = -25
+        for p in entities["entities"]:
+            if p.health <= 0 or self.team == p.team:
+                continue
+            if control_agro > p.agro:
+                continue
+
+            if p.status["Stealth"] > 0 and not p.status["Visible"] > 0:
+                continue
+            detection_modifier = p.stealth_mod * self.stealth_counter
+
+            if detection_modifier > 1: detection_modifier = 1
+            if p.status["Visible"] > 0: detection_modifier = 1
+
+            # Check if the potential target is in detection range
+            if Fun.check_point_in_cone(target_check // 6 * detection_modifier,
+                    self.pos[0], self.pos[1], p.pos[0], p.pos[1],
+                    self.angle, self.targeting_angle * 3) or \
+                    Fun.check_point_in_cone(target_check * detection_modifier,
+                                        self.pos[0], self.pos[1], p.pos[0], p.pos[1],
+                                        self.angle, self.targeting_angle)\
+                    or Fun.check_point_in_circle(target_check // 10, self.pos[0], self.pos[1], p.pos[0], p.pos[1]):
+                self.target = p
+                self.is_target = True
+                control_agro = p.agro
+
+        # Check for sounds
+        if not self.target:
+            for sound in entities["sounds"]:
+                if self.team == sound.source:
+                    continue
+                if Fun.check_point_in_circle(sound.radius, sound.pos[0], sound.pos[1], self.pos[0], self.pos[1]):
+                    self.angle = Fun.angle_between(sound.pos, self.pos)
+    target_angle = 0
+    target_pos = False
+    wall_in = False
+
+    if self.target:
+        self.target.is_targeted = True
+        # If the target is dead, reset targeting
+        if self.target.health <= 0:
+            self.target = False
+            return target_pos, target_angle, wall_in
+
+        target_angle = self.target.angle
+        target_pos = self.target.pos.copy()
+        # Pathfinding
+        # results = pathfinding(self, level)
+        results = universal_pathfinding(self, level, target_pos)
+        if results:
+            # entities["particles"].append(Fun.GrowingCircle(results, Fun.WHITE, 0, 1, 32, 8))
+            target_pos = results
+            wall_in = True
     return target_pos, target_angle, wall_in
 
 
@@ -1866,6 +1931,354 @@ ALLY_SKILL_CONTROL = {
     "Mark": mark_skill_control,
     "Vivianne": basic_skill_control
 }
+
+
+# THR-1 Boss act func
+def lord_boss_input(self, entities, level):
+    if self.time < 60 * 5: return
+    self.input = Fun.get_default_inputs()
+    # Make it stay on the position to hold
+    self.angle = Fun.angle_between(self.mouse_pos, self.pos)
+
+    target, target_angle, wall_in = entity_target_detection(self, entities, level)
+
+    if target:
+        aim_target = self.target.pos.copy()
+        self.angle = Fun.angle_between(aim_target, self.pos)
+        ALLY_FIRE_CONTROL[self.name][self.weapon.name](self, entities, level, target, wall_in)
+        entity_dash_when_targeted(self)
+        move_target = universal_pathfinding(self, level, self.target.pos)
+        aaa = bool(move_target)
+        if not move_target:
+            move_target = self.target.pos
+        self.mouse_pos = self.target.mouse_pos.copy()
+        entity_move_toward_point(self, move_target, 48)
+    elif self.weapon.ammo < self.weapon.max_ammo and self.weapon.ammo_pool > 0:
+            self.input["Reload"] = True
+    else:
+        m_target = self.pos.copy()
+        for e in entities["entities"]:
+            if e.team == self.team: continue
+            if Fun.distance_between(self.pos, e.pos) > 320:
+                m_target = e.pos.copy()
+        move_target = universal_pathfinding(self, level, m_target)
+        aaa = bool(move_target)
+        if not move_target:
+            move_target = m_target
+        self.mouse_pos = m_target
+
+        entity_move_toward_point(self, move_target, 128)
+        if not aaa: entity_spread_apart(self, entities)
+    # entity_dodge_bullets(self, entities, 64)
+    ALLY_SKILL_CONTROL[self.name](self, entities, level)
+    # Stunned status manager
+    Fun.stunned_manager(self)
+
+    return target, target_angle
+
+
+def emperor_boss_input(self, entities, level):
+    if self.time < 60 * 5: return
+    self.input = Fun.get_default_inputs()
+    # Make it stay on the position to hold
+    self.angle = Fun.angle_between(self.mouse_pos, self.pos)
+
+    target, target_angle, wall_in = entity_target_detection(self, entities, level)
+
+    if target:
+        aim_target = self.target.pos.copy()
+        self.angle = Fun.angle_between(aim_target, self.pos)
+
+        if not melee_fire_control(self, entities, level, target, wall_in):
+            self.input["Reload"] = self.weapon.ammo == 0 and self.weapon.ammo_pool > 0
+            entity_shoot_with_startup_lag(self, Fun.distance_between(target, self.pos), 7 * 30)
+            if self.free_var['Startup lag'] > 0:
+                self.input["Alt fire"] = True
+                self.input["Shoot"] = start_up_lag_handler(self, self.free_var["Startup time"])
+        else:
+            self.input["Skill 2"] = entity_get_enemy_count(self, entities, goal=5, dist=256)
+        entity_dash_when_targeted(self)
+        move_target = universal_pathfinding(self, level, self.target.pos)
+        aaa = bool(move_target)
+        if not move_target:
+            move_target = self.target.pos
+        self.mouse_pos = self.target.mouse_pos.copy()
+        dist = Fun.distance_between(self.pos, self.target.pos)
+        if dist < 96:
+            print(f"{dist=}")
+
+            if self.free_var["Startup lag kick"] == 0 and self.free_var["kick cooldown"] == 0:
+                self.free_var["Startup lag kick"] += 1
+        entity_move_toward_point(self, move_target, 48)
+    elif self.weapon.ammo < self.weapon.max_ammo and self.weapon.ammo_pool > 0:
+            self.input["Reload"] = True
+    else:
+        m_target = self.pos.copy()
+        for e in entities["entities"]:
+            if e.team == self.team: continue
+            if Fun.distance_between(self.pos, e.pos) > 320:
+                m_target = e.pos.copy()
+        move_target = universal_pathfinding(self, level, m_target)
+        aaa = bool(move_target)
+        if not move_target:
+            move_target = m_target
+        self.mouse_pos = m_target
+
+        entity_move_toward_point(self, move_target, 128)
+        if not aaa: entity_spread_apart(self, entities)
+
+    if self.free_var["kick cooldown"] == 0 and self.free_var["Startup lag kick"] != 0 :
+        self.input["Skill 1"] = start_up_lag_handler(self, 90, key="Startup lag kick")
+        if self.input["Skill 1"]:
+            self.free_var["kick cooldown"] = 120
+    else:
+        self.free_var["kick cooldown"] -=1
+
+    # entity_dodge_bullets(self, entities, 64)
+    entity_spread_apart(self, entities)
+    # Stunned status manager
+    Fun.stunned_manager(self)
+
+    return target, target_angle
+
+
+def emperor_boss_draw(self, WIN, scrolling):
+    # That one has animations
+    if self.status["Stealth"] > 0:
+        return
+    # Draw the enemy
+    WIN.blit(Fun.ENTITY_SHADOW, (self.pos[0]-16 + scrolling[0], self.pos[1] + 11 + scrolling[1]), special_flags=pg.BLEND_RGBA_SUB)
+    enemy_direction = Fun.get_entity_direction(self.angle)
+    # Fun.draw_entity(self, scrolling, WIN, enemy_direction)
+    self.draw_player(scrolling, WIN, enemy_direction)
+
+    # Draw the gun
+    angle_to_add = 0
+    if self.reloading:
+        angle_to_add = (360 / self.weapon.reload_time) * self.no_shoot_state
+
+    Fun.blitRotate(WIN, pg.transform.flip(self.weapon.sprite, True, -90 < self.aim_angle < 90),
+                   Fun.move_with_vel_angle([self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]], 10,
+                                           self.aim_angle),
+                   [0, 0], 180 - self.aim_angle + angle_to_add)
+
+    if self.free_var["Startup lag kick"]:
+        pos = Fun.move_with_vel_angle(self.pos, 16, self.angle)
+        pos[0] += scrolling[0]
+        pos[1] += scrolling[1]
+        mod = self.free_var["Startup lag kick"]/90
+        Fun.draw_transparent_arc(WIN, Fun.DARK_RED, pos, self.angle, 128, 45, 96, width=100000)
+        Fun.draw_transparent_arc(WIN, Fun.DARK_RED, pos, self.angle, 128*mod, 45, 96, width=100000)
+
+
+def wizard_boss_input(self, entities, level):
+    if self.time < 60 * 5: return
+    self.input = Fun.get_default_inputs()
+    self.input = Fun.get_default_inputs()
+    # Make it stay on the position to hold
+
+    main_group = entity_find_main_group(self, entities, dist=256)
+    move_target = universal_pathfinding(self, level, main_group)
+    aaa = bool(move_target)
+    if not move_target:
+        move_target = main_group
+    mod_move_target = move_target.copy()
+    self.mouse_pos = main_group.copy()
+    self.angle = Fun.angle_between(self.mouse_pos, self.pos)
+
+    target, target_angle, wall_in = entity_target_simple(self, entities, level)
+
+    if target:
+        aim_target = self.target.pos.copy()
+        self.angle = Fun.angle_between(aim_target, self.pos)
+        ALLY_FIRE_CONTROL[self.name][self.weapon.name](self, entities, level, target, wall_in)
+        entity_dash_when_targeted(self)
+        mod_move_target = Fun.move_with_vel_angle(move_target, 128, self.angle - 180)
+    elif self.weapon.ammo < self.weapon.max_ammo and self.weapon.ammo_pool > 0:
+            self.input["Reload"] = True
+
+    entity_move_toward_point(self, move_target, 96)
+    entity_move_toward_point(self, mod_move_target, 32)
+    # if not aaa: entity_spread_apart(self, entities)
+    entity_dodge_bullets(self, entities, 64)
+    ALLY_SKILL_CONTROL[self.name](self, entities, level)
+    # Stunned status manager
+    Fun.stunned_manager(self)
+
+    return target, target_angle
+
+
+def sovereign_boss_input(self, entities, level):
+    if self.time < 60 * 5: return
+    self.input = Fun.get_default_inputs()
+    # Make it stay on the position to hold
+    move_target = universal_pathfinding(self, level, self.free_var["Ally waypoint"].pos)
+    aaa = bool(move_target)
+    if not move_target:
+        move_target = self.free_var["Ally waypoint"].pos
+    self.mouse_pos = self.free_var["Ally waypoint"].mouse_pos.copy()
+    self.angle = Fun.angle_between(self.mouse_pos, self.pos)
+
+    target, target_angle, wall_in = entity_target_simple(self, entities, level)
+
+    if target:
+        aim_target = self.target.pos.copy()
+        self.angle = Fun.angle_between(aim_target, self.pos)
+        # basic_fire_control(self, entities, level, target, wall_in)
+
+        entity_shoot_with_startup_lag(self, Fun.distance_between(target, self.pos), self.weapon.range * 0.9)
+        entity_dash_when_targeted(self)
+    elif self.weapon.ammo < self.weapon.max_ammo and self.weapon.ammo_pool > 0:
+            self.input["Reload"] = True
+
+    entity_shoot_startup_handler(self)
+    entity_move_toward_point(self, move_target, 224)
+    if not aaa: entity_spread_apart(self, entities)
+    entity_dodge_bullets(self, entities, 64)
+    ALLY_SKILL_CONTROL[self.name](self, entities, level)
+
+    # Stunned status manager
+    Fun.stunned_manager(self)
+
+    return target, target_angle
+
+
+def duke_boss_input(self, entities, level):
+    if self.time < 60 * 5: return
+    self.input = Fun.get_default_inputs()
+    # Make it stay on the position to hold
+
+    # Try to find Corrine
+    main_group = entity_find_teammate(self, entities, target="Sovereign", check_limit=8)
+    dist = 32
+    if not main_group:
+        main_group = self.free_var["Ally waypoint"].pos
+        dist = 120
+
+    move_target = universal_pathfinding(self, level, main_group)
+    if not move_target:
+        move_target = main_group
+    mod_move_target = move_target.copy()
+    self.mouse_pos = main_group.copy()
+    self.angle = Fun.angle_between(self.mouse_pos, self.pos)
+
+    target, target_angle, wall_in = entity_target_simple(self, entities, level)
+
+    if target:
+        aim_target = self.target.pos.copy()
+        self.angle = Fun.angle_between(aim_target, self.pos)
+        ALLY_FIRE_CONTROL[self.name][self.weapon.name](self, entities, level, target, wall_in)
+        entity_dash_when_targeted(self)
+        mod_move_target = Fun.move_with_vel_angle(move_target, 128, self.angle)
+    elif self.weapon.ammo < self.weapon.max_ammo and self.weapon.ammo_pool > 0:
+            self.input["Reload"] = True
+
+    entity_move_toward_point(self, move_target, 96)
+    entity_move_toward_point(self, mod_move_target, 32)
+    # if not aaa: entity_spread_apart(self, entities)
+    entity_dodge_bullets(self, entities, dist)
+    ALLY_SKILL_CONTROL[self.name](self, entities, level)
+    # Stunned status manager
+    Fun.stunned_manager(self)
+
+    return target, target_angle
+
+
+def jester_boss_input(self, entities, level):
+    if self.time < 60 * 5: return
+    self.input = Fun.get_default_inputs()
+    # Make it stay on the position to hold
+
+    target, target_angle, wall_in = entity_target_detection_healer(self, entities, level)
+
+    if target:
+        aim_target = self.target.pos.copy()
+        self.angle = Fun.angle_between(aim_target, self.pos)
+        medic_rifle_fire_control(self, entities, level, target, wall_in)
+        entity_dash_when_targeted(self)
+
+        move_target = universal_pathfinding(self, level, self.target.pos)
+        aaa = bool(move_target)
+        if not move_target:
+            move_target = self.target.pos
+        self.mouse_pos = self.target.mouse_pos.copy()
+        entity_move_toward_point(self, move_target, 48)
+        if not aaa: entity_spread_apart(self, entities, spread_dist=48)
+
+    elif self.weapon.ammo < self.weapon.max_ammo and self.weapon.ammo_pool > 0:
+            self.input["Reload"] = True
+
+    entity_dodge_bullets(self, entities, 64)
+    jester_skill_control(self, entities, level)
+    # Stunned status manager
+    Fun.stunned_manager(self)
+
+    return target, target_angle
+
+
+def condor_boss_input(self, entities, level):
+    if self.time < 60 * 5: return
+    self.input = Fun.get_default_inputs()
+    # Make it stay on the position to hold
+
+    main_group = entity_find_main_group(self, entities, dist=256)
+    move_target = universal_pathfinding(self, level, main_group)
+    aaa = bool(move_target)
+    if not move_target:
+        move_target = main_group
+    mod_move_target = move_target.copy()
+    self.mouse_pos = main_group.copy()
+    self.angle = Fun.angle_between(self.mouse_pos, self.pos)
+
+    target, target_angle, wall_in = entity_target_simple(self, entities, level)
+
+    if target:
+        aim_target = self.target.pos.copy()
+        self.angle = Fun.angle_between(aim_target, self.pos)
+        ALLY_FIRE_CONTROL[self.name][self.weapon.name](self, entities, level, target, wall_in)
+        entity_dash_when_targeted(self)
+        mod_move_target = Fun.move_with_vel_angle(move_target, 128, self.angle)
+    elif self.weapon.ammo < self.weapon.max_ammo and self.weapon.ammo_pool > 0:
+            self.input["Reload"] = True
+
+    entity_move_toward_point(self, move_target, 96)
+    entity_move_toward_point(self, mod_move_target, 32)
+    # if not aaa: entity_spread_apart(self, entities)
+    entity_dodge_bullets(self, entities, 64)
+    ALLY_SKILL_CONTROL[self.name](self, entities, level)
+    # Stunned status manager
+    Fun.stunned_manager(self)
+
+    return target, target_angle
+
+
+def thr_1_on_death(self, entities, level):
+    if "IS BOSS" in self.free_var:
+        for e in entities["entities"]:
+            if e.team != self.team:
+                continue
+            if "IS BOSS" in e.free_var:
+                continue
+            e.free_var.update({"IS BOSS": True})
+
+
+def condor_boss_on_death(self, entities, level):
+    if self.status["Last Stand"] > 0:
+        self.health = round(self.max_health * 0.33)
+        self.status["No damage"] = 60 * 3
+        self.status["No debuff"] = 60 * 3
+        self.status["Last Stand"] = 0
+
+        number_of_particle = 18
+        for particles_to_add in range(360 // number_of_particle):
+            entities["particles"].append(Particles.RandomParticle2(
+                [self.pos[0], self.pos[1]], Fun.DARK_RED, 1 + 3 * random.random(), random.randint(45, 90),
+                                                        particles_to_add * number_of_particle,
+                size=Fun.get_random_element_from_list([3, 4, 6])))
+
+        Fun.play_sound("Skill 7")
+        return
+    thr_1_on_death(self, entities, level)
 
 
 # |Ally input|----------------------------------------------------------------------------------------------------------
@@ -2921,7 +3334,6 @@ def vivianne_summons_on_death(self, entities, level):
 
 
 # |Enemy Input|---------------------------------------------------------------------------------------------------------
-# Testing
 def enemy_input_nest_trooper(self, entities, level):
     # Input functions are the IA for an enemy
     # better targeting system
@@ -2962,9 +3374,9 @@ def enemy_input_nest_trooper(self, entities, level):
     Fun.stunned_manager(self)
 
     return target, target_angle
+# Testing
 
 
-# Faction 1
 def enemy_input_faction_1_basic(self, entities, level):
     # Input functions are the IA for an enemy
     # better targeting system
@@ -2989,6 +3401,7 @@ def enemy_input_faction_1_basic(self, entities, level):
     Fun.stunned_manager(self)
 
     return target, target_angle
+# Faction 1
 
 
 def enemy_input_faction_1_body_guard(self, entities, level):
@@ -4415,10 +4828,14 @@ def gilgamesh_act(self, entities, level):
             Fun.move_with_vel_angle(self.pos, 20, self.aim_angle), Fun.BLUE, 1, self.weapon.range-20, self.aim_angle, 2, 0))
 
 
-# TODO: Give animations for Gilgamesh's sword and sound
+# TODO: Give sound for Gilgamesh's sword
 def gilgamesh_attack_1(self, entities, level):
     if start_up_lag_handler(self, 120, key="Startup lag sword"):
         self.free_var["Current sword attack"] = "Dual shot"
+        self.draw_angle = 0
+        self.draw_rotated_dist = 0
+        self.weapon_draw_dist = 0
+        return
     elif self.free_var["Startup lag sword"] % 40 == 0:
         for x in range(3):
             angle = self.angle - 30 + 30 * x
@@ -4435,10 +4852,22 @@ def gilgamesh_attack_1(self, entities, level):
                       "Colour": (25, 235, 25)
                       }])
 
+    if self.free_var["Startup lag sword"] % 40 < 30:
+        self.draw_angle += 3
+        # self.draw_rotated_dist += 0.2
+        self.weapon_draw_dist -= 0.4
+    else:
+        self.draw_angle -= 12
+        self.weapon_draw_dist += 1.6
+
 
 def gilgamesh_attack_2(self, entities, level):
     if start_up_lag_handler(self, 120, key="Startup lag sword"):
         self.free_var["Current sword attack"] = "Hose"
+        self.draw_angle = 0
+        self.draw_rotated_dist = 0
+        self.weapon_draw_dist = 0
+        return
     elif self.free_var["Startup lag sword"] % 40 == 0:
         for x in range(2):
             angle = self.angle - 30 + 60 * x
@@ -4454,11 +4883,16 @@ def gilgamesh_attack_2(self, entities, level):
                        "Damage type": "Fire",
                       "Colour": (25, 235, 25)
                       }])
+    self.draw_angle = self.free_var["Startup lag sword"] * 3 * 3
 
 
 def gilgamesh_attack_3(self, entities, level):
     if start_up_lag_handler(self, 120, key="Startup lag sword"):
         self.free_var["Current sword attack"] = "Trishot"
+        self.draw_angle = 0
+        self.draw_rotated_dist = 0
+        self.weapon_draw_dist = 0
+        return
     elif self.free_var["Startup lag sword"] % 3 == 0:
         for x in range(2):
             angle = self.angle + random.randint(-12, 12)
@@ -4474,6 +4908,11 @@ def gilgamesh_attack_3(self, entities, level):
                            "Damage type": "Fire",
                           "Colour": (25, 235, 25)
                           }])
+    if self.free_var["Startup lag sword"] % 20 <= 15:
+        self.weapon_draw_dist -= 24 / 15
+    else:
+        self.weapon_draw_dist += 32 / 5
+    self.draw_angle = math.sin(self.free_var["Startup lag sword"]//20) * 12
 
 
 def gilgamesh_divorce_spiral(self, entities, level):
@@ -4728,6 +5167,14 @@ def bloodhound_act(self, entities, level):
 def bloodhound_draw(self, WIN, scrolling):
     self.free_var["Mech"].pos = [self.pos[0] + scrolling[0], self.pos[1] + 28 + scrolling[1]]
     self.free_var["Mech"].draw(WIN, self.free_var["Move angle"])
+    self.free_var["Mech"].mech_parts["Leg"]["Animation state"] = -1
+
+    frame_to_get = -1
+    if not self.standing_still:
+        # print(player_direction)
+        self.animation_counter["Walk"] += 1
+        frame_to_get = self.animation_counter["Walk"] // 7 % (6 - 1) + 1
+    self.free_var["Mech"].mech_parts["Leg"]["Animation state"] = frame_to_get
 
 
 def bloodhound_hadean_missile(self, entities, level):
@@ -5471,7 +5918,6 @@ def curtis_input(self, entities, level):
             Bullets.Bullet, Bullets.BulletSlowing, Bullets.Missile
         ])
         if bullet_to_dodge:
-            # dodge_pos = Fun.move_with_vel_angle(self.pos, bullet_to_dodge.radius, bullet_to_dodge.angle  - 75)
             dodge_pos = bullet_to_dodge.pos
 
             self.input["Right"] = self.pos[0] < dodge_pos[0]
@@ -5739,6 +6185,27 @@ ACT_FREELY_DICT = {
          "Vivianne": ally_sub_input_wizard
      }
 # |Repertories|---------------------------------------------------------------------------------------------------------
+ENEMY_NO_OWNER = Entity({"name": "Nest Trooper",
+         "faction": "FAC-1",
+         "type": "VIP",
+         "targeting range": 0,
+         "targeting angle": 0,
+         "wall hack": False,
+         "health": 1,
+         "armour": 0,
+         "damage resistances": {"Physical": 0, "Fire": 0, "Explosion": 0, "Energy": 0, "Melee": 0, "Healing": 0},
+         "thickness": 0,
+         "vel max": 0,
+         "speed": 0,
+         "friction": 0,
+         "weapon": "Unarmed",
+         "func input": "enemy_input_nest_trooper",
+         "func act": "enemy_act_type_1",
+         "func draw": "enemy_draw_basic",
+         "sprites": "Sprites/Enemies/Nest Commander.png",
+         "on death": "none",
+         "free var": {}
+         }, team="Enemies", pos=[0, 0], start_angle=0)
 # Entity stats
 H_LO, H_LM, H_MO, H_MH, H_HO = 60, 90, 130, 170, 200        # Max Health
 A_LO, A_LM, A_MO, A_MH, A_HO = 40, 60, 90, 120, 140         # Max Armour
@@ -6687,7 +7154,7 @@ enemy_repertory = {
         # Weapons
         "weapon": "Desert's Wind",
         # AI
-        "func input": "gilgamesh_input", "func act": "gilgamesh_act", "func draw": "enemy_draw_basic",
+        "func input": "gilgamesh_input", "func act": "gilgamesh_act", "func draw": "enemy_draw_advanced_gun",
         "on death": "none",
         "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
         "wall hack": False,
@@ -6950,7 +7417,7 @@ enemy_repertory = {
         # Weapons
         "weapon": "Saloum Mk-2", "skills": ["Gauntlet Punch", "Beast Mode"],
         # AI
-        "func input": test_ally_input, "func act": player_act, "func draw": player_draw, "on death": lord_on_death,
+        "func input": lord_boss_input, "func act": player_act, "func draw": enemy_draw_basic, "on death": thr_1_on_death,
         "targeting range": R_MH, "targeting angle": D_LM, "wall hack": False,
         "driving": DRIVE_MO,
         "free var": {"Ally waypoint": [0, 0], "IS BOSS": True}
@@ -6967,11 +7434,11 @@ enemy_repertory = {
         # Weapons
         "weapon": "GunBlade", "skills": ["Stun Kick", "Mega Buff"],
         # AI
-        "func input": test_ally_input, "func act": player_act, "func draw": player_draw, "on death": "none",
+        "func input": emperor_boss_input, "func act": player_act, "func draw": emperor_boss_draw, "on death": thr_1_on_death,
         "targeting range": R_HO, "targeting angle": D_MO, "stealth mod": S_MO, "stealth counter": C_MH,
-        "wall hack": False,
+        "wall hack": True,
         "driving": DRIVE_MO,
-        "free var": {"Ally waypoint": [0, 0], "Startup lag": 0, "Startup time": 60, "Kicked": 0}
+        "free var": {"Ally waypoint": [0, 0], "Startup lag": 0, "Startup time": 60, "Kicked": 0, "Startup lag kick": 0, "kick cooldown": 120}
     },
     # Wizard        L/M     M       M/H     M       M       L/M     M       M       H       M       H       M       Area denial
     "Wizard": {
@@ -6983,13 +7450,13 @@ enemy_repertory = {
         # Weapons
         "weapon": "Jeanne's Family Shotgun", "skills": ["Building", "All Guns Blazing"],
         # AI
-        "func input": test_ally_input, "func act": player_act, "func draw": player_draw, "on death": "none",
+        "func input": wizard_boss_input, "func act": player_act, "func draw": enemy_draw_basic, "on death": thr_1_on_death,
         "targeting range": R_MO, "targeting angle": D_MH, "stealth mod": S_LM, "stealth counter": C_MO,
-        "wall hack": False,
+        "wall hack": True,
         "driving": DRIVE_HO,
         "free var": {"Ally waypoint": [0, 0]}
     },
-    # Sovreig       L/M     L/M     L       M/H     H++     M/H     H       L       L       L/M     L       M       Sniper recon
+    # Sovreign       L/M     L/M     L       M/H     H++     M/H     H       L       L       L/M     L       M       Sniper recon
     "Sovereign": {
         "name": "Sovereign", "faction": "THR-1",
         "health": H_LM, "armour": A_LM, "damage resistances": SO_RESIT, "sprites": "Sprites/Player/THR-1/Sovereign.png",
@@ -7001,11 +7468,11 @@ enemy_repertory = {
         # Weapons
         "weapon": "St-Maurice", "skills": ["Cardboard box", "Detect Targets"],
         # AI
-        "func input": test_ally_input, "func act": player_act, "func draw": player_draw, "on death": "none",
+        "func input": sovereign_boss_input, "func act": player_act, "func draw": enemy_draw_basic, "on death": thr_1_on_death,
         "targeting range": R_HO * 1.5, "targeting angle": D_LM, "stealth mod": S_MH, "stealth counter": C_HO,
-        "wall hack": False,
+        "wall hack": True,
         "driving": DRIVE_LO,
-        "free var": {"Ally waypoint": [0, 0], "Detect Targets Duration": 3 * 60, "Exposed blue ball timer": 0}
+        "free var": {"Ally waypoint": ENEMY_NO_OWNER, "Detect Targets Duration": 3 * 60, "Exposed blue ball timer": 0, "Startup lag": 0, "Startup time": 60}
     },
     # Duke	        M       L/M     M       H       M       H       M       L/M     L/M     H       H       H	    Plays with agro
     "Duke": {
@@ -7020,11 +7487,11 @@ enemy_repertory = {
         # Weapons
         "weapon": "Chain Axe", "skills": ["Tail Swipe", "Smoke Screen"],
         # AI
-        "func input": test_ally_input, "func act": player_act, "func draw": player_draw, "on death": "none",
+        "func input": duke_boss_input, "func act": player_act, "func draw": enemy_draw_basic, "on death": thr_1_on_death,
         "targeting range": R_MO, "targeting angle": D_HO, "stealth mod": S_HO, "stealth counter": C_HO,
         "driving": DRIVE_LM,
-        "wall hack": False,
-        "free var": {"Ally waypoint": [0, 0]}
+        "wall hack": True,
+        "free var": {"Ally waypoint": ENEMY_NO_OWNER}
     },
     # Jester	    L--     H++     H       L       L/M     L/M     H++     M/H     L/M     L--     H++     L       Primary support. Helps them not dying
     "Jester": {
@@ -7040,11 +7507,11 @@ enemy_repertory = {
         # Weapons
         "weapon": "Epicurean Medic Rifle", "skills": ["Discharge", "Robot Fuck Off"],
         # AI
-        "func input": jester_input, "func act": player_act, "func draw": player_draw, "on death": "none",
+        "func input": jester_boss_input, "func act": player_act, "func draw": enemy_draw_basic, "on death": thr_1_on_death,
         "targeting range": R_LM, "targeting angle": D_MH, "stealth mod": S_LM, "stealth counter": C_HO * 1.2,
-        "wall hack": False,
+        "wall hack": True,
         "driving": DRIVE_LM,
-        "free var": {"Ally waypoint": [0, 0]}
+        "free var": {"Ally waypoint": [0, 0], "Startup lag": 0}
     },
     # Condor        H       H       M/H     L/M     M       L       L/M     M/H     M/H     M       L       L       Tank and cause debuffs
     "Condor": {
@@ -7060,11 +7527,11 @@ enemy_repertory = {
         # Weapons
         "weapon": "Type 41 SMG", "skills": ["Armour Breaker", "Last Stand"],
         # AI
-        "func input": test_ally_input, "func act": player_act, "func draw": player_draw, "on death": "condor_on_death",
+        "func input": condor_boss_input, "func act": player_act, "func draw": enemy_draw_basic, "on death": condor_boss_on_death,
         "targeting range": R_MO, "targeting angle": D_MO, "stealth mod": S_LO, "stealth counter": C_LM,
         "driving": DRIVE_MH,
-        "wall hack": False,
-        "free var": {"Ally waypoint": [0, 0]}
+        "wall hack": True,
+        "free var": {"Ally waypoint": ENEMY_NO_OWNER}
     },
     "VIP":
         {"name": "Nest Trooper",
