@@ -2,6 +2,9 @@ import pygame as pg
 import math
 
 from copy import deepcopy
+
+from numpy.ma.core import angle
+
 from Fun import get_image, swap, distance_between, angle_between, move_with_vel_angle
 
 
@@ -63,6 +66,26 @@ def get_off_set_points(parent_img, current_img, colour, check_for_right=True):
                     # return [p_x - x//2, p_y - y//2, z - p_z]
 
     return [x, y, z]
+
+
+def get_origin_point(current_img, colour, check_for_right=True):
+    x, y = 0, 0
+    supa_break = False
+    for p_z, s in enumerate(current_img):
+        s_copy = s
+        for p_x in range(s_copy.get_width()):
+            for p_y in range(s_copy.get_height()):
+                if s_copy.get_at((p_x, p_y)) == colour:
+                    x -= s.get_width() // 2 * -1 + p_x
+                    y -= s.get_height() // 2 * -1 + p_y
+                    if check_for_right:
+                        supa_break = True
+                        break
+                    return [x, y]
+            if supa_break: break
+        if supa_break: break
+
+    return [x, y]
 
 
 def paint(paint_mech, new_colours):
@@ -223,34 +246,55 @@ rigel_mech = [
         {"Type": "Arm L", "Sprite": invert_sprite_stack('Sprites/Mech parts/AM-Rigel.png', 10)},
         # Shoulder guns have a separate thing for draw
         {"Type": "Arm R", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/AW-BL-Bellatrix.png'), 58)},
+        # {"Type": "Arm R", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/AM-Igneous.png'), 31)},
     ]
+
+
+def make_part_sub(unbuilt_mech, sprite_list, p, origin, colour, owner="Torso", check_for_right=True):
+    p4 = get_off_set_points(unbuilt_mech[owner]["Sprite"], sprite_list, colour, check_for_right=check_for_right)
+    offset = [p4[0] + p[0], p4[1] + p[1], p4[2] + p[2]]
+    # offset = [p4[0]+p[0], p4[1]+p[1], p4[2] + p[2]]
+    o_x, o_y = get_origin_point(sprite_list, (0, 255, 0))
+    origin[0] -= o_x
+    origin[1] -= o_y
+    offset[0] -= o_x
+    offset[1] -= o_y
+    return origin, offset
+
 
 def make_part(sprite_list, part_palette, part_type, unbuilt_mech, animation):
     offset = [0, 0, 0]
     p = [0, 0, 0]
     draw_angle = 0
+    origin = [sprite_list[0].get_width() // 2, sprite_list[0].get_height() // 2]
 
     owner = "Leg"
     if part_type == "Torso":
         offset = get_off_set_points(unbuilt_mech["Leg"]["Sprite"], sprite_list, (255, 0, 0))
         owner = "Leg"
+        o_x, o_y = get_origin_point(sprite_list, (255, 0, 0))
+        origin[0] -= o_x
+        origin[1] -= o_y
+        offset[0] -= o_x
+        offset[1] -= o_y
+
 
     # There to simplify code
     if part_type not in ["Torso", "Leg"]:
         p = get_off_set_points(unbuilt_mech["Leg"]["Sprite"], unbuilt_mech["Torso"]["Sprite"], (255, 0, 0))
+        owner = "Torso"
+
     # Get real offset
-    if part_type == "Head":
-        p2 = get_off_set_points(unbuilt_mech["Torso"]["Sprite"], sprite_list, (255, 0, 255))
-        offset = [p2[0]+p[0], p2[1]+p[1], p2[2] + p[2]]
-        owner = "Torso"
-    if part_type == "Arm L":
-        p3 = get_off_set_points(unbuilt_mech["Torso"]["Sprite"], sprite_list, (0, 255, 0), check_for_right=False)
-        offset = [p3[0]+p[0], p3[1]+p[1], p3[2] + p[2]]
-        owner = "Torso"
-    if part_type == "Arm R":
-        p4 = get_off_set_points(unbuilt_mech["Torso"]["Sprite"], sprite_list, (0, 255, 0), check_for_right=True)
-        offset = [p4[0]+p[0], p4[1]+p[1], p4[2] + p[2]]
-        owner = "Torso"
+    if part_type in ["Head", "Arm L", "Arm R", "Shoulder R", "Shoulder L"]:
+        origin, offset = make_part_sub(unbuilt_mech, sprite_list, p, origin,
+                                       {"Head": (255, 0, 255),
+                                        "Arm L": (0, 255, 0),
+                                        "Arm R": (0, 255, 0),
+                                        "Shoulder R": (0, 255, 255),
+                                        "Shoulder L": (0, 255, 255)
+                                        }[part_type],
+                                       check_for_right=part_type in ["Arm R", "Shoulder R"])
+
     if part_type == "Arm Shoulder R":
         p4 = get_off_set_points(unbuilt_mech["Torso"]["Sprite"], unbuilt_mech["Arm R"]["Sprite"], (0, 255, 0), check_for_right=True)
         p5 = get_off_set_points(unbuilt_mech["Arm R"]["Sprite"], sprite_list, (0, 255, 255))
@@ -267,22 +311,20 @@ def make_part(sprite_list, part_palette, part_type, unbuilt_mech, animation):
         offset = [p7[0]+p4[0]+p[0], p7[1]+p4[1]+p[1], p7[2] + p[2] + p4[2]]
         owner = "Arm L"
     if part_type == "Wpn R":
-        # p = get_off_set_points(unbuilt_mech["Leg"]["Sprite"], unbuilt_mech["Torso"]["Sprite"], (255, 0, 0))
         p3 = get_off_set_points(unbuilt_mech["Torso"]["Sprite"], unbuilt_mech["Arm R"]["Sprite"], (0, 255, 0), check_for_right=True)
         p7 = get_off_set_points(unbuilt_mech["Arm R"]["Sprite"], sprite_list, (255, 255, 0))
         offset = [p7[0]+p3[0]+p[0], p7[1]+p3[1]+p[1], p7[2] + p[2] + p3[2]]
         owner = "Arm R"
-    if part_type == "Shoulder R":
-        p4 = get_off_set_points(unbuilt_mech["Torso"]["Sprite"], sprite_list, (0, 255, 255), check_for_right=True)
-        offset = [p4[0]+p[0], p4[1]+p[1], p4[2] + p[2]]
-        owner = "Torso"
-    if part_type == "Shoulder L":
-        p4 = get_off_set_points(unbuilt_mech["Torso"]["Sprite"], sprite_list, (0, 255, 255), check_for_right=False)
-        offset = [p4[0] + p[0], p4[1] + p[1], p4[2] + p[2]]
-        owner = "Torso"
 
-    return {"Sprite": sprite_list, 'h2': len(sprite_list), "offset": offset, "palette": part_palette.copy(),
-            "Draw angle": draw_angle, "Owner": owner, "Child": [], "Animation": animation,"Animation state": -1}
+    # offset distance
+    offset_dist = 0
+    if part_type != "Leg":
+        offset_dist = abs(distance_between(unbuilt_mech[owner]["offset"], offset))
+
+    return {"Sprite": sprite_list, "palette": part_palette.copy(),
+            "Animation": animation, "Animation state": -1, "Draw angle": draw_angle,
+            "stack layers": len(sprite_list), "origin": origin, "offset": offset, "offset dist": offset_dist,
+            "Type": part_type, "Owner": owner, "Child": []}
 
 
 def blit_rotate(surf, image, pos, origin_pos, angle):
@@ -337,7 +379,7 @@ class Mech:
         for i in range(MAX_MECH_HEIGHT):
             new_layer = []
             for e in self.mech_parts:
-                if self.mech_parts[e]["offset"][2] <= i < self.mech_parts[e]["offset"][2] + self.mech_parts[e]["h2"]:
+                if self.mech_parts[e]["offset"][2] <= i < self.mech_parts[e]["offset"][2] + self.mech_parts[e]["stack layers"]:
                     num = i - self.mech_parts[e]["offset"][2]
                     sprite = self.mech_parts[e]["Sprite"][num]
                     alt_animation = False
@@ -373,22 +415,21 @@ class Mech:
         # Used to do animations that doesn't need different sprites
 
         for part in self.mech_parts:
-            # self.mech_parts[part]["offset"] = move_with_vel_angle([0, 0], distance_between([0, 0], self.mech_parts[part]["offset"])*-1, self.mech_parts[part]["Draw angle"])
-            # self.mech_parts[part]["offset"][0] -= self.mech_parts[self.mech_parts[part]["Owner"]]["offset"][0]
-            # self.mech_parts[part]["offset"][1] -= self.mech_parts[self.mech_parts[part]["Owner"]]["offset"][1]
             if self.mech_animations[part]:
                 info = self.mech_animations[part][0]
+                # Make animation timer go down
                 info["Time"] -= 1
 
-                # self.mech_parts[part]["offset"][0] +=
-                # self.mech_parts[part]["offset"][1] +=
+                # Change the main part's draw angle
                 self.mech_parts[part]["Draw angle"] += info["Angle Speed"]
+
                 for child in self.mech_parts[part]["Child"]:
                     self.mech_parts[child]["Draw angle"] += info["Angle Speed"]
+
                     # Modify offset here
                     self.mech_parts[child]["offset"] = move_with_vel_angle(
                         self.mech_parts[part]["offset"],
-                        distance_between(self.mech_parts[part]["offset"], self.mech_parts[child]["offset"]),
+                        self.mech_parts[child]["offset dist"],
                         angle_between(self.mech_parts[child]["offset"], self.mech_parts[part]["offset"]) - info["Angle Speed"]
                     )
                 if info["Time"] == 0:
@@ -409,7 +450,7 @@ class Mech:
         self.animate()  # Don't know where to put that
         mech_surface = win
 
-        height_mod = 1.3  # This can be used to optimize the render but removing some layers of the sprite stack
+        height_mod = 1.3  # This can be used to optimize the render by removing some layers of the sprite stack
 
         for count, layer in enumerate(self.mech_sprite_stack):
             draw_height = count * height_mod
@@ -417,14 +458,12 @@ class Mech:
             for layer_info in layer:
                 sprite = layer_info[0]
                 if layer_info[1]["Animation state"] > -1:
-                    sprite = layer_info[2][layer_info[1]["Animation state"]][count] # Count is a temporary measure
-
-                origin = [sprite.get_width() // 2 , sprite.get_height() // 2]
+                    sprite = layer_info[2][layer_info[1]["Animation state"]][count] # Count is a temporary measure, would fuck over parts that aren't legs
 
                 blit_rotate(layer_surf, sprite,
                             [mech_surf_size // 2  + layer_info[1]["offset"][0],
                               mech_surf_size // 2  + layer_info[1]["offset"][1]],
-                            origin,
+                            layer_info[1]["origin"],
                             layer_info[1]["Draw angle"])
 
             layer_surf = pg.transform.rotate(layer_surf, angle * -1 - 90) # This part could be replaced using the animation system, might look into it

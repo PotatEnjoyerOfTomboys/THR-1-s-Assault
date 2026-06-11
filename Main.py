@@ -3,22 +3,6 @@ import os
 import random
 # Cool video https://www.youtube.com/watch?v=2Yj5mmKWukw
 
-# Music 5/7
-# 	1 menu track            (Grid room - Armored Core 4             )
-#           bassline
-# 	1/3 mission track       (The Rock Drill - Armored Core 4        X is a base, do different solos like in SMT3, drums and other instruments more prominent, Synth?)
-#                            I Hate - Metal Wolf Chaos (the riff)
-#       Industrial Park     (Viper - Armored Core For Answer        Guitar at the start)
-#       Red Desert          (SMT3 Normal battle theme               Guitar Solo 4)
-#       Iron Mines          (The Fog - Persona 4                    Solo at 0:50)
-#           short notes into a long note
-# 	1 THR-1 boss track      (Vulture - Armored Core V,              more synth/violin thing)
-# 	1 Curtis boss theme	    (Scorcher - Armored Core For Answer     Tom drums)
-#                            Metal Fighter - Metal Wolf Chaos
-# 	1 final boss track      (Fall - Armored Core 4                  use same bass line as menu track)
-#                            Machine - Metal Wolf Chaos
-#           constant base, switches between 2 instruments (guitar, synth?). Use the menu bassline
-
 # Unlock tree
 # Encyclopedia entries
 #   Enemies                 Finish missions (faction affects which are unlocked)
@@ -41,11 +25,9 @@ import random
 # Version 1.0 - Final version
 #   Bosses
 #       Rigel                   (Final boss)    attacks, leg animations
-#       Fire Support Mech       Boost effects, leg animations
 #       AA Site - Drone builder (animations)
 #   Character conversations & Encyclopedia
-#   SOUNDTRACK
-
+#   SOUNDTRACK  being made
 
 pg.mixer.pre_init()
 pg.init()
@@ -70,7 +52,7 @@ import Main_Loop
 
 def main_game(party_info):
     big_game_loop = True
-    current_mission = 1
+    current_mission = 15
     run_info = {
         "Player party": player_party,
         "Missions completed": 0,

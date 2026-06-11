@@ -65,43 +65,6 @@ class NewExplosionEffect:
             # self.radius += self.radius_growth
 
 
-class BetelgeuseDeathParticle:
-    def __init__(self, pos, duration):
-        self.survive_wipe = True
-        self.pos = [pos[0], pos[1] - 16]
-
-        # Other properties
-        self.duration = duration
-        self.particles = []  # Stores the GrowingCircle particles
-        # GrowingCircleTransparent
-        # Add
-
-    def draw(self, WIN, scrolling):
-        if self.duration > 0:
-            if self.duration <= 600:
-                if self.duration == 600:
-                    self.particles.append(SolidColourOverlay(UI_COLOUR_BACKGROUND, 600, 0, fade_in=(60, 3)))
-                    play_sound("Betel Death BIGGER")
-            else:
-                self.particles.append(RandomParticle2(
-                    [self.pos[0], self.pos[1]],
-                    (int(64 - math.sin(self.duration * 0.025) * 64),
-                     int(96 - math.sin(self.duration * 0.035) * 64),
-                     int(64 - math.sin(self.duration * 0.005) * 64)),
-                    3 * random.random(), 45, 360 * random.random(), size=3))
-                if self.duration % 45 == 0:
-                    play_sound("Betel Death")
-                    mod = random.random()
-                    pos = random_point_in_circle(self.pos, 32)
-                    self.particles.append(GrowingCircleTransparent(
-                        pos, (55, 11, 72), 1 * mod, random.randint(25 + round(20 * mod), 75), 0, 0, alpha=125))
-
-            for i in self.particles:
-                i.draw(WIN, scrolling)
-
-            self.duration -= 1
-
-
 class BeastModeParticle:
     def __init__(self, pos, duration, colour):
         self.survive_wipe = True

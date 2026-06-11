@@ -4444,6 +4444,7 @@ def aa_site_act_missile_battery(self, entities, level):
         angle = Fun.angle_between(self.target.pos, self.pos)
 
     if start_up_lag_handler(self, start_delay + interval_time * interval_amount):
+        Fun.play_sound("Mech Missile")
         for x in range(3):
             Bullets.spawn_bullet(
                 self, entities, Bullets.Missile, [self.pos[0], self.pos[1]],
@@ -4452,6 +4453,7 @@ def aa_site_act_missile_battery(self, entities, level):
         Bullets.spawn_bullet(
                 self, entities, Bullets.Missile, [self.pos[0], self.pos[1]],
                 angle, missile_info)
+        Fun.play_sound("Mech Missile")
 
 
 def aa_site_on_death_shield_generator(self, entities, level):
@@ -4828,7 +4830,6 @@ def gilgamesh_act(self, entities, level):
             Fun.move_with_vel_angle(self.pos, 20, self.aim_angle), Fun.BLUE, 1, self.weapon.range-20, self.aim_angle, 2, 0))
 
 
-# TODO: Give sound for Gilgamesh's sword
 def gilgamesh_attack_1(self, entities, level):
     if start_up_lag_handler(self, 120, key="Startup lag sword"):
         self.free_var["Current sword attack"] = "Dual shot"
@@ -4837,6 +4838,8 @@ def gilgamesh_attack_1(self, entities, level):
         self.weapon_draw_dist = 0
         return
     elif self.free_var["Startup lag sword"] % 40 == 0:
+        Fun.play_sound("Gilgamesh Sword M")
+
         for x in range(3):
             angle = self.angle - 30 + 30 * x
             Bullets.spawn_bullet(
@@ -4869,6 +4872,7 @@ def gilgamesh_attack_2(self, entities, level):
         self.weapon_draw_dist = 0
         return
     elif self.free_var["Startup lag sword"] % 40 == 0:
+        Fun.play_sound("Gilgamesh Sword H")
         for x in range(2):
             angle = self.angle - 30 + 60 * x
             Bullets.spawn_bullet(
@@ -4910,6 +4914,8 @@ def gilgamesh_attack_3(self, entities, level):
                           }])
     if self.free_var["Startup lag sword"] % 20 <= 15:
         self.weapon_draw_dist -= 24 / 15
+        if self.free_var["Startup lag sword"] % 20 == 15:
+            Fun.play_sound("Gilgamesh Sword L")
     else:
         self.weapon_draw_dist += 32 / 5
     self.draw_angle = math.sin(self.free_var["Startup lag sword"]//20) * 12
@@ -5096,7 +5102,6 @@ def bloodhound_act(self, entities, level):
     if self.status["Double speed"]:
         max_vel *= 2
 
-
     # Quick boost
     bloodhound_boost(self, entities, level)
     # Checks for which direction the player must move
@@ -5172,6 +5177,7 @@ def bloodhound_draw(self, WIN, scrolling):
     frame_to_get = -1
     if not self.standing_still:
         # print(player_direction)
+        # self.animation_counter["Walk"] += round((abs(self.vel[0]) + abs(self.vel[1])//4))
         self.animation_counter["Walk"] += 1
         frame_to_get = self.animation_counter["Walk"] // 7 % (6 - 1) + 1
     self.free_var["Mech"].mech_parts["Leg"]["Animation state"] = frame_to_get
@@ -5185,6 +5191,7 @@ def bloodhound_hadean_missile(self, entities, level):
     elif 30 <= self.free_var["Startup lag"] <= 190 and self.free_var["Startup lag"] % 10 == 0:
         # spawn fire
         angle = self.free_var["Mech"].mech_parts["Torso"]["Draw angle"] * -1 + self.free_var["Move angle"]
+        Fun.play_sound("Mech Missile")
         Bullets.spawn_bullet(
             self, entities,
             Bullets.Missile,
@@ -5212,6 +5219,9 @@ def bloodhound_lopolith_minigun(self, entities, level):
     elif 80 <= self.free_var["Startup lag"] < 230:
         if self.free_var["Startup lag"] == 80:
             self.free_var["Boost type"].append("Forward Boost")
+        if self.free_var["Startup lag"] % 4 == 0:
+            Fun.play_sound("Mech Minigun")
+
         # spawn fire
         angle = self.free_var["Mech"].mech_parts["Arm L"]["Draw angle"] * -1 + self.free_var["Move angle"]
         Bullets.spawn_bullet(
@@ -5262,6 +5272,8 @@ def bloodhound_magma_blade(self, entities, level):
                   "Burn duration": 30,
                   "Colour": Fun.FIRE,
                   }])
+    elif self.free_var["Startup lag"] == 70:
+        Fun.play_sound("Magma Blade")
 
     # if self.free_var["Startup lag"] == 1:
     if not self.free_var["Mech"].mech_animations["Torso"] and animation:
@@ -5282,6 +5294,8 @@ def bloodhound_canon(self, entities, level):
         self.no_shoot_state = 10
         self.free_var["Current attack"] = Fun.get_random_element_from_list(["Minigun", "Minigun", "Blade"])
     elif self.free_var["Startup lag"] % 15 == 1:
+        Fun.play_sound("Mech Cannon")
+    elif self.free_var["Startup lag"] % 15 == 14:
         angle = self.free_var["Move angle"] + random.uniform(-25, 25)
         Bullets.spawn_bullet(
             self, entities,
@@ -5328,28 +5342,54 @@ def bloodhound_boost(self, entities, level):
         if "Turn" in self.free_var["Boost type"][0]:
             self.free_var["Turn speed"] = 6
             return
+        Fun.play_sound("Mech Booster")  # Change sound
         side = {
             "Forward Boost": 0,
             "Side Boost R": 90,
             "Side Boost L": -90,
             "Backward Boost": 180,
         }[self.free_var["Boost type"][0]]
+        self.vel = [0, 0]
         self.vel = Fun.move_with_vel_angle([0, 0], 25, side + self.free_var["Move angle"])
 
         # Boost effects
         if self.free_var["Boost type"][0] == "Backward Boost":
             for x in [33, -33]:
-                for y in range(12):
+                for y in range(7):
                     angle = self.free_var["Move angle"] + x + random.uniform(-7.5, 7.5)
-                    entities["particles"].append(Particles.FireParticle(
-                        Fun.move_with_vel_angle([self.pos[0], self.pos[1] + 28], random.uniform(6, 15), angle),
-                        colour=Fun.FIRE))
+                    # entities["particles"].append(Particles.FireParticle(
+                    #     Fun.move_with_vel_angle([self.pos[0], self.pos[1] + 28], random.uniform(6, 15), angle),
+                    #     colour=Fun.FIRE))
 
+                    entities["particles"].append(Particles.RandomParticle2(
+                        Fun.move_with_vel_angle([self.pos[0], self.pos[1] + 28], random.uniform(6, 15), angle),
+                        Fun.FIRE,
+                        random.uniform(2, 4), 60, angle, size=random.randint(4, 8)))
+            for x in range(9):
+                angle = self.free_var["Move angle"] + side + random.uniform(80, 100) * [-1, 1][round(random.random())]
+                entities["particles"].append(Particles.RandomParticle2(
+                    Fun.move_with_vel_angle([self.pos[0], self.pos[1] + 28], random.uniform(6, 15), angle),
+                    Fun.get_random_element_from_list([Fun.GRAY, Fun.LIGHT_GRAY, Fun.WHITE]),
+                    random.uniform(3, 5), 35, angle, size=random.randint(3, 7)))
             return
 
-        for y in range(28):
-            angle = self.free_var["Move angle"] + side + random.uniform(-9.5, 9.5)
-            entities["particles"].append(Particles.FireParticle(Fun.move_with_vel_angle([self.pos[0], self.pos[1] + 28], random.uniform(6, 15), angle), colour=Fun.FIRE))
+
+        for y in range(14):
+            angle = self.free_var["Move angle"] + side + random.uniform(-9.5, 9.5) + 180
+            # entities["particles"].append(Particles.FireParticle(Fun.move_with_vel_angle([self.pos[0], self.pos[1] + 28], random.uniform(6, 15), angle), colour=Fun.FIRE))
+
+            entities["particles"].append(Particles.RandomParticle2(
+                Fun.move_with_vel_angle([self.pos[0], self.pos[1] + 28], random.uniform(6, 15), angle),
+                Fun.FIRE,
+                random.uniform(2, 4), 60, angle, size=random.randint(4, 8)))
+        for x in range(9):
+            angle = self.free_var["Move angle"] + side + random.uniform(80, 100) * [-1, 1][round(random.random())]
+            entities["particles"].append(Particles.RandomParticle2(
+                Fun.move_with_vel_angle([self.pos[0], self.pos[1] + 28], random.uniform(6, 15), angle),
+                Fun.get_random_element_from_list([Fun.GRAY, Fun.LIGHT_GRAY, Fun.WHITE]),
+                random.uniform(3, 5), 35, angle, size=random.randint(3, 7))
+            # (Fun.move_with_vel_angle([self.pos[0], self.pos[1] + 28], random.uniform(6, 15), angle), colour=Fun.FIRE)
+                                         )
 
 
 # Attack Helicopter
@@ -5615,6 +5655,8 @@ def attack_helicopter_draw(self, WIN, scrolling):
 #       Plasma                  Creates a big bullet with limited homing
 #       Missile Circus          Spawn a large amount of missiles
 def rigel_input(self, entities, level):
+    if self.no_shoot_state > 0:
+        return
     # Input functions are the IA for an enemy
     # better targeting system
     target, target_angle, wall_in = entity_target_detection(self, entities, level)
@@ -5701,8 +5743,8 @@ def rigel_act(self, entities, level):
 
     else:
         self.no_shoot_state -= 1
-        if self.no_shoot_state == 0:
-            self.free_var["Mech"].reset_animations()
+        # if self.no_shoot_state == 0:
+        #     self.free_var["Mech"].reset_animations()
 
     # Handle Missile Circus
     if self.free_var["Missile Circus"] > 0:
@@ -5742,7 +5784,8 @@ def rigel_act(self, entities, level):
 def rigel_draw(self, WIN, scrolling):
     self.free_var["Mech"].pos = [self.pos[0] + scrolling[0], self.pos[1] + 28 + scrolling[1]]
     self.free_var["Mech"].draw(WIN, self.free_var["Move angle"])
-
+    # self.free_var["Mech"].mech_parts["Arm R"]["origin"] = [26, 14]
+    # 26, 14
 
 def rigel_on_death(self, entities, level):
     if self.free_var["Phase"] == 1:
@@ -5766,12 +5809,37 @@ def rigel_on_death(self, entities, level):
 
 def rigel_shoulder_bash(self, entities, level):
     animation = True
-    if start_up_lag_handler(self, 30):
+    if start_up_lag_handler(self, 60):
         self.free_var["Current attack"] = "Lance Swipe"
         animation = False
+    elif self.free_var["Startup lag"] == 10:
+        self.no_shoot_state = 130
+        self.vel = Fun.move_with_vel_angle([0, 0], 35, self.free_var["Move angle"])
+
+
+    if self.free_var["Startup lag"] > 10:
+        if self.free_var["Startup lag"] % 3 == 0:
+            pass
+    damage = 40
+    for e in entities["entities"]:
+        if e == self: continue
+        if self.collision_box.colliderect(e.collision_box):
+            e.vel = Fun.move_with_vel_angle(e.vel, 2, Fun.angle_between(e.collision_box.center, self.pos))
+            if e.team != self.team:
+                Fun.damage_calculation(e, damage, "Melee", death_message="Tried to commit insurance fraud")
+
+    self.input["Up"] = False
+    self.input["Down"] = False
+    self.input["Right"] = False
+    self.input["Left"] = False
 
     if not self.free_var["Mech"].mech_animations["Torso"] and animation:
-        pass
+        # Load animations
+        self.free_var["Mech"].mech_animations["Torso"].append({"Time": 10, "Angle Speed": 1.2})
+        self.free_var["Mech"].mech_animations["Arm R"].append({"Time": 10, "Angle Speed": 1.2})
+
+        self.free_var["Mech"].mech_animations["Torso"].append({"Time": 50, "Angle Speed": -2.88})
+        self.free_var["Mech"].mech_animations["Arm R"].append({"Time": 50, "Angle Speed": -2.88})
 
 
 def rigel_lance_swipe(self, entities, level):
@@ -5780,21 +5848,28 @@ def rigel_lance_swipe(self, entities, level):
         self.free_var["Current attack"] = "Giga Thrust"
         animation = False
 
+
     if not self.free_var["Mech"].mech_animations["Torso"] and animation:
-        pass
+        self.free_var["Mech"].mech_animations["Torso"].append({"Time": 30, "Angle Speed": 4.8})
+        self.free_var["Mech"].mech_animations["Arm R"].append({"Time": 30, "Angle Speed": 4.8})
 
 
 def rigel_giga_thrust(self, entities, level):
     animation = True
     if start_up_lag_handler(self, 30):
-        self.free_var["Current attack"] = Fun.get_random_element_from_list(["Laser Barrage", "Plasma"])
+        # self.free_var["Current attack"] = Fun.get_random_element_from_list(["Laser Barrage", "Plasma"])
+        self.free_var["Current attack"] = "Shoulder Bash"
         animation = False
+    elif self.free_var["Startup lag"] == 10:
+        # self.no_shoot_state = 130
+        self.vel = Fun.move_with_vel_angle([0, 0], 35, self.free_var["Move angle"])
 
     if not self.free_var["Mech"].mech_animations["Torso"] and animation:
         pass
 
 
 def rigel_laser_barrage(self, entities, level):
+    # TODO: Animation
     animation = True
     if start_up_lag_handler(self, 90):
         self.free_var["Current attack"] = Fun.get_random_element_from_list(["Missile Circus", "Raining Hell"])

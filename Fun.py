@@ -272,7 +272,7 @@ sounds_dict = {
     "Rifle lever shoot": {
         "Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Gun/lever action shoot.ogg')), "Volume": 0.85},
 
-    "Rocket launcher": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Gun/small arms.ogg')), "Volume": 1},
+    "Rocket launcher": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Rocket Launcher.ogg')), "Volume": 1},
     "Toaster Shoot": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Gun/Toaster Shoot.ogg')),
                       "Volume": 0.4},
 
@@ -377,7 +377,6 @@ sounds_dict = {
     "Betel 5": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Bosses/Betelgeuse_5.ogg')), "Volume": 1.5},
     "Betel 6": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Bosses/Betelgeuse_6.ogg')), "Volume": 0.95},
     "Betel Death": {"Sound": pg.mixer.Sound(os.path.join(opt('/Bosses/Betelgeuse_death.ogg'))), "Volume": 0.95},
-    "Betel Death BIGGER": {"Sound": pg.mixer.Sound(os.path.join(opt('/Bosses/Betelgeuse_death_bigger.ogg'))), "Volume": 0.95},
 
     "Com 1": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Bosses/Combustion_1.ogg')), "Volume": 0.125},
     "Com 2": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Bosses/Combustion_2.ogg')), "Volume": 0.15},
@@ -408,9 +407,6 @@ sounds_dict = {
     "Curtis Hit": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Player/Hurt.ogg')), "Volume": 1},
     "Curtis Walk 1": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Player/Walk 1.ogg')), "Volume": 0.25},
     "Curtis Walk 2": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Player/Walk 2.ogg')), "Volume": 0.25},
-    "Curtis Walk 3": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Player/Walk 3.ogg')), "Volume": 0.25},
-    "Curtis Walk 4": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Player/Walk 4.ogg')), "Volume": 0.25},
-    "Curtis Walk 5": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Player/Walk 5.ogg')), "Volume": 0.25},
     "Curtis Slide": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Player/Slide.ogg')), "Volume": 0.35},
     "Curtis Switch": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Player/player_switch.ogg')),
                       "Volume": 0.25},
@@ -424,6 +420,15 @@ sounds_dict = {
     "Rifle 2 Shooting": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Rifle_2.ogg')), "Volume": 1},
     "Safety": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Safety_Click.ogg')), "Volume": 0.4},
     "Hover Tank Canon": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Hover Tank Cannon.ogg')), "Volume": 1.2},
+    "Mech Booster": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Mech Booster.ogg')), "Volume": 0.6},
+    "Magma Blade": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Magma Blade.ogg')), "Volume": 1.2},
+    "Mech Cannon": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Mech Cannon.ogg')), "Volume": 1.2},
+    "Mech Minigun": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Mech Minigun.ogg')), "Volume": 1.2},
+    "Mech Missile": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Mech Missile.ogg')), "Volume": 1},
+
+    "Gilgamesh Sword L": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Gilgamesh Sword Light.ogg')), "Volume": 1},
+    "Gilgamesh Sword M": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Gilgamesh Sword.ogg')), "Volume": 1},
+    "Gilgamesh Sword H": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Gilgamesh Sword Heavy.ogg')), "Volume": 1},
     # "Shot gun 2 Shooting": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Shotgun.ogg')), "Volume": 0.8},
 }
 
@@ -5127,8 +5132,8 @@ def find_scrolling_target(scrolling_target_entities):
 
 
 # |Stuff between 2 points|----------------------------------------------------------------------------------------------
-def angle_between(p1, p2):
-    return math.degrees(math.atan2(p2[1] - p1[1], p2[0] - p1[0]))
+def angle_between(target_point, origin_point):
+    return math.degrees(math.atan2(origin_point[1] - target_point[1], origin_point[0] - target_point[0]))
 
 
 def distance_between(p1, p2):
@@ -7499,6 +7504,7 @@ def level_generator(possible_levels, party_info, run_info, current_mission=1, mi
                 # Get mission name
                 if level['name'] == write_textline("Finale 1"): # Load Rigel
                     enemy_spawns.append({"Pos": [commander_spawn.centerx, commander_spawn.centery], "Type": "Rigel"})
+                    level['faction'] = 3
                 if level['name'] == write_textline("Finale 2"): # Load Curtis
                     enemy_spawns.append({"Pos": [commander_spawn.centerx, commander_spawn.centery], "Type": "Curtis"})
                     level['faction'] = 4
