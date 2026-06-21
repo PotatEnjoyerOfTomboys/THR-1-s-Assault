@@ -1,33 +1,23 @@
 import pygame as pg
 import os
 import random
-# Cool video https://www.youtube.com/watch?v=2Yj5mmKWukw
+import sys  # Cool video https://www.youtube.com/watch?v=2Yj5mmKWukw
 
-# Unlock tree
-# Encyclopedia entries
-#   Enemies                 Finish missions (faction affects which are unlocked)
-#       Grunt               Finish 3 mission against the faction
-#       Shock               Finish 9 mission against the faction
-#       Support             Finish 18 mission against the faction
-#       Specialist 1        Finish 27 mission against the faction
-#       Specialist 2        Finish 36 mission against the faction
-#       Elite               Finish 45 mission against the faction
-#       VIP                 Finish eliminate VIP
-#   Bosses                  Beat the boss
-#   Weapon                  When the weapon is unlocked
-#   Background info
-#       Manufacturer        When a weapon they made is unlocked.
-#       Enemy groups        Unlocked by default
-#       Solar War           Unlocked by default
-#       Events of NNTSS     Unlocked by default
 
 # TODO: fix enemy spawn in defense
-# Version 1.0 - Final version
+# Version 1.0
 #   Bosses
-#       Rigel                   (Final boss)    attacks, leg animations
+#       Rigel                   (Final boss)
+#                                   attacks
+#                                       combo
+#                                       plasma
+#                                   leg animations
+#                                   death particle
+#                                   custom intro
 #       AA Site - Drone builder (animations)
 #   Character conversations & Encyclopedia
-#   SOUNDTRACK  being made
+#   Voices
+#   Story elements (do small comics)
 
 pg.mixer.pre_init()
 pg.init()
@@ -41,6 +31,96 @@ CLOCK = pg.time.Clock()
 pg.mixer.set_num_channels(32)
 
 
+# Move that here so that you don't start on a black screen
+def pygame_splash_screen(WIN, CLOCK):
+    width, height = 630, 450
+    stage = 100
+    sprite = pg.image.load(os.path.join("Sprites/pygame_ce_tiny.png")).convert_alpha()
+    colour = [170, 238, 187]
+    text_colour = [40, 40, 40]
+    draw = True
+    font = pg.font.SysFont("Sprites/JetBrainsMono-SemiBold.ttf", 25)
+    while colour != [12, 12, 12] and stage > 0:
+        # Handle events
+        for event in pg.event.get():
+            if event.type not in [pg.QUIT, pg.JOYDEVICEADDED, pg.JOYDEVICEREMOVED, pg.WINDOWFOCUSLOST, pg.VIDEORESIZE]:
+                continue
+            elif event.type == pg.QUIT:
+                sys.exit()
+            elif event.type == pg.VIDEORESIZE:
+                width_e, height_e = event.size
+                if width_e < 630:
+                    width_e = 630
+                if height_e < 450:
+                    height_e = 450
+
+                WIN = pg.display.set_mode((width_e, height_e), pg.RESIZABLE)
+            elif event.type == pg.WINDOWFOCUSLOST:
+                return True
+
+        if colour == [12, 12, 12]:
+            stage -= 1
+        for x in range(3):
+            if colour[x] > 12:
+                colour[x] -= 2
+
+                if colour[x] < 12:
+                    colour[x] = 12
+
+                if text_colour[x] < 255:
+                    text_colour[x] += 2
+
+                    if text_colour[x] > 255:
+                        text_colour[x] = 255
+
+        # |Draw|--------------------------------------------------------------------------------------------------------
+        if draw:
+            frame = pg.Surface((width, height))
+            surface_to_draw = frame
+            WIN.fill((0, 0, 0))
+            surface_to_draw.fill(colour)
+            surface_to_draw.blit(sprite, [315 - sprite.get_width() // 2, 225 - sprite.get_height() // 2])
+            text = font.render(f"Made with", True, text_colour)
+            surface_to_draw.blit(text, [315 - text.get_width() // 2, 110])
+
+
+            width_s, height_s = WIN.get_size()
+            slide_width, slide_height = [630, 450]  # 1.4
+
+            # Get the smallest of the 2 dimensions
+            if width_s != slide_width or height_s != slide_height:
+                if width_s > height_s * 1.4:
+                    slide_width = slide_width * height_s / slide_height
+                    slide_height = height_s
+                elif width_s < height_s:
+                    slide_height = slide_height * width_s / slide_width
+                    slide_width = width_s
+                if width_s < height_s * 1.4:
+                    slide_width = slide_width * height_s / slide_height
+                    slide_height = height_s
+                elif width_s > height_s:
+                    slide_height = slide_height * width_s / slide_width
+                    slide_width = width_s
+
+            # This was added to handle the render zoom
+            if slide_width > width_s or slide_height > height_s:
+                if width_s > height_s * 1.4:
+                    slide_width = slide_width * height_s / slide_height
+                    slide_height = height_s
+                elif width_s < height_s * 1.4:
+                    slide_height = slide_height * width_s / slide_width
+                    slide_width = width_s
+
+            # Draw the stuff
+            surface_to_draw = pg.transform.scale(surface_to_draw, (slide_width, slide_height))
+            WIN.blit(surface_to_draw, (width_s // 2 - slide_width // 2, height_s // 2 - slide_height // 2))
+            pg.display.update()
+            CLOCK.tick(60)
+
+
+pygame_splash_screen(WIN, CLOCK)
+
+
 import Fun  # General use functions
 import Items   # Everything crashes if I remove that
 import Event
@@ -52,7 +132,7 @@ import Main_Loop
 
 def main_game(party_info):
     big_game_loop = True
-    current_mission = 15
+    current_mission = 1
     run_info = {
         "Player party": player_party,
         "Missions completed": 0,
@@ -274,7 +354,7 @@ def main_game(party_info):
                     run_info["Missions completed"] += 1
                     run_info["Mission historic"].append({
                         "Name": level["name"], "Mission": current_mission, "Faction": level["faction"],
-                        "Deployed team": deployed_team, "Surviving deployed team": surviving_deployed_team
+                        "Deployed team": deployed_team, "Surviving deployed team": surviving_deployed_team, "Objective": level["objective"]
                     })
                     current_mission += 1
                 if end_status == "Loss":
@@ -286,23 +366,30 @@ def main_game(party_info):
         # Zoar          Shortly after dealing with the Nest and the entity Betelgeuse, Curtis kept getting headaches and visions of a salt lake in the desert. Makoto tells them that a few armed groups have arrived at the planet and seem to be searching for one too
         # Story Beat 1
         # THR-1         Emperor asks Lord if he finds the job strange, as last time Secretary claimed that she wouldn't ever work with them again. Lord does agree that it's strange but doesn't question it much, the pay is very good. Emperor thinks it's too good
-        # Zoar
+        # Zoar          Vivianne talks to Mark about Curtis' condition, she worried that Curtis' is losing it. Mark says that Curtis probably has a gut feeling about whatever they are looking for. Vivianne asks Mark if that's all it takes for him. Mark says that everyone else seemingly going into the desert is proof enough for him.
         # Story Beat 2
-        # THR-1
-        # Zoar
+        # THR-1         Emperor finds documents talking about a weapon that can be found in the desert. Condor asks him what he found, Emperor says it's just basic intel.
+        # Zoar          Vivianne talks to Lawrence about Curtis' condition, she asks Lawrence if he went through something similar. Lawrence says that he hasn't but heard about long time spaceship pilots being able to
         # Endings
         # THR-1 Good    THR-1 gets paid, but Emperor presses on Secretary to tell him what that mission was about. She says that they just helped her client get something needed for project Orion but that's all she knows.
         # THR-1 Bad     Secretary says that they failed the mission, but she can still manage to salvage the situation. They don't get paid as much as promised.
         # Zoar Good     Curtis
         # Zoar Bad      Curtis
     # Run end screen
-    Fun.end_run_menu(WIN, CLOCK, run_info, party_info, end_status)  # TODO: Fix inputs not working there
+    Fun.end_run_menu(WIN, CLOCK, run_info, party_info, end_status)
+
     # Unlock stuff here
     # Check through the run history
     save_data = Fun.get_from_json("Save.json", "Everything")
     unlocked_weapons = save_data["Character weapons unlocked"]
     for m in run_info["Mission historic"]:
         # {'Player party': 'THR-1', 'Missions completed': 0, 'Mission historic': [], 'Funds': 0, 'Upgrades': [], 'Available upgrades': []}
+        # {
+        #                         "Name": level["name"], "Mission": current_mission, "Faction": level["faction"],
+        #                         "Deployed team": deployed_team, "Surviving deployed team": surviving_deployed_team
+        #                     }
+        save_data["Faction mission count"][m["Faction"]] += 1
+        # Unlock weapons
         if m["Mission"] == 5:
             for p in m["Surviving deployed team"]:
                 if 1 not in unlocked_weapons[p]:
@@ -313,6 +400,28 @@ def main_game(party_info):
                         [{"Name": "Continue", "Value": "No", "On select": "Return", "Render func": "Text only"}],
                         text=f"New weapon unlocked - {Fun.weapon_ownership_table[p][1]}"
                     )
+                Fun.weapon_entry_unlock({
+                        "Lord": "GMG-04B",
+                        "Emperor": "Corrine's Old Rifle",
+                        "Wizard": "Custom Mk18 Laser cutter",
+                        "Sovereign": "St-Laurent Gen 1",
+                        "Duke": "Hook Swords",
+                        "Jester": "Nihilist Stretcher",
+                        "Condor": "Type 23 Shotgun",
+                        "Curtis": "War and Peace",
+                        "Lawrence": "Captain's Axe & Blunderbuss",
+                        "Mark": "Type 30 Rifle",
+                        "Vivianne": "Vivianne's Shotgun"
+                }[p], save_data, WIN, CLOCK)
+                if p == "Sovereign":
+                    Fun.weapon_entry_unlock("Corrine's Hands", save_data, WIN, CLOCK)
+
+            # unlock boss entries
+            boss = [
+                "Armed Shield Generator",
+                "Hover Tank",
+                "Fire Support Mech"][m["Faction"]]
+            Fun.boss_entry_unlock(boss, m["Faction"], save_data, WIN, CLOCK)
         if m["Mission"] == 10:
             for p in m["Surviving deployed team"]:
                 if 2 not in unlocked_weapons[p]:
@@ -323,8 +432,76 @@ def main_game(party_info):
                         [{"Name": "Continue", "Value": "No", "On select": "Return", "Render func": "Text only"}],
                         text=f"New weapon unlocked - {Fun.weapon_ownership_table[p][2]}"
                     )
+                Fun.weapon_entry_unlock({
+                        "Lord": "Big Iron",
+                        "Emperor": "Oversized stun baton",
+                        "Wizard": "Crippled Laddie FCS Radio",
+                        "Sovereign": "Mk16 Flare Mortar",
+                        "Duke": "Gun and Ballistic Knife",
+                        "Jester": "Stoic Shield generator",
+                        "Condor": "Type 47 Rifle",
+                        "Curtis": "Hunk of Steel",
+                        "Lawrence": "Musket .360",
+                        "Mark": "C4",
+                        "Vivianne": "Vivianne's Leg"
+                }[p], save_data, WIN, CLOCK)
+            # unlock boss entries
+            boss = [
+			"AA Site",
+			"Gilgamesh",
+			"Attack Helicopter"][m["Faction"]]
+            Fun.boss_entry_unlock(boss, m["Faction"], save_data, WIN, CLOCK)
+        # Unlock final bosses entries
+        if m["Mission"] == 15:
+            boss = "Rigel"
+            if not run_info["Time spend in mission"] / 60 / 60 < 20:
+                if "Curtis" not in party_info:
+                    boss = "Curtis"
+                else:
+                    boss = "THR-1 (Throne)"
+            Fun.boss_entry_unlock(boss, 3, save_data, WIN, CLOCK)
+        # Unlock encyclopedia entries
+        if m["Objective"] == "Eliminate Commander":
+            Fun.enemy_entry_unlock("VIP", m["Faction"], save_data, WIN, CLOCK)
 
+    # Unlock enemy entries
+    for x in range(3):
+        if save_data["Faction mission count"][x] >= 3:
+            Fun.enemy_entry_unlock("Grunt", x, save_data, WIN, CLOCK)
+        if save_data["Faction mission count"][x] >= 9:
+            Fun.enemy_entry_unlock("Shock", x, save_data, WIN, CLOCK)
+        if save_data["Faction mission count"][x] >= 18:
+            Fun.enemy_entry_unlock("Support", x, save_data, WIN, CLOCK)
+        if save_data["Faction mission count"][x] >= 27:
+            Fun.enemy_entry_unlock("Specialist 1", x, save_data, WIN, CLOCK)
+        if save_data["Faction mission count"][x] >= 36:
+            Fun.enemy_entry_unlock("Specialist 2", x, save_data, WIN, CLOCK)
+        if save_data["Faction mission count"][x] >= 45:
+            Fun.enemy_entry_unlock("Elite", x, save_data, WIN, CLOCK)
 
+    # unlock Zoar
+    if current_mission == 15:
+        if not save_data["Zoar unlocked"]:
+            save_data["Zoar unlocked"] = True
+            Fun.confirmation_popup(
+                        WIN, CLOCK, Fun.UNLOCK_POPUP_POS,
+                        [{"Name": "Continue", "Value": "No", "On select": "Return", "Render func": "Text only"}],
+                        text=f"Zoar has been unlocked!", popup_width=Fun.UNLOCK_POPUP_WIDTH
+                    )
+        # unlock Zoar default weapons
+        for gun in ["Standard Shotgun", "Cowboy's Repeater", "Lawrence's Cutlass & Flintlock", "Mark's Rifle", "Vivianne's Rifle"]:
+            Fun.weapon_entry_unlock(gun, save_data, WIN, CLOCK)
+        if "NEST" not in save_data["Databank entries unlocked"]:
+            try:
+                if level['name'] == Fun.write_textline("Finale 1"):
+                    save_data["Databank entries unlocked"].append("NEST")
+                    Fun.confirmation_popup(
+                                WIN, CLOCK, Fun.UNLOCK_POPUP_POS,
+                                [{"Name": "Continue", "Value": "No", "On select": "Return", "Render func": "Text only"}],
+                                text=f"Entry 'NEST' added to Databank in 'Root\Organizations\Armed groups'", popup_width=Fun.UNLOCK_POPUP_WIDTH
+                            )
+            except NameError:
+                pass
     save_data["Character weapons unlocked"] = unlocked_weapons
     Fun.dict_to_json("Save.json", save_data)
 
@@ -445,137 +622,26 @@ def versus_mode(party_info):
                                                                                         party_info, scrolling,
                                                                                         scrolling_target_entities,
                                                                                         end_with_main_player=False)
-
         pg.mixer.music.fadeout(60)
         # |Mission end screen|----------------------------------------------------------------------------------
         if big_game_loop:
+
             Fun.versus_end_menu(WIN, CLOCK, party_info, end_status)
 
-
-# Might never finish this
-def tutorials():
-    while True:
-        # Menus
-        Fun.loading_screen(WIN, CLOCK)
-
-        possible_levels = []
-
-        # Modified mission selection menu to let choose between versus maps
-        level, extra_info, party_info, out_party, give_up = Fun.versus_arena_menu(WIN, CLOCK, possible_levels, party_info)
-
-        if give_up:
-            return
-
-        # Load level
-        entities = {"entities": [], "items": [], "sounds": [], "bullets": [],
-                    "background particles": [], "particles": [], "UI particles": [], "screen shake": [],
-                    "cutscene stage": 0, "shadows": [], "scrolling": [], "scrolling target": []}
-
-        scrolling_target_entities = []  # Use that
-        # Load up the party
-        player_count = 0
-        for count, player_to_add in enumerate(out_party):
-            name = player_to_add[0]
-            input_method = player_to_add[1]
-            info = party_info[name]["Info"].copy()
-
-            # Manage input functions, default is AI
-            if input_method == "Keyboard & Mouse":
-                info["func input"] = Entity.player_input_keyboard
-
-            elif input_method in ["Controller 1", "Controller 2", "Controller 3", "Controller 4"]:
-                info["func input"] = {
-                    "Controller 1": Entity.player_input_controller_1,
-                    "Controller 2": Entity.player_input_controller_2,
-                    "Controller 3": Entity.player_input_controller_3,
-                    "Controller 4": Entity.player_input_controller_4
-                }[input_method]
-                info["Input mode"] = "Controller"
-
-            # Change weapons
-            info["weapon"] = player_to_add[2]
-
-            # Add outline based on position number and players in
-            info["free var"].update({"Outline": Fun.PLAYER_OUTLINE_COLOUR[player_count]})
-            entities["entities"].append(Entity.Entity(info))
-            last_added_entity = entities["entities"][-1]
-            scrolling_target_entities.append(last_added_entity)
-
-            player_count += 1
-            last_added_entity.team = f"Player {player_count}"
-
-            if input_method != "COM":
-                # New AI for COM?
-                last_added_entity.is_player = True
-
-            # Handle spawn points
-            num = random.randint(0, len(extra_info["Spawn"])-1)
-            last_added_entity.pos = extra_info["Spawn"][num]
-            extra_info["Spawn"].pop(num)
-
-            # Reset the name to the correct one
-            last_added_entity.name = name
-            last_added_entity.ai_state = "Attack"
-            last_added_entity.force_draw = True
-            last_added_entity.max_health *= 5
-            last_added_entity.health *= 5
-            last_added_entity.max_armour *= 5
-            last_added_entity.armour *= 5
-            last_added_entity.armour *= 5
-            last_added_entity.targeting_angle = 180
-            last_added_entity.targeting_range = 1280
-
-        # Load events
-        new_events = []
-        for events_to_load in level["events"]:
-            event_name = events_to_load[0]
-            event_trigger = Event.get_event_trigger(events_to_load[1])
-            # event_functions = Event.get_event_function(events_to_load[3])
-            event_functions = []
-            for funcs in events_to_load[3]:
-                event_functions.append(getattr(Event, funcs))
-                # "Name", Event.relevant trigger, single use, Event.effects
-            free_var = {}
-            if len(events_to_load) == 5:
-                free_var = events_to_load[4]
-
-            new_events.append(
-                Event.MissionEvent(event_name, event_trigger, events_to_load[2], event_functions,
-                                   free_var=free_var))
-        level["events"] = new_events
-
-        # Scrolling
-        scrolling_target = Fun.find_scrolling_target(scrolling_target_entities)
-        scrolling = scrolling_target
-        entities["scrolling"] = scrolling
-
-        # |Main game loop|------------------------------------------------------------------------------------------
-        go_to_hub = False,  # mission_end_screen = False, True
-
-        frame_2 = WIN.copy()
-        Render.draw(WIN, CLOCK, 0, scrolling, scrolling_target, level, entities, 1)
-        Fun.menu_transition_doom_screen_melt(WIN, CLOCK, WIN.copy(), frame_2)
-
-        checked_time = False
-        end_status, mission_end_screen, big_game_loop, party_info, time_spent = Main_Loop.main_loop(WIN, CLOCK, entities, level,
-                                                                                        party_info, scrolling,
-                                                                                        scrolling_target_entities,
-                                                                                        end_with_main_player=False)
-
-        pg.mixer.music.fadeout(60)
-        # |Mission end screen|----------------------------------------------------------------------------------
-        if big_game_loop:
-            Fun.versus_end_menu(WIN, CLOCK, party_info, end_status)
-
-# for p in range(1000):
-#     Fun.level_generator([], current_mission=1, mission_type="", faction=0)
-#     print(p)
 
 if __name__ == "__main__":
     # |Load controls and save|------------------------------------------------------------------------------------------
     try:
-        Fun.get_from_json("Save.json", "Everything")
+        save_data = Fun.get_from_json("Save.json", "Everything")
         # Convert data file if needed
+        for field_to_check in Fun.EMPTY_SAVE_FILE:
+            if field_to_check not in save_data:
+                Fun.print_to_error_stream(f"Whoops, someone doesn't have '{field_to_check}' in his save file")
+                save_data.update({field_to_check: Fun.EMPTY_SAVE_FILE[field_to_check]})
+                save_data.update({"Version": Fun.VERSION})
+                Fun.dict_to_json("Save.json", save_data)
+                Fun.print_to_error_stream("Fixed!")
+        # Fun.weapon_entry_unlock("Big Iron", save_data, WIN, CLOCK)
     except FileNotFoundError:
         Fun.print_to_error_stream("Save.json not found, creating new one")
         Fun.dict_to_json("Save.json", Fun.EMPTY_SAVE_FILE)
@@ -590,10 +656,7 @@ if __name__ == "__main__":
         Fun.dict_to_json("Key binds.json", Fun.DEFAULT_KEY_BINDS)
         controls = Fun.PseudoPlayer().control
 
-    # Fun.sound_test(Fun.PseudoPlayer(), WIN, CLOCK)
-    Fun.pygame_splash_screen(WIN, CLOCK)
     Fun.my_own_shit(WIN, CLOCK)
-    # Fun.game_intro(WIN, CLOCK, controls, Fun.PseudoPlayer())
     Fun.title_screen(WIN, CLOCK, controls)
 
     while True:
@@ -639,8 +702,7 @@ if __name__ == "__main__":
 
         if player_party == "Versus":
             versus_mode(party_info)
-        elif player_party == "Tutorials":
-            tutorials()
         else:
             main_game(party_info)
         #
+    #

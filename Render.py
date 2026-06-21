@@ -159,7 +159,7 @@ def draw(WIN, CLOCK, time_passed, scrolling, scrolling_target, level, entities, 
     # Draw the entities
     # Only draw enemies when they are within targeting range for players
 
-    # TODO: Optimize this pile of shit
+    # Won't DO: Optimize this pile of shit
     for e in entities["entities"]:
         # Skip checks if entity is a player or an enemy that has to be drawn no matter what
         if e in players or e.status["Visible"] > 0 or e.force_draw:

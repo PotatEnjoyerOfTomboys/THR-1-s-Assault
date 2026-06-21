@@ -1,11 +1,8 @@
 import pygame as pg
 import math
-
 from copy import deepcopy
 
-from numpy.ma.core import angle
-
-from Fun import get_image, swap, distance_between, angle_between, move_with_vel_angle
+from Fun import get_image, swap, distance_between, angle_between, move_with_vel_angle, num_between
 
 
 MAX_MECH_HEIGHT = 96
@@ -265,7 +262,6 @@ def make_part_sub(unbuilt_mech, sprite_list, p, origin, colour, owner="Torso", c
 def make_part(sprite_list, part_palette, part_type, unbuilt_mech, animation):
     offset = [0, 0, 0]
     p = [0, 0, 0]
-    draw_angle = 0
     origin = [sprite_list[0].get_width() // 2, sprite_list[0].get_height() // 2]
 
     owner = "Leg"
@@ -322,8 +318,9 @@ def make_part(sprite_list, part_palette, part_type, unbuilt_mech, animation):
         offset_dist = abs(distance_between(unbuilt_mech[owner]["offset"], offset))
 
     return {"Sprite": sprite_list, "palette": part_palette.copy(),
-            "Animation": animation, "Animation state": -1, "Draw angle": draw_angle,
+            "Animation": animation, "Animation state": -1, "Draw angle": 0,
             "stack layers": len(sprite_list), "origin": origin, "offset": offset, "offset dist": offset_dist,
+            "origin copy": origin.copy(), "offset copy": offset.copy(),
             "Type": part_type, "Owner": owner, "Child": []}
 
 
@@ -373,7 +370,7 @@ class Mech:
         self.backup_mech_copy = deepcopy(self.mech_parts)
         for e in self.mech_parts:
             self.mech_parts = paint_single_part(self.mech_parts.copy(), e, self.backup_mech_copy .copy())
-
+        self.backup_mech_copy = deepcopy(self.mech_parts)
 
         self.mech_sprite_stack = []
         for i in range(MAX_MECH_HEIGHT):
@@ -427,24 +424,38 @@ class Mech:
                     self.mech_parts[child]["Draw angle"] += info["Angle Speed"]
 
                     # Modify offset here
-                    self.mech_parts[child]["offset"] = move_with_vel_angle(
+                    n_offset = move_with_vel_angle(
                         self.mech_parts[part]["offset"],
                         self.mech_parts[child]["offset dist"],
                         angle_between(self.mech_parts[child]["offset"], self.mech_parts[part]["offset"]) - info["Angle Speed"]
                     )
+                    self.mech_parts[child]["offset"] = [n_offset[0], n_offset[1], self.mech_parts[part]["offset"][2]]
                 if info["Time"] == 0:
                     self.mech_animations[part].pop(0)
 
     def reset_animations(self):
         for p in self.mech_parts:
             self.mech_parts[p]["Draw angle"] = 0
+            self.mech_parts[p]["origin"] = self.mech_parts[p]["origin copy"]
+            self.mech_parts[p]["offset"] = self.mech_parts[p]["offset copy"]
+
+        # self.mech_parts = deepcopy(self.backup_mech_copy)
+        print("Mech reset")
         self.mech_animations = {
             "Leg": [], "Torso": [], "Head": [],
-            "Arm L": [], "Arm R": [],
-            "Wpn L": [], "Wpn R": [],
+             "Arm L": [], "Arm R": [],
+             "Wpn L": [], "Wpn R": [],
             "Arm Shoulder L": [], "Arm Shoulder R": [],
             "Shoulder L": [], "Shoulder R": [],
         }
+
+    def start_animation(self, part, time, target_angle, current_angle):
+        direction = [1, -1][int(target_angle > current_angle)]
+
+        self.mech_animations[part].append({
+            "Time": time,
+            "Angle Speed": round(num_between(target_angle, current_angle) / time * direction, 2)
+        })
 
     def draw(self, win, angle):
         self.animate()  # Don't know where to put that

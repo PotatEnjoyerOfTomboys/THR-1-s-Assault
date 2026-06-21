@@ -2508,6 +2508,7 @@ def azura_passive(self, entities, level):
 
 
 # |Weapon Repertories|--------------------------------------------------------------------------------------------------
+
 weapon_repertory = {
     # |THR-1|-----------------------------------------------------------------------------------------------------------
     # |Lord|------------------------------------------------------------------------------------------------------------
@@ -4759,7 +4760,6 @@ weapon_repertory = {
          "passive": "war_and_peace_passive",
          "free var": {"Peace angle": 0, "War angle": 0}},
 }
-
 # Encyclopedia notes
 # 	"Weapon-Energy-Laser Carbine": "",
 #   Manufacturer: 2nd Weapons RnD Division||Power Supply: ?????||||A variant of the <laser rifle>. It is still an experimental design but testing shows promising results.||||The goal of this design is to reduce overall length while retaining capabilities. If successful, it might very well become a replacement to the original.

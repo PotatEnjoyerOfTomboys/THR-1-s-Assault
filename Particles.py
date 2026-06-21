@@ -698,7 +698,6 @@ class SquareTransparent:
             self.duration -= 1
 
 
-
 class SolidColourOverlay:
     def __init__(self, colour, duration, alpha, fade_in=(), fadeout=()):
         self.survive_wipe = False
@@ -1226,136 +1225,80 @@ class BossIntro:
             self.duration -= 1
 
 
+RIGEL_INTRO_SPRITE_SHEET = get_image('Sprites/UI/Spoilers.png')
+RIGEL_INTRO_SPRITES = {
+    "R": [RIGEL_INTRO_SPRITE_SHEET.subsurface(00, x * 32, 16, 32).convert_alpha() for x in range(4)],
+    "I": [RIGEL_INTRO_SPRITE_SHEET.subsurface(16, x * 32, 16, 32).convert_alpha() for x in range(3)],
+    "G": [RIGEL_INTRO_SPRITE_SHEET.subsurface(32, x * 32, 16, 32).convert_alpha() for x in range(5)],
+    "E": [RIGEL_INTRO_SPRITE_SHEET.subsurface(48, x * 32, 16, 32).convert_alpha() for x in range(4)],
+    "L": [RIGEL_INTRO_SPRITE_SHEET.subsurface(64, x * 32, 16, 32).convert_alpha() for x in range(2)],
+}
+
 class RigelIntro:
-    def __init__(self, boss_name="Boss Intro", duration=1020):
+    def __init__(self, duration=1020):
         self.survive_wipe = True  # Should it survive FPS boosting measures
-        self.start_duration = duration
         self.duration = duration
-
-        self.boss_name = str_to_list(boss_name)
-
-        self.written_text = ""
-        self.particles = []
-        self.bar_x_mod = 0
-        self.warning_x_mod = -120
-
-        self.end_duration = -BIG_INT
-
-        comms = []
-        for i in range(4):
-            comms.append(
-                {"Sender": "SYS", "Message": str_to_list(write_textline(f"BOSS-INTRO-{random.randint(0, 25)}"))},
-            )
-        self.comms = UICommunicationLog(comms, [10, 128], speed=3, offset=10)
-        # {"Sender": "THR-1", "Message": str_to_list("I AM MAKING MAC AND CHEESE AND NOBODY CAN STOP ME!")}
+        self.starting_duration = duration
+        self.name_surf = pg.Surface((65+16, 32)).convert_alpha()
+        self.name_surf.fill((0, 0, 0, 0))
+        self.status = 0
+        self.letter = "R"
+        self.letter_count = 0
 
     def draw(self, WIN, scrolling):
-        # Fade in
-        if self.duration > self.end_duration:
-            # width, height = WIN.get_size()
-            width, height = FRAME_MAX_SIZE
-            z_mod = FRAME_MAX_SIZE[0]/630
+        width, height = FRAME_MAX_SIZE
+        if self.duration % 8 == 0:
+            play_sound("Menu move")
+            self.name_surf.blit(RIGEL_INTRO_SPRITES[self.letter][self.status], [{"R": 0, "I": 16, "G": 32, "E": 48, "L": 64}[self.letter], 0])
+            self.status += 1
+            if len(RIGEL_INTRO_SPRITES[self.letter]) <= self.status:
+                self.status = 0
+                if self.letter_count < 4:
+                    self.letter_count += 1
+                self.letter = ["R", "I", "G", "E", "L"][self.letter_count]
 
-            # Move both bars to the left and right
-            base_dist = 32 * z_mod
-            bar_height = 3 * z_mod
-            bar_spread = 48 * z_mod
-            pg.draw.rect(WIN, AMBER, (self.bar_x_mod* z_mod-width, base_dist, width, bar_height ))
-            pg.draw.rect(WIN, AMBER, (self.bar_x_mod* z_mod-width, base_dist + bar_spread, width, bar_height ))
-            pg.draw.rect(WIN, AMBER, (width-self.bar_x_mod* z_mod, height - base_dist - bar_height * 2 - bar_spread, width, bar_height ))
-            pg.draw.rect(WIN, AMBER, (width-self.bar_x_mod* z_mod, height - base_dist - bar_height, width, bar_height ))
+        WIN.blit(self.name_surf, [
+            width // 2 - self.name_surf.get_width() // 2,
+            height // 2 - 16
+        ])
+        self.duration -= 1
 
-            # draw text
-            temp_font = create_temp_font_4(height)
-            text_sprite = temp_font.render("WARNING", True, AMBER_LIGHT)
-            text_width = text_sprite.get_width() + 30 * z_mod
-            text_spread = (bar_spread - text_sprite.get_height()) / 2
 
-            for x in range(int(width // text_width * 8)):
-                WIN.blit(text_sprite, [
-                    (self.warning_x_mod - text_width * x) * z_mod,
-                    base_dist+bar_height+text_spread
-                ])
+class RigelDeathParticle:
+    def __init__(self, pos, duration):
+        self.survive_wipe = True
+        self.pos = [pos[0], pos[1] - 16]
 
-            for x in range(int(width // text_width * 8)):
-                WIN.blit(text_sprite, [
-                    (width - self.warning_x_mod + text_width * x - 120) * z_mod,
-                    height - base_dist - bar_height - bar_spread+text_spread
-                ])
-            self.warning_x_mod += 2
+        # Other properties
+        self.duration = duration
+        self.particles = []  # Stores the GrowingCircle particles
+        # GrowingCircleTransparent
+        # Add
 
-            if 630 > self.bar_x_mod:
-                self.bar_x_mod += 4
-                if not 630 > self.bar_x_mod:
-                    # play noise
-                    pass
+    def draw(self, WIN, scrolling):
+        if self.duration > 0:
+            if self.duration <= 600:
+                if self.duration == 600:
+                    self.particles.append(SolidColourOverlay(UI_COLOUR_BACKGROUND, 600, 0, fade_in=(60, 3)))
+                    play_sound("Betel Death BIGGER")
             else:
-                # Write boss name
-                if self.duration % 30 == 0:
-                    if self.boss_name:
-                        self.written_text += self.boss_name[0]
-                        self.boss_name.pop(0)
-                        if not self.boss_name:
-                            self.end_duration = self.duration - 240
+                self.particles.append(RandomParticle2(
+                    [self.pos[0], self.pos[1]],
+                    (int(64 - math.sin(self.duration * 0.025) * 64),
+                     int(96 - math.sin(self.duration * 0.035) * 64),
+                     int(64 - math.sin(self.duration * 0.005) * 64)),
+                    3 * random.random(), 45, 360 * random.random(), size=3))
+                if self.duration % 45 == 0:
+                    play_sound("Betel Death")
+                    mod = random.random()
+                    pos = random_point_in_circle(self.pos, 32)
+                    self.particles.append(GrowingCircleTransparent(
+                        pos, (55, 11, 72), 1 * mod, random.randint(25 + round(20 * mod), 75), 0, 0, alpha=125))
 
-                name_sprite = temp_font.render(self.written_text, True, AMBER_LIGHT)
-                WIN.blit(name_sprite, [
-                    width//2 - name_sprite.get_width()//2,
-                    height//2 - name_sprite.get_height()//2
-                ])
-            # Handles shits
             for i in self.particles:
                 i.draw(WIN, scrolling)
-            self.comms.act()
-            self.comms.draw(WIN, z=z_mod)
-            #  * z_mod
+
             self.duration -= 1
-
-
-
-class Music:
-    def __init__(self, text, duration=180, color=WHITE, start_delay=180):
-        self.survive_wipe = True  # Should it survive FPS boosting measures
-        self.start_duration = duration
-        self.duration = duration
-        self.start_delay = start_delay
-
-        self.text = FONTS["dia"].render(text, True, color)
-        self.text_width = self.text.get_width() // 2
-        self.text_height = self.text.get_height() // 2
-
-        self.text_alpha = 255
-
-        self.rect = pg.Rect(0, 0, 0, 0)
-
-    def draw(self, WIN, scrolling):
-        # Fade in
-        if self.duration > 0:
-            if self.start_delay == 0:
-                width, height = WIN.get_size()
-
-                # Change height of the rects
-                if self.duration == self.start_duration:
-                    rect_height = height // 10
-                else:
-                    rect_height = self.rect.height
-                if self.duration <= self.start_duration // 3 * 2 and self.rect.height > 1:
-                    rect_height -= (height // 5) // (self.duration // 3 * 2)
-
-                self.rect = pg.Rect(0, 0, width, rect_height)
-
-                # Draw the rects
-                draw_transparent_rect(WIN, self.rect, BLACK, 175)
-
-                # Draw Text
-                if self.duration <= self.start_duration // 3 * 2:
-                    self.text_alpha -= 4
-                    self.text.set_alpha(self.text_alpha)
-                WIN.blit(self.text, [25, 0])
-
-                self.duration -= 1
-            else:
-                self.start_delay -= 1
 
 
 class CutsceneSkip:

@@ -302,6 +302,7 @@ trigger_ep_finished = {"rects": [], "Conditions": trigger_check_m6e_end}  # Hand
 
 # |Mission events|------------------------------------------------------------------------------------------------------
 def mission_start(self, entities, bullets, level, time_passed, screen, CLOCK):
+    track_to_play = "Mission 1"
     if level['objective'] != "Defeat Elite Unit":
         allies = []
         for e in entities["entities"]:
@@ -326,9 +327,19 @@ def mission_start(self, entities, bullets, level, time_passed, screen, CLOCK):
         radio_handler(entities, [
             [sprite[0], f"RADIO-START-{a}-{level['objective']}", Fun.AMBER, 240]
             ])
+
+        # Get music to play
+        if level["mission number"] > 5:
+            track_to_play = "Mission 2"
+        if level["mission number"] > 10:
+            track_to_play = "Mission 3"
+        Fun.play_music(track_to_play)
         return
     # BossIntro
     boss_name = "BOSS-NAME-UNKNOWN"
+
+    track_to_play = {"THR-1": "Boss - THR-1", "Zoar Colonists": "Boss - Curtis"}[level["Player party"]]
+
     if level["mission number"] == 5:
         boss_name = [
             "BOSS-NAME-ARMED-SHIELD-GENERATOR",
@@ -344,7 +355,13 @@ def mission_start(self, entities, bullets, level, time_passed, screen, CLOCK):
     if level["mission number"] == 15:
         # Fun.play_music("Dracula")
         # Additional stuff for final boss
+        track_to_play = {"THR-1": "Boss - Curtis", "Zoar Colonists": "Boss - THR-1"}[level["Player party"]]
+        if level['name'] == Fun.write_textline("Finale 1"):
+            track_to_play = "Boss - Rigel"
+        if level['name'] == Fun.write_textline("Finale 2"):
+            boss_name = "BOSS-NAME-CURTIS"
         if level['name'] == Fun.write_textline("Finale 3"):
+            boss_name = "BOSS-NAME-THR-1"
             for e in entities["entities"]:
                 if e.team == "Player":
                     continue
@@ -360,39 +377,48 @@ def mission_start(self, entities, bullets, level, time_passed, screen, CLOCK):
                 MissionEvent('Ambush', {"rects": [], "Conditions": trigger_check_under_specified_amount_enemies}, True, [thr_1],
                  free_var={"Specified amount": 3})
             )
-    # Use the old boss thing for Curtis?
     for e in entities["entities"]:
         if e.team == "Player":
             continue
         e.force_draw = True
-    entities["UI particles"].append(Particles.BossIntro(boss_name=Fun.write_textline(boss_name)))
-    # level["scrolling target"]
+
+    # Intro manager
+    if level['name'] != Fun.write_textline("Finale 2"):
+        # entities["UI particles"].append(Particles.BossIntro(boss_name=Fun.write_textline(boss_name)))
+        pass
+    else:
+        entities["UI particles"].append(Particles.MissionTitleCard(Fun.write_textline(boss_name), ""))
+
     level["events"].append(
         MissionEvent("Finishing", trigger_on_for, False, [change_scrolling_target], free_var={"Timer": 60 * 5}))
 
-
-# for ob in ["Capture", "Seek and Destroy", "Eliminate Commander", "Escort", "Defense", "Defeat Elite Unit"]:
-#     for a in ["Lord", "Emperor", "Wizard", "Sovereign", "Duke", "Jester", "Condor", "Curtis", "Lawrence", "Mark", "Vivianne"]:
-#         print(f'    "RADIO-START-{a}-{ob}": "",')
+    # Play music track
+    Fun.play_music(track_to_play)
 
 
 def win(self, entities, bullets, level, time_passed, screen, CLOCK):
-    # SPRITE_RADIO_MAKOTO
-    # "THR-1": "Fortress", "Zoar Colonists"
-    level["events"].append(MissionEvent("Finishing", trigger_timer, False, [finish_mission], free_var={"Timer": 60 * 5}))
+    time_till_end = 60 * 5
+    text_1 = "Objective completed."
+    text_2 = "Mission complete!"
+    if level['name'] == Fun.write_textline("Finale 1"):
+        time_till_end = 1200
+        text_1 = "Objective completed."
+        text_2 = "Mission complete!"
+    level["events"].append(MissionEvent("Finishing", trigger_timer, False, [finish_mission], free_var={"Timer": time_till_end}))
     radio_handler(entities,
                   {
-                      "THR-1": [[Fun.SPRITE_RADIO_EMPLOYER[0], "Objective completed.", Fun.AMBER, 300]],
-                      "Zoar Colonists": [[Fun.SPRITE_RADIO_MAKOTO[0], "Mission complete!", Fun.AMBER, 300]],
+                      "THR-1": [[Fun.SPRITE_RADIO_EMPLOYER[0], text_1, Fun.AMBER, time_till_end]],
+                      "Zoar Colonists": [[Fun.SPRITE_RADIO_MAKOTO[0], text_2, Fun.AMBER, time_till_end]],
                   }[level["Player party"]]
                   )
     for e in entities["entities"]:
         if e.team == "Players":
-            e.status["No damage"] = 300
+            e.status["No damage"] = time_till_end
     #
 
 
 def loss(self, entities, bullets, level, time_passed, screen, CLOCK):
+    Fun.stop_music()
     level["events"].append(MissionEvent("Finishing", trigger_timer, False, [finish_mission], free_var={"Timer": 60 * 5}))
     for e in entities["entities"]:
         if e.team != "Players":
@@ -420,6 +446,7 @@ def skip_mission(self, entities, bullets, level, time_passed, screen, CLOCK):
 
 
 def loss_of_apc(self, entities, bullets, level, time_passed, screen, CLOCK):
+    Fun.stop_music()
     level["events"].append(MissionEvent("Finishing", trigger_timer, False, [finish_mission], free_var={"Timer": 60 * 5}))
     radio_handler(entities,
                   {
@@ -439,6 +466,9 @@ def change_scrolling_target(self, entities, bullets, level, time_passed, screen,
     for e in entities["entities"]:
         if "IS BOSS" in e.free_var:
             scrolling_target_entities.append(e)
+    if "Manual target" in self.free_var:
+        ENEMY_NO_OWNER.pos = self.free_var["Manual target"]
+        scrolling_target_entities.append(ENEMY_NO_OWNER)
     level["scrolling target"] = Fun.find_scrolling_target(scrolling_target_entities)
 
     if self.free_var["Timer"] == 1:
@@ -729,6 +759,8 @@ def thr_1(self, entities, bullets, level, time_passed, screen, CLOCK):
 # Versus
 def versus_every_frame(self, entities, bullets, level, time_passed, screen, CLOCK):
     if time_passed == 0:
+        track_to_play = f"Mission {random.randint(1, 3)}"
+        Fun.play_music(track_to_play)
         t = 20
         mod = 1.5
         radio_handler(entities, [

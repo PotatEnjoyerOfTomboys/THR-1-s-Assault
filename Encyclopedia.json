@@ -1,8 +1,8 @@
 {
 	"Annals": {
-		"2100": ["Solar War | January - April", "Solar War | May - August", "Solar War | Setptember - December"],
-		"2101": ["Solar War | January - April", "Solar War | May - August", "Solar War | Setptember - December"],
-		"2102": ["End of the Solar War", "Human FTLT system intergration"],
+		"2100": ["Solar War | January - April", "Solar War | May - August", "Solar War | September - December"],
+		"2101": ["Solar War | January - April", "Solar War | May - August", "Solar War | September - December"],
+		"2102": ["End of the Solar War", "Human FTLT system integration"],
 		"2103": ["Humans Move to Zoar"],
 		"2105": ["Pirate attack on Zoar"]
 	},
@@ -43,13 +43,13 @@
 		"Misc.": [
 			"Rigel",
 			"Curtis",
-			"THR-1"
+			"THR-1 (Throne)"
 		]
 	},
 	"Organizations": {
-		"Armed groups": ["Asset Protecting & Collection Dept.", "Burning Winds Band", "C8 Mercenary Army", "Nest"],
+		"Armed groups": ["Asset Protecting & Collection Dept.", "Burning Winds Band", "C8 Mercenary Army", "NEST"],
 		"Mercenary Teams": {
-			"THR-1": ["Overview", "Leopold LORD Storch", "Kai KAISER", "Jeanne WIZARD McNeil", "Corrine SOVEREIGN", "M4-D1C JESTER", "Vincent CONDOR Varga"], 
+			"THR-1": ["Overview", "Leopold LORD Storch", "Kai KAISER", "Jeanne WIZARD McNeil", "Corrine SOVEREIGN", "Zander DUKE", "M4-D1C JESTER", "Vincent CONDOR Vidmar"], 
 			"Zoar Colony's Gun Shop": ["Overview", "Curtis Miller", "Vivianne Miller", "Lawrence Reed", "Mark"]
 			},
 		"Weapon Manufacturer": ["Old West Firearms & Replicas",

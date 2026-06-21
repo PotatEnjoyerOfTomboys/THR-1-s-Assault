@@ -12,6 +12,7 @@ import Particles
 import Weapons
 import MechRenderer
 import Items
+import Event
 
 
 from Fun import none
@@ -5664,14 +5665,13 @@ def rigel_input(self, entities, level):
     self.input = Fun.get_default_inputs()
     if target:
         aim_target, move_target, og_dist = entity_get_aim_move_target(self, target)
-        aim_target = self.target.pos.copy()
 
         entity_shoot_with_startup_lag(self, og_dist, 320)
 
     closest_target = Fun.find_closest_in_circle(self, entities, 512, "entities")
     if closest_target:
         fortress_move_toward_point(self, closest_target, 40 * 7)
-        fortress_move_away_point(self, closest_target, 25 * 7)
+        #fortress_move_away_point(self, closest_target, 25 * 7)
 
         angle = Fun.angle_between(closest_target, self.pos)
         self.input["Right"] = self.free_var["Move angle"] < angle
@@ -5693,10 +5693,6 @@ def rigel_act(self, entities, level):
 
     max_vel = self.vel_max
 
-    # Quick boost
-    # bloodhound_boost(self, entities, level)
-    # Checks for which direction the player must move
-    # Rework it so that you are not faster when walking in diagonal, this should be fixed now
     if self.dash_cooldown <= 0:
         allow_correction = False
         speed = 0
@@ -5728,6 +5724,8 @@ def rigel_act(self, entities, level):
     # |Status effects|----------------------------------------------------------------------------------------------
     # ha ha, Fun go brr
     Fun.status_manager(self, entities)
+    for x in self.free_var["Segments"]:
+        self.free_var["Segments"][x]["Angle"] = self.free_var["Move angle"] - self.free_var["Mech"].mech_parts["Arm L"]["Draw angle"]
     if self.no_shoot_state == 0:
         # Attack logic
         {
@@ -5743,19 +5741,19 @@ def rigel_act(self, entities, level):
 
     else:
         self.no_shoot_state -= 1
-        # if self.no_shoot_state == 0:
-        #     self.free_var["Mech"].reset_animations()
 
     # Handle Missile Circus
     if self.free_var["Missile Circus"] > 0:
         if self.free_var["Missile Circus"] % 4 == 0:
-            angle = self.angle - 180 - random.uniform(-45, 45)
+            Fun.play_sound("Mech Missile")  # TODO: Give his own missile sound
+            angle = self.free_var["Move angle"] - 180 - random.uniform(-45, 45)
+            mod = random.random()
             Bullets.spawn_bullet(
                 self, entities,
                 Bullets.Missile,
-                Fun.move_with_vel_angle(self.pos, 20, angle),
-                angle,
-                [2 + 3 * random.random(), 180, 4, 3, {"Targeting range": 512,
+                Fun.move_with_vel_angle(self.pos, 40 * mod, angle),
+                angle - 180,
+                [2 + 3 * mod, 180, 4, 3, {"Targeting range": 512,
                                  "Targeting angle": 60,
                                  "Target": "enemies",
                                  "Secondary explosion": {"Duration": 5,
@@ -5786,16 +5784,34 @@ def rigel_draw(self, WIN, scrolling):
     self.free_var["Mech"].draw(WIN, self.free_var["Move angle"])
     # self.free_var["Mech"].mech_parts["Arm R"]["origin"] = [26, 14]
     # 26, 14
+    # Canons/wing
+    # segment offset
+    # segment angle
+    for x in range(3):
+        pos = Fun.move_with_vel_angle(self.pos, 33 + x * 10, self.free_var["Segments"][f"{x+1}"]["Angle"] - 80)
+        pos[1] -= self.free_var["Mech"].mech_parts["Arm L"]["offset"][2] - 8
+        self.free_var["Segments"][f"{x + 1}"]["Pos"] = pos
+
+        Fun.blitRotate(WIN, RIGEL_SEGMENT,
+                       [
+                           self.free_var["Segments"][f"{x + 1}"]["Pos"][0] + scrolling[0],
+                           self.free_var["Segments"][f"{x + 1}"]["Pos"][1] + scrolling[1]
+                       ],
+                       RIGEL_SEGMENT_ORIGIN, self.free_var["Segments"][f"{x+1}"]["Angle"] * -1 + 90)
+
 
 def rigel_on_death(self, entities, level):
     if self.free_var["Phase"] == 1:
+        entities["UI particles"].append(Particles.RigelIntro())
         # Switch to phase 2
-        self.health = round(self.max_health * 2)
+        self.health = round(self.max_health * 1.75)
+        self.max_health = self.health
         self.status["No damage"] = 60 * 3
         self.status["No debuff"] = 60 * 3
         self.no_shoot_state = 180
         # self.status["Last Stand"] = 0
-        self.free_var["History limit"] = 5
+        self.free_var["History limit"] = 25
+        self.free_var["Phase"] = 2
 
         number_of_particle = 18
         for particles_to_add in range(360 // number_of_particle):
@@ -5803,17 +5819,22 @@ def rigel_on_death(self, entities, level):
                 [self.pos[0], self.pos[1]], Fun.DARK_RED, 1 + 3 * random.random(), random.randint(45, 90),
                                                         particles_to_add * number_of_particle,
                 size=Fun.get_random_element_from_list([3, 4, 6])))
+        return
+    # Make death particle
+    entities["UI particles"].append(Particles.RigelDeathParticle(self.pos, 1200))
 
-    # print(self.health)
+    level["events"].append(
+        MissionEvent("Finishing", Event.trigger_on_for, False, [Event.change_scrolling_target], free_var={"Timer": 60 * 5, "Manual target": self.pos}))
 
 
 def rigel_shoulder_bash(self, entities, level):
-    animation = True
-    if start_up_lag_handler(self, 60):
+    animation = self.free_var["Startup lag"] <= 1
+    if start_up_lag_handler(self, 60+80):
         self.free_var["Current attack"] = "Lance Swipe"
+        self.free_var["Anti Missile Circus Spam"] = False
         animation = False
     elif self.free_var["Startup lag"] == 10:
-        self.no_shoot_state = 130
+        # self.no_shoot_state = 130
         self.vel = Fun.move_with_vel_angle([0, 0], 35, self.free_var["Move angle"])
 
 
@@ -5834,59 +5855,65 @@ def rigel_shoulder_bash(self, entities, level):
     self.input["Left"] = False
 
     if not self.free_var["Mech"].mech_animations["Torso"] and animation:
-        # Load animations
-        self.free_var["Mech"].mech_animations["Torso"].append({"Time": 10, "Angle Speed": 1.2})
-        self.free_var["Mech"].mech_animations["Arm R"].append({"Time": 10, "Angle Speed": 1.2})
-
-        self.free_var["Mech"].mech_animations["Torso"].append({"Time": 50, "Angle Speed": -2.88})
-        self.free_var["Mech"].mech_animations["Arm R"].append({"Time": 50, "Angle Speed": -2.88})
+        self.free_var["Mech"].start_animation("Torso", 10, -80, 0)
+        self.free_var["Mech"].start_animation("Arm R", 10, -20, 0)
+        self.free_var["Mech"].start_animation("Torso", 130, -80, -80)
+        self.free_var["Mech"].start_animation("Arm R", 130, -20, -20)
 
 
 def rigel_lance_swipe(self, entities, level):
-    animation = True
-    if start_up_lag_handler(self, 30):
+    animation = self.free_var["Startup lag"] <= 1
+    if start_up_lag_handler(self, 20):
         self.free_var["Current attack"] = "Giga Thrust"
-        animation = False
-
 
     if not self.free_var["Mech"].mech_animations["Torso"] and animation:
-        self.free_var["Mech"].mech_animations["Torso"].append({"Time": 30, "Angle Speed": 4.8})
-        self.free_var["Mech"].mech_animations["Arm R"].append({"Time": 30, "Angle Speed": 4.8})
+        self.free_var["Mech"].start_animation("Torso", 20, 40, -80)
+        self.free_var["Mech"].start_animation("Arm R", 20, 40, -20)
 
 
 def rigel_giga_thrust(self, entities, level):
-    animation = True
-    if start_up_lag_handler(self, 30):
+    animation = self.free_var["Startup lag"] <= 1
+    if start_up_lag_handler(self, 200):
         # self.free_var["Current attack"] = Fun.get_random_element_from_list(["Laser Barrage", "Plasma"])
-        self.free_var["Current attack"] = "Shoulder Bash"
+
+        self.free_var["Current attack"] = "Laser Barrage"
         animation = False
-    elif self.free_var["Startup lag"] == 10:
-        # self.no_shoot_state = 130
+    elif self.free_var["Startup lag"] == 15:
         self.vel = Fun.move_with_vel_angle([0, 0], 35, self.free_var["Move angle"])
 
     if not self.free_var["Mech"].mech_animations["Torso"] and animation:
-        pass
+        self.free_var["Mech"].start_animation("Torso", 20, -80, 40)
+        self.free_var["Mech"].start_animation("Arm R", 20, 80, 40)
+        self.free_var["Mech"].start_animation("Torso", 50, -80, -80)
+        self.free_var["Mech"].start_animation("Arm R", 50, 80, 80)
+        self.free_var["Mech"].start_animation("Torso", 50, 0, -80)
+        self.free_var["Mech"].start_animation("Arm R", 50, 0, 80)
+        self.free_var["Mech"].start_animation("Torso", 100, 0, 0)
+        self.free_var["Mech"].start_animation("Arm R", 100, 0, 0)
 
 
 def rigel_laser_barrage(self, entities, level):
-    # TODO: Animation
-    animation = True
     if start_up_lag_handler(self, 90):
         self.free_var["Current attack"] = Fun.get_random_element_from_list(["Missile Circus", "Raining Hell"])
-        animation = False
-    elif self.free_var["Startup lag"] == 1:
+        if  self.free_var["Anti Missile Circus Spam"]:
+            self.free_var["Current attack"] = "Raining Hell"
+
+        # self.free_var["Current attack"] = "Shoulder Bash"
+
+    if self.free_var["Startup lag"] == 1:
+    # if self.free_var["Pos history"]["1"]["Target"] is None and self.free_var["Pos history"]["2"]["Target"] is None and self.free_var["Pos history"]["3"]["Target"] is None:
         # Initialize the attack
         self.free_var["Pos history"] = {
                  "1": {"Target": None, "History": []},
                  "2": {"Target": None, "History": []},
                  "3": {"Target": None, "History": []},
              }
-        count = 1
+        count = 0
         for e in entities["entities"]:
-            if self.team == e.team:
+            if self == e:
                 continue
-            self.free_var["Pos history"][f"{count}"]["Target"] = e
-            self.free_var["Pos history"][f"{count}"]["History"].append(e.pos.copy())
+            self.free_var["Pos history"][f"{count+1}"]["Target"] = e
+            self.free_var["Pos history"][f"{count+1}"]["History"].append(e.pos.copy())
             count += 1
             if count == 3:
                 break
@@ -5899,29 +5926,27 @@ def rigel_laser_barrage(self, entities, level):
             laser["History"].append(laser["Target"].pos.copy())
 
             # Make laser
-            pos = [self.pos[0], self.pos[1] - 10 * int(l)]
+            # pos = [self.pos[0], self.pos[1] - 10 * int(l)]
+            pos = self.free_var["Segments"][l]["Pos"]
             angle = Fun.angle_between(laser["History"][0], pos)
             self.free_var["Draw angle"] = angle
             dist = Fun.distance_between(pos, laser["History"][0]) - laser["Target"].thiccness//2
-            Bullets.spawn_bullet(self, entities, Bullets.Laser, pos,
-                                    angle, [0, 12, dist, 2, {"Colour": (107, 153, 165)}])
-            entities["particles"].append(Particles.FireParticle(
-                Fun.move_with_vel_angle(pos, dist, angle),
-                colour=(107, 153, 165)))
+            Bullets.spawn_bullet(self, entities, Bullets.Laser, pos, angle, [0, 2, dist, 2, {"Colour": (107, 153, 165)}])
+            self.free_var["Segments"][l]["Angle"] = angle
+            entities["particles"].append(Particles.FireParticle(Fun.move_with_vel_angle(pos, dist, angle), colour=(107, 153, 165)))
 
             if len(laser["History"]) > self.free_var["History limit"]:
                 laser["History"].pop(0)
             if len(laser["History"]) >= self.free_var["History limit"]:
                 laser["History"].pop(0)
 
-    # if not self.free_var["Mech"].mech_animations["Torso"] and animation:
-    #     pass
-
 
 def rigel_plasma(self, entities, level):
     animation = True
     if start_up_lag_handler(self, 30):
         self.free_var["Current attack"] = Fun.get_random_element_from_list(["Missile Circus", "Raining Hell"])
+        if self.free_var["Anti Missile Circus Spam"]:
+            self.free_var["Current attack"] = "Raining Hell"
         animation = False
 
     if not self.free_var["Mech"].mech_animations["Torso"] and animation:
@@ -5931,8 +5956,12 @@ def rigel_plasma(self, entities, level):
 def rigel_missile_circus(self, entities, level):
     animation = True
     if start_up_lag_handler(self, 30):
+        self.free_var["Anti Missile Circus Spam"] = True
         self.free_var["Missile Circus"] = 120
         self.free_var["Current attack"] = "Shoulder Bash"
+        if self.free_var["Phase"] == 2:
+            self.free_var["Missile Circus"] *= 2
+            self.free_var["Current attack"] = Fun.get_random_element_from_list(["Laser Barrage", "Shoulder Bash"])
         animation = False
 
     if not self.free_var["Mech"].mech_animations["Torso"] and animation:
@@ -5940,10 +5969,14 @@ def rigel_missile_circus(self, entities, level):
 
 
 def rigel_raining_hell(self, entities, level):
+    self.free_var["Pos history"] = {
+        "1": {"Target": None, "History": []},
+        "2": {"Target": None, "History": []},
+        "3": {"Target": None, "History": []},
+    }
     animation = True
     if start_up_lag_handler(self, 61):
         self.free_var["Current attack"] = "Shoulder Bash"
-        animation = False
     elif self.free_var["Startup lag"] == 20:
         for x in range(8):
             pos = Fun.move_with_vel_angle(self.pos, 128, x * 45)
@@ -5964,9 +5997,6 @@ def rigel_raining_hell(self, entities, level):
                 [0, 60, 48, 50,
                  {"Secondary explosion": {"Duration": 20, "Strength": 120, "Radius": 64}, "Colour": Fun.DARK_RED,
                   "Slowdown rate": 0.05}])
-
-    if not self.free_var["Mech"].mech_animations["Torso"] and animation:
-        pass
 
 
 # Curtis
@@ -7424,7 +7454,8 @@ enemy_repertory = {
          "faction": "FAC-3",
          "type": "Elite",
          "targeting range": R_MO, "targeting angle": D_HO, "stealth mod": S_LO, "stealth counter": C_MO,
-         "wall hack": False, "health": H_HO * 12, "armour": 0, "damage resistances": F3_RESIT_H,
+         # "wall hack": False, "health": H_HO * 12, "armour": 0, "damage resistances": F3_RESIT_H,
+         "wall hack": False, "health": 1, "armour": 0, "damage resistances": F3_RESIT_H,
          "thickness": 48,
          "vel max": V_LO * 0.8, "speed": V_LO * 0.8, "friction": V_LO * 0.8,
          "weapon": "Bloodhound Weaponry",
@@ -7448,7 +7479,13 @@ enemy_repertory = {
                  "2": {"Target": None, "History": []},
                  "3": {"Target": None, "History": []},
              },
+             "Segments": {
+                 "1": {"Pos": [0, 0], "Angle": 0},
+                 "2": {"Pos": [0, 0], "Angle": 0},
+                 "3": {"Pos": [0, 0], "Angle": 0},
+             },
              "Missile Circus": 0,
+             "Anti Missile Circus Spam": False,
              "History limit": 15
          }
          },
@@ -7650,3 +7687,8 @@ def how_many_attacks_to_kill_everyone(damage, damage_type):
             print(f'{repertory[e]["name"]} takes {attack_count} attacks')
 # how_many_attacks_to_kill_everyone(250, "Melee")
 # "Physical" "Fire" "Explosion" "Energy" "Melee"
+
+RIGEL_SEGMENT = Fun.get_image('Sprites/Segment.png')
+RIGEL_SEGMENT_WIDTH = RIGEL_SEGMENT.get_width()
+RIGEL_SEGMENT_HEIGHT = RIGEL_SEGMENT.get_height()
+RIGEL_SEGMENT_ORIGIN = [RIGEL_SEGMENT_WIDTH * 0.5, RIGEL_SEGMENT_HEIGHT * 0]

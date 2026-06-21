@@ -27,7 +27,6 @@ import sys
 #   M13,
 #   M14,
 
-
 # Fun.py is not fun
 # Here is many functions that are used a lot in the other files
 
@@ -135,8 +134,47 @@ EMPTY_SAVE_FILE = {
     "Character weapons unlocked": {
         "Lord": [], "Emperor": [], "Wizard": [], "Sovereign": [], "Duke": [], "Jester": [], "Condor": [],
         "Curtis": [], "Lawrence": [], "Mark": [], "Vivianne": []
-    }
+    },
+    "Zoar unlocked": False,
+    "Faction mission count": [0, 0, 0, 0, 0, 0],
+    "Databank entries unlocked": [
+        "Annals",
+            "2100", "Solar War | January - April", "Solar War | May - August", "Solar War | September - December",
+            "2101", "Solar War | January - April", "Solar War | May - August", "Solar War | September - December",
+            "2102", "End of the Solar War", "Human FTLT system integration",
+            "2103", "Humans Move to Zoar",
+            "2105", "Pirate attack on Zoar",
+        "Enemies",
+            "Asset Protecting & Collection Dept.",
+            "Burning Winds Band",
+            "C8 Mercenary Army",
+            "Misc.",
+        "Organizations",
+            "Armed groups", "Asset Protecting & Collection Dept.", "Burning Winds Band", "C8 Mercenary Army",
+        "Mercenary Teams",
+            "THR-1", "Overview", "Leopold LORD Storch", "Kai KAISER", "Jeanne WIZARD McNeil", "Corrine SOVEREIGN", "Zander DUKE", "M4-D1C JESTER", "Vincent CONDOR Varga",
+            "Zoar Colony's Gun Shop", "Overview", # "Curtis Miller", "Vivianne Miller", "Lawrence Reed", "Mark",
+		"Weapon Manufacturer",
+            "Socrates",
+            "Novak & Boyko",
+            "CFCR",
+            "ASUM",
+            "Old English Armoury",
+            "Factory Munition Ballistics",
+        "Dickinson Technologies", "Manhunter Ammunitions",
+        "Weapon",
+            "Handgun", # "Big Iron", "War and Peace",
+            "Rifle", "St-Maurice", #: ["St-Maurice Youth Model", "St-Laurent Gen 1", "Type 47 Rifle", "Cowboy's Repeater", "Mark's Rifle", "Type 30 Rifle", "Vivianne's Rifle", "Combat Rifle",
+     		"Sub Machine Gun", "Type 41 SMG",
+     		"Shotgun", "Jeanne's Family Shotgun", # "Type 23 Shotgun", "Standard Shotgun", "Vivianne's Shotgun", "Desert Shotgun",
+     		"Energy", # "Custom Mk18 Laser cutter", "Laser Carbine", "Laser Rifle", "Heavy Laser", "Marker Laser", "Plasma Spray", "Plasma Rifle", "Laser Shotgun",
+            "Melee", "Chain Axe", # "Oversized stun baton", "Corrine's Hands", "Hook Swords", "Hunk of Steel", "Vivianne's Leg", "Gun Hammer", "Pile Bunker",
+     		"Combo", "GunBlade", # "Gun and Ballistic Knife", "Lawrence's Cutlass & Flintlock", "Captain's Axe & Blunderbuss",
+     		"Heavy", "Saloum Mk-2", "Fortress Machine Gun", # "GMG-04B", "Musket .360", "Buggy Gun", "Missile Pod", "ARWS", "Flamethrower", "Napalm Grenade Launcher", "Bulwark Minigun",
+     		"Gear", "Epicurean Medic Rifle", # "Crippled Laddie FCS Radio", "Mk16 Flare Mortar", "Nihilist Stretcher", "Stoic Shield generator", "C4", "Radar", "Smoke Dispenser", "Binoculars", "Artillery Radio"
+    ]
 }
+
 
 
 # Just to check that every save files are there
@@ -181,15 +219,15 @@ class Sound:
         self.duration -= 1
 
 
-def play_music(music_to_play, entities="This argument is USELESS", particule=False, use_intro=False):
+def play_music(music_to_play, use_intro=False, check_if_busy=False):
     # music_to_play is the name of song in music_dict
     # particule is there to place the particule that gives the song name, and it's author
     # use_intro is used to play any song with that have a start that doesn't loop, mainly boss themes
-    if music_to_play not in music_dict:
+    if music_to_play not in music_dict or music_dict[music_to_play]["Music"] == "":
         print_to_error_stream(f"{music_to_play} does not exist")
         return
-    if music_dict[music_to_play]["Music"] == "":
-        print_to_error_stream(f"{music_to_play} does not exist")
+
+    if check_if_busy and pg.mixer.music.get_busy() or CURRENT_TRACK_INFO[1] == music_to_play:
         return
 
     # Play the music
@@ -204,15 +242,13 @@ def play_music(music_to_play, entities="This argument is USELESS", particule=Fal
     # Set the volume
     volume_to_use = music_dict[music_to_play]["Volume"] * 0.5
     pg.mixer.music.set_volume(volume_to_use * (get_from_json("Settings.json", "Music") / 10))
-    CURRENT_TRACK_VOLUME[0] = volume_to_use
-    # Place the particle
-    # if particule:
-    #     entities["UI particles"].append(
-    #         Music(f"Now playing {music_to_play} by {music_dict[music_to_play]['Author']}", start_delay=160))
+    CURRENT_TRACK_INFO[0] = volume_to_use
+    CURRENT_TRACK_INFO[1] = music_to_play
 
 
 def stop_music():
     pg.mixer.music.fadeout(600)
+    CURRENT_TRACK_INFO[1] = "No track"
 
 
 def play_sound(sound_to_play, sound_type="SFX", modified_volume=0, fadeout=0, absolute_volume=-1):
@@ -235,12 +271,16 @@ def play_sound(sound_to_play, sound_type="SFX", modified_volume=0, fadeout=0, ab
 
 
 # This is a way to save the current volume of the music playing
-CURRENT_TRACK_VOLUME = [0]
+CURRENT_TRACK_INFO = [0, "No track"]
 
 music_dict = {
-    "Template": {"Music": '', "Volume": 1, "Author": "", "Name": ""},
-    "Template Intro": {"Music": '', "Volume": 1, "Author": "", "Name": ""},
-    # "Dracula": {"Music": 'Sounds/Music/Dracula_Flow_3_x_All_Star.mp3', "Volume": 1, "Author": "", "Name": ""},
+    "Menu": {"Music": 'Sounds/Music/Menu theme.wav', "Volume": 1, "Author": "", "Name": ""},
+    "Mission 1": {"Music": 'Sounds/Music/Mission theme.wav', "Volume": 1, "Author": "", "Name": ""},
+    "Mission 2": {"Music": 'Sounds/Music/Mission theme.wav', "Volume": 1, "Author": "", "Name": ""},
+    "Mission 3": {"Music": 'Sounds/Music/Mission theme.wav', "Volume": 1, "Author": "", "Name": ""},
+    "Boss - THR-1": {"Music": 'Sounds/Music/THR-1 Boss theme.wav', "Volume": 1, "Author": "", "Name": ""},
+    "Boss - Curtis": {"Music": 'Sounds/Music/Zoar Boss theme.wav', "Volume": 1, "Author": "", "Name": ""},
+    "Boss - Rigel": {"Music": 'Sounds/Music/Final Boss theme.wav', "Volume": 1, "Author": "", "Name": ""},
 }
 
 
@@ -377,6 +417,7 @@ sounds_dict = {
     "Betel 5": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Bosses/Betelgeuse_5.ogg')), "Volume": 1.5},
     "Betel 6": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Bosses/Betelgeuse_6.ogg')), "Volume": 0.95},
     "Betel Death": {"Sound": pg.mixer.Sound(os.path.join(opt('/Bosses/Betelgeuse_death.ogg'))), "Volume": 0.95},
+    "Betel Death BIGGER": {"Sound": pg.mixer.Sound(os.path.join(opt('/Bosses/Betelgeuse_death_bigger.ogg'))), "Volume": 0.95},
 
     "Com 1": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Bosses/Combustion_1.ogg')), "Volume": 0.125},
     "Com 2": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Bosses/Combustion_2.ogg')), "Volume": 0.15},
@@ -1298,13 +1339,14 @@ class UICommunicationLog:
             surface_to_draw.blit(self.font.render(message, True, self.font_colour), (x2 * z, y1 - negative_height + count * text_h * z))
 
 
-def confirmation_popup(WIN, CLOCK, pos, options, text="", do_crt=True):
+def confirmation_popup(WIN, CLOCK, pos, options, text="", do_crt=True, popup_width=256):
     menu_logic = UniversalMenuLogic(
         options
     )
     menu_overlay = pg.image.load(os.path.join("Sprites/UI/Overlay.png")).convert_alpha()
     frame_1 = some_bullshit_for_transitions(WIN)
     draw = True
+    text_lines = split_text(text, limit=80)
     while True:
         do_shit = menu_logic.act(WIN, CLOCK)
         if do_shit:
@@ -1325,17 +1367,20 @@ def confirmation_popup(WIN, CLOCK, pos, options, text="", do_crt=True):
             # width, height
             # 80+24, 10+4
             # +100
-            popup_width = 256
+
             height_mod = 0
             if text != "":
-                rendered_text = temp_ui_font.render(text, True, AMBER)
-                height_mod = 25
+                #
+                height_mod = 18 * len(text_lines)
             popup_height = 17 * len(menu_logic.options) + 30 + height_mod
             popup_uni = pg.Surface((popup_width, popup_height))
             popup_uni.fill(UI_COLOUR_NEW_BACKGROUND)
             menu_logic.draw(popup_uni, [0, height_mod])
             if text != "":
-                popup_uni.blit(rendered_text, [20, 0])
+                # text_lines
+                for count, text_line in enumerate(text_lines):
+                    rendered_text = temp_ui_font.render(text_line, True, AMBER)
+                    popup_uni.blit(rendered_text, [20, count * 18])
 
             surface_to_draw.blit(popup_uni, pos)
             pg.draw.rect(surface_to_draw, AMBER, (pos[0] - 2, pos[1] - 2, popup_width + 4, popup_height + 4), width=2)
@@ -1410,7 +1455,6 @@ def title_screen(WIN, CLOCK, controls):
 
 
 def main_menu(WIN, CLOCK):
-    pg.mixer.music.pause()
     transition = True
     frame_1 = some_bullshit_for_transitions(WIN)
 
@@ -1457,7 +1501,7 @@ def main_menu(WIN, CLOCK):
                 transition, frame_1 = menu_transition_start(WIN)
             if do_shit == "Databank":
                 encyclopedia_menu(WIN, CLOCK)
-                pg.mixer.music.pause()
+                # pg.mixer.music.pause()
                 win_copy = WIN.copy()
                 transition, frame_1 = menu_transition_start(WIN)
             if do_shit == "Return":
@@ -1485,6 +1529,7 @@ def main_menu(WIN, CLOCK):
             if transition:
                 transition = False
                 menu_transition_doom_screen_melt(WIN, CLOCK, WIN, win_copy)
+                play_music("Menu")
 
             pg.display.update()
         CLOCK.tick(60)
@@ -1504,6 +1549,7 @@ def party_selection_menu(WIN, CLOCK):
     zoar_sprite = pg.image.load(os.path.join("Sprites/UI/Party Selection/Zoar.png")).convert_alpha()
     zoar_sprite_unselected = pg.image.load(os.path.join("Sprites/UI/Party Selection/Zoar.png")).convert_alpha()
     zoar_sprite_unselected.set_alpha(128)
+    zoar_unlocked = get_from_json("Save.json", "Zoar unlocked")
 
     menu_sprite = pg.image.load(os.path.join("Sprites/UI/Selection Screen.png")).convert_alpha()
 
@@ -1516,13 +1562,17 @@ def party_selection_menu(WIN, CLOCK):
     menu_logic = UniversalMenuLogic(options, key_binds={"Select Up": "Left", "Select Down": "Right",
                                            "Select Left": "Left", "Select Right": "Right",
                                            "Confirm": "Interact", "Return": "Reload"}, width=2, default_return=1)
+
     x_mod = 0
     draw = True
     while True:
         # Select
         do_shit = menu_logic.act(WIN, CLOCK)
         if do_shit:
-            return do_shit
+            if do_shit == "Zoar Colonists" and not zoar_unlocked:
+                pass
+            else:
+                return do_shit
 
         # |Draw|--------------------------------------------------------------------------------------------------------
         if draw:
@@ -1551,9 +1601,25 @@ def party_selection_menu(WIN, CLOCK):
             surface_to_draw.blit(text, (x - text.get_width() // 2, y - text.get_height() // 2))
 
             zoar = zoar_sprite_unselected
+            zoar_selected = False
             if menu_logic.options[menu_logic.selected_option]["Value"] == "Zoar Colonists":
-                zoar = zoar_sprite
+                zoar_selected = True
+                if zoar_unlocked:
+                    zoar = zoar_sprite
             surface_to_draw.blit(zoar, [630-192-8, 450-296-96])
+
+            if not zoar_unlocked:
+                col = (AMBER[0] // 2, AMBER[1] // 2, AMBER[2] // 2)
+                if menu_logic.options[menu_logic.selected_option]["Value"] == "Zoar Colonists":
+                    col = AMBER
+                text = temp_ui_font.render(write_textline("Party Select Zoar not unlocked"),
+                                        True, BLACK)
+                rect_width, rect_height = text.get_width() * 1.05, text.get_height() * 1.5
+                x, y = 515, 260
+                pg.draw.rect(surface_to_draw, col, (x - rect_width // 2, y - rect_height // 2, rect_width, rect_height))
+                surface_to_draw.blit(
+                    text, [x  - text.get_width() // 2, y - text.get_height() // 2])
+
             surface_to_draw.blit(menu_overlay, [0, 0])
             # Add controls
             crt(surface_to_draw)
@@ -1693,7 +1759,7 @@ def settings_menu(WIN, CLOCK, also_pause=False):
     #                   "Language": 0}
 
     # Handle music volume changes
-    pg.mixer.music.set_volume(CURRENT_TRACK_VOLUME[0] * (get_from_json("Settings.json", "Music") / 10))
+    pg.mixer.music.set_volume(CURRENT_TRACK_INFO[0] * (get_from_json("Settings.json", "Music") / 10))
     pg.mixer.music.unpause()
 
     # Handle zoom changes
@@ -2357,13 +2423,23 @@ def my_own_shit(WIN, CLOCK):
 
 
 def game_credits(WIN, clock):
-    # TODO: Add way to speed up credits
     key_pressed = DEFAULT_KEY_PRESSED
     key_cooldown = DEFAULT_KEY_COOLDOWN * 2
     controller = PseudoPlayer()
 
-    time_spend = 0
+    scrolling_amount = 0
+    scrolling_default_mod = 0.4
+    scrolling_mod = scrolling_default_mod
     draw = True
+    seperator = "-----"
+    real_credits = [
+        [seperator, "Development", seperator], "",
+        "Seigneur des Patates",
+        "", "",
+        [seperator, write_textline("Credits additional"), seperator], "",
+        "",
+        write_textline("Credits Thanks")
+    ]
     while True:
         # |Menu Logic|--------------------------------------------------------------------------------------------------
         keys = pg.key.get_pressed()
@@ -2372,14 +2448,18 @@ def game_credits(WIN, clock):
 
         # Allow to get out
         if key_pressed == 0:
-            for x in controller.input:
-                if controller.input[x]:
-                    return
+            if controller.input["Interact"]:
+                scrolling_mod = scrolling_default_mod * 3
+            else:
+                scrolling_mod = scrolling_default_mod
+                for x in controller.input:
+                    if controller.input[x]:
+                        return
         else:
             key_pressed -= 1
 
-        if time_spend < 400:
-            time_spend += 0.4
+        if scrolling_amount < 400:
+            scrolling_amount += scrolling_mod
 
         # |Draw|--------------------------------------------------------------------------------------------------------
         if draw:
@@ -2389,41 +2469,30 @@ def game_credits(WIN, clock):
             WIN.fill(BLACK)
             # Draw the stuff for real
             surface_to_draw.fill(UI_COLOUR_BACKGROUND)
-            seperator = "-----"
-            real_credits = [
-                [seperator, write_textline("Credits main dev"), seperator], "",
-                "Seigneur des Patates",
-                "", "",
-                [seperator, write_textline("Credits additional"), seperator], "",
-                "",
-                write_textline("Credits Thanks")
-            ]
 
             # Render the text
             for y_mod, x in enumerate(real_credits):
                 # Handles single columns
                 if type(x) == str:
-                    text = UI_FONT.render(x, True, UI_COLOUR_FONT)
+                    text = UI_FONT.render(x, True, UI_COLOUR_TUTORIAL)
                     surface_to_draw.blit(text, (630 // 2 - text.get_width() // 2,
-                                                450 - time_spend * 1 + y_mod * 15))
+                                                450 - scrolling_amount * 1 + y_mod * 15))
                 # Handle multi columns
                 elif type(x) == list:
                     base_x_pos = 630 // (1 + len(x))
                     for x_mod, temp in enumerate(x):
-                        text = UI_FONT.render(temp, True, UI_COLOUR_FONT)
+                        text = UI_FONT.render(temp, True, UI_COLOUR_TUTORIAL)
                         surface_to_draw.blit(text, (base_x_pos - (text.get_width() // 2),
-                                                    450 - time_spend * 1 + y_mod * 15))
+                                                    450 - scrolling_amount * 1 + y_mod * 15))
                         base_x_pos += 630 // (1 + len(x))
 
             scale_render(WIN, surface_to_draw, clock)
             pg.display.update()
         clock.tick(60)
-    # stop_music()
 
 
 def mission_menu(WIN, CLOCK, missions_to_choose, party_info, run_info):
     # Render stuff
-    pg.mixer.music.pause()
     transition, frame_1 = menu_transition_start(WIN)
 
     menu_sprite = pg.image.load(os.path.join("Sprites/UI/Settings Screen.png")).convert_alpha()
@@ -2594,12 +2663,13 @@ def mission_menu(WIN, CLOCK, missions_to_choose, party_info, run_info):
 
 def encyclopedia_menu(WIN, CLOCK):
     # Render stuff
-    pg.mixer.music.pause()
+    # pg.mixer.music.pause()
     transition, frame_1 = menu_transition_start(WIN)
     menu_sprite = pg.image.load(os.path.join("Sprites/UI/Encyclopedia Screen.png")).convert_alpha()
     menu_overlay = pg.image.load(os.path.join("Sprites/UI/Overlay.png")).convert_alpha()
 
     encyclopedia =  get_from_json("Encyclopedia.json", "Everything")
+    unlocked_entries =  get_from_json("Save.json", "Databank entries unlocked")
 
     current_position = []
     previous_options = []
@@ -2609,6 +2679,8 @@ def encyclopedia_menu(WIN, CLOCK):
     #
     for op in encyclopedia:
         on_select = "Return"
+        if op not in unlocked_entries:
+            continue
         options.append({"Name": op, "Value": op, "On select": on_select, "Render func": "Text only"})
 
     options.append({"Name": "Exit databank", "Value": "Quit", "On select": "Return", "Render func": "Text only"})
@@ -2622,7 +2694,9 @@ def encyclopedia_menu(WIN, CLOCK):
     menu_logic.colour_low_vis = UI_COLOUR_NEW_BACKGROUND
 
     comms_log = UICommunicationLog([
-        {"Sender": "SYS", "Message": str_to_list("Edging and Gooning")},
+        {"Sender": "SYS", "Message": str_to_list(
+            get_random_element_from_list(["Booting up", "Nice ass", "Edging and Gooning"])
+        )},
     ], [0, 444-321-3], speed=0, offset=15)
     comms_log.font_func = create_temp_font_1
     comms_log.font_colour = font_colour
@@ -2652,6 +2726,8 @@ def encyclopedia_menu(WIN, CLOCK):
                     encyclopedia_section = encyclopedia_section[p]
 
                 for op in encyclopedia_section:
+                    if op not in unlocked_entries:
+                        continue
                     options.append({"Name": op, "Value": op, "On select": "Return", "Render func": "Text only"})
                 message = "Go back"
                 if len(current_position) == 0:
@@ -2677,10 +2753,13 @@ def encyclopedia_menu(WIN, CLOCK):
                 for p in current_position:
                     encyclopedia_section = encyclopedia_section[p]
                 for op in encyclopedia_section:
+                    if op not in unlocked_entries:
+                        continue
                     # Text entries are strings, the rest is either a dict or list
                     on_select = "Return"
                     # Had an issue where you had to get into a category stored in a list to go into one stored in a dict
                     # This solution is so stupid, I can't believe that worked
+
                     try:
                         encyclopedia_section[op]
                     except TypeError:
@@ -2789,7 +2868,6 @@ def character_menu(WIN, CLOCK, missions_to_choose, player_party, mission_name):
             chosen_mission = e
             break
     # Render stuff
-    pg.mixer.music.pause()
     frame_1 = some_bullshit_for_transitions(WIN)
     transition = True
     win_copy = WIN.copy()
@@ -3027,7 +3105,6 @@ def weapons_menu(WIN, CLOCK, party_info, run_info, exit_message="Continue", from
     # Up down. choose the character
     # Sides choose the weapon.
     # Check for unlocks
-    pg.mixer.music.pause()
     frame_1 = some_bullshit_for_transitions(WIN)
     transition = True
     win_copy = WIN.copy()
@@ -3149,7 +3226,7 @@ def weapons_menu(WIN, CLOCK, party_info, run_info, exit_message="Continue", from
 
 def versus_arena_menu(WIN, CLOCK, missions_to_choose, party_info):
     # Render stuff
-    pg.mixer.music.pause()
+
     transition, frame_1 = menu_transition_start(WIN)
 
     menu_sprite = pg.image.load(os.path.join("Sprites/UI/Settings Screen.png")).convert_alpha()
@@ -3220,16 +3297,8 @@ def versus_arena_menu(WIN, CLOCK, missions_to_choose, party_info):
                 surface_to_draw.blit(temp_ui_font.render(mission_details['level']["name"], True, AMBER),
                                      (info_zero[0], info_zero[1]))
                 if mission_details["level"]['modifiers'] != ["Skip mission"]:
-                    surface_to_draw.blit(temp_ui_font.render(f"{mission_details['level']['faction']}", True, AMBER),
-                                         (info_zero[0], info_zero[1] + 20))
-                    surface_to_draw.blit(temp_ui_font.render(mission_details["level"]['objective'], True, AMBER),
-                                         (info_zero[0], info_zero[1] + 40))
-                    enemy_count = len(mission_details["extra info"]['Enemy spawns'])
-                    surface_to_draw.blit(temp_ui_font.render(f'{enemy_count} potential hostile contact', True, AMBER),
-                                         (info_zero[0], info_zero[1] + 60))
-
                     # Draw map of the mission
-                    map_zero = [256+16, 128+16]
+                    map_zero = [256+16, 48+16]
                     for wall in mission_details["level"]["map"]:
                         pg.draw.rect(surface_to_draw, UI_COLOUR_NEW_BACKDROP, [
                             wall.left // 16 + map_zero[0], wall.top // 16 + map_zero[1],
@@ -3240,24 +3309,6 @@ def versus_arena_menu(WIN, CLOCK, missions_to_choose, party_info):
                         pg.draw.rect(surface_to_draw, AMBER_LIGHT, [
                             spawn_point[0] // 16 + map_zero[0], spawn_point[1] // 16 + map_zero[1], 2, 2
                         ])
-                    # Draw where enemies could be
-                    for enemy_spawn in mission_details["extra info"]['Enemy spawns']:
-                        enemy_spawn_point = random_point_in_circle(
-                            [enemy_spawn["Pos"][0] // 16 + map_zero[0], enemy_spawn["Pos"][1] // 16 + map_zero[1]],
-                            5)
-                        draw_transparent_circle(surface_to_draw, [enemy_spawn_point[0], enemy_spawn_point[1], 3],
-                                                UI_COLOUR_NEW_BACKDROP, 96)
-
-                    # Draw mission objective
-                    if mission_details["level"]['objective'] == "Capture":
-                        for point in mission_details["level"]['free var']["Cap points"]:
-                            pg.draw.circle(surface_to_draw, AMBER, [
-                                point["Pos"][0] // 16 + map_zero[0], point["Pos"][1] // 16 + map_zero[1]
-                            ], 3)
-
-                surface_to_draw.blit(temp_ui_font.render(f'{mission_details["extra info"]["Mission Reward"]} $', True, AMBER),
-                                     (info_zero[0], info_zero[1] + 80))
-
 
             crt(surface_to_draw)
             surface_to_draw.blit(menu_overlay, [0, 0])
@@ -3299,7 +3350,7 @@ def versus_character_menu(WIN, CLOCK, missions_to_choose, player_party, mission_
             chosen_mission = e
             break
     # Render stuff
-    pg.mixer.music.pause()
+    # pg.mixer.music.pause()
     frame_1 = some_bullshit_for_transitions(WIN)
     transition = True
 
@@ -3465,6 +3516,7 @@ def versus_character_menu(WIN, CLOCK, missions_to_choose, player_party, mission_
 
 
 def versus_end_menu(WIN, CLOCK, party_info, status):
+    stop_music()
     b = "Secretary" # use a bird name, she is part of the Nest but
 
     elements_to_show = [
@@ -3513,6 +3565,7 @@ def versus_end_menu(WIN, CLOCK, party_info, status):
         if transition:
             transition = False
             menu_transition_doom_screen_melt(WIN, CLOCK, WIN, win_copy)
+            play_music("Menu")
         pg.display.update()
         CLOCK.tick(60)
         end_timer -= 1
@@ -4086,7 +4139,6 @@ def shop_menu(WIN, CLOCK, party_info, run_info):
     # I despise writing UI code
 
     # Render stuff
-    pg.mixer.music.pause()
     transition, frame_1 = menu_transition_start(WIN)
 
     # menu_sprite = pg.image.load(os.path.join("Sprites/UI/Settings Screen.png")).convert_alpha()
@@ -4407,6 +4459,7 @@ def shop_menu(WIN, CLOCK, party_info, run_info):
 
 
 def end_menu(WIN, CLOCK, status_line, elements_to_show, comment_line, elements_to_show_2=[{"Sender": "", "Message": str_to_list("")}]):
+    stop_music()
     menu_overlay = pg.image.load(os.path.join("Sprites/UI/Overlay.png")).convert_alpha()
     key_pressed = DEFAULT_KEY_PRESSED * 4
 
@@ -4475,6 +4528,7 @@ def end_menu(WIN, CLOCK, status_line, elements_to_show, comment_line, elements_t
         if transition:
             transition = False
             menu_transition_doom_screen_melt(WIN, CLOCK, WIN, win_copy)
+            play_music("Menu")
         pg.display.update()
         CLOCK.tick(60)
         end_timer -= 1
@@ -4542,7 +4596,7 @@ def end_mission_menu(WIN, CLOCK, party_info, status, run_info, level, extra_info
         # Time
         escort_time_to_beat = 0
         if extra_info["Type"] == "Escort":
-            escort_time_to_beat = level['free var']['APC path'] * 2
+            escort_time_to_beat = len(level['free var']['APC path']) * 2
         time_to_beat = {
             "Defeat Elite Unit": 90,
             "Capture":  40 * (round(extra_info["Current mission"]*0.30) + 1) + 30,
@@ -4570,7 +4624,7 @@ def end_mission_menu(WIN, CLOCK, party_info, status, run_info, level, extra_info
         # Enemies wiped out
         if extra_info["Type"] not in ["Seek and Destroy", "Defense", "Defeat Elite Unit"]:
             allow_bonus = True
-            for e in entities:
+            for e in entities["entities"]:
                 if e.team != "Players":
                     allow_bonus = False
                     break
@@ -5144,6 +5198,12 @@ def midpoint_between(p1, p2):
     return [(p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2]
 
 
+def num_between(p1, p2):
+    if p1 < p2:
+        return p2 - p1
+    return p1 - p2
+
+
 # |Math related functions|----------------------------------------------------------------------------------------------
 def random_point_in_circle(center, radius):
     # Get a random angle and radius
@@ -5155,7 +5215,6 @@ def random_point_in_circle(center, radius):
 
 
 def random_point_in_cone(center, radius, angle, deviation):
-
     return move_with_vel_angle(center, radius * random.random(), random.uniform(angle - deviation, angle + deviation))
 
 
@@ -5222,7 +5281,6 @@ def check_point_in_cone(radius, center_x, center_y, x, y, direction, angle):
     return False
 
 
-
 def check_point_in_donut_cone(radius, radius_small, center_x, center_y, x, y, direction, angle):
     radius = int(radius)
     angle_to_check = angle_between([x, y], [center_x, center_y])
@@ -5238,6 +5296,7 @@ def check_point_in_donut_cone(radius, radius_small, center_x, center_y, x, y, di
         if smaller_angle < angle_to_check < bigger_angle:
             return True
     return False
+
 
 def check_angle_between_range(angle, t_angle):
     smaller_angle = angle - 30
@@ -7703,6 +7762,70 @@ def versus_level_generator(possible_levels, party_info, map_name, current_missio
     extra_info = {"Spawn": possible_spawn_points, "Enemy spawns": enemy_spawns, "Mission Reward": round(0), "Type": level["objective"], "Current mission": current_mission}
 
     return level, extra_info
+
+
+UNLOCK_POPUP_POS = [50, 150]
+UNLOCK_POPUP_WIDTH = 530
+
+def enemy_entry_unlock(enemy_type, faction, save_data, WIN, CLOCK):
+    enemy_entry = ENEMY_TYPE_TO_FACTION_UNIT[faction][enemy_type]
+    if enemy_entry not in save_data["Databank entries unlocked"]:
+        save_data["Databank entries unlocked"].append(enemy_entry)
+        confirmation_popup(
+            WIN, CLOCK, UNLOCK_POPUP_POS,
+            [{"Name": "Continue", "Value": "No", "On select": "Return", "Render func": "Text only"}],
+            text=f"Entry '{enemy_entry}' added to Databank in '{'Root\Enemies' + ["\Asset Protecting & Collection Dept.",
+                                                                                  "\Burning Winds Band",
+                                                                                   "\C8 Mercenary Army"][faction]}'", popup_width=UNLOCK_POPUP_WIDTH)
+
+def boss_entry_unlock(boss, faction, save_data, WIN, CLOCK):
+    if boss not in save_data["Databank entries unlocked"]:
+        save_data["Databank entries unlocked"].append(boss)
+        confirmation_popup(
+            WIN, CLOCK, UNLOCK_POPUP_POS,
+            [{"Name": "Continue", "Value": "No", "On select": "Return", "Render func": "Text only"}],
+            text=f"Entry '{boss}' added to Databank in '{'Root\Enemies' + ["\Asset Protecting & Collection Dept.",
+                                                                                  "\Burning Winds Band",
+                                                                                   "\C8 Mercenary Army",
+                                                                                  "\Misc."][faction]}'", popup_width=UNLOCK_POPUP_WIDTH)
+
+
+def weapon_entry_unlock(gun, save_data, WIN, CLOCK):
+    if gun not in save_data["Databank entries unlocked"]:
+        entries = {
+		"\Handgun": ["Big Iron", "War and Peace"],
+		"\Rifle": ["St-Maurice Youth Model", "St-Maurice", "St-Laurent Gen 1", "Type 47 Rifle", "Cowboy's Repeater", "Mark's Rifle", "Type 30 Rifle", "Vivianne's Rifle", "Combat Rifle"],
+		"\Sub Machine Gun": ["Type 41 SMG"],
+		"\Shotgun": ["Jeanne's Family Shotgun", "Type 23 Shotgun", "Standard Shotgun", "Vivianne's Shotgun", "Desert Shotgun"],
+		"\Energy": ["Custom Mk18 Laser cutter", "Laser Carbine", "Laser Rifle", "Heavy Laser", "Marker Laser", "Plasma Spray", "Plasma Rifle", "Laser Shotgun"],
+		"\Melee": ["Oversized stun baton", "Corrine's Hands", "Chain Axe", "Hook Swords", "Hunk of Steel", "Vivianne's Leg", "Gun Hammer", "Pile Bunker"],
+		"\Combo": ["GunBlade", "Gun and Ballistic Knife", "Lawrence's Cutlass & Flintlock", "Captain's Axe & Blunderbuss"],
+		"\Heavy": ["Saloum Mk-2", "GMG-04B", "Fortress Machine Gun", "Musket .360", "Buggy Gun", "Missile Pod", "ARWS", "Flamethrower", "Napalm Grenade Launcher", "Bulwark Minigun"],
+		"\Gear": ["Crippled Laddie FCS Radio", "Mk16 Flare Mortar", "Epicurean Medic Rifle", "Nihilist Stretcher", "Stoic Shield generator", "C4", "Radar", "Smoke Dispenser", "Binoculars", "Artillery Radio"]
+	    }
+        entry_type = "\Handgun"
+        for weapon_type in entries:
+            if gun in entries[weapon_type]:
+                entry_type = weapon_type
+        save_data["Databank entries unlocked"].append(gun)
+        confirmation_popup(
+            WIN, CLOCK, UNLOCK_POPUP_POS,
+            [{"Name": "Continue", "Value": "No", "On select": "Return", "Render func": "Text only"}],
+            text=f"Entry '{gun}' added to Databank in '{'Root\Weapon'+entry_type}'", popup_width=UNLOCK_POPUP_WIDTH)
+        manufacturer = {
+            "Old West Firearms & Replicas": ["Big Iron", "Cowboy's Repeater"],
+            "Toolkit Manufacturing": ["Crippled Laddie FCS Radio", "Mk16 Flare Mortar", "C4", "Custom Mk18 Laser cutter"]}
+        unlocked_manufacturer = False
+        for weapon_type in manufacturer:
+            if gun in manufacturer[weapon_type]:
+                unlocked_manufacturer = weapon_type
+        if unlocked_manufacturer:
+            if unlocked_manufacturer not in save_data["Databank entries unlocked"]:
+                save_data["Databank entries unlocked"].append(unlocked_manufacturer)
+                confirmation_popup(
+                    WIN, CLOCK, UNLOCK_POPUP_POS,
+                    [{"Name": "Continue", "Value": "No", "On select": "Return", "Render func": "Text only"}],
+                    text=f"Entry '{unlocked_manufacturer}' added to Databank in 'Root\Organizations\Weapon Manufacturer'", popup_width=UNLOCK_POPUP_WIDTH)
 
 
 import Particles    # Doing this so I can get all the stuff I need from fun

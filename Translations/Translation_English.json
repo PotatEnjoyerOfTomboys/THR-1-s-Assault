@@ -13,6 +13,7 @@
 	"Mission title": "Mission Selection",
 	"Loading screen": "Generating missions.",
 	"Party Select Screen return": "Return",
+	"Party Select Zoar not unlocked": "Reach mission 15 to Unlock Zoar",
 		
 	"Version": "Version",
     "Pause Menu": "Pause Menu",      "Start Game": "Start Game",
@@ -291,7 +292,7 @@
 	"Defeat Elite Unit Name 11": "Op. Frogs",
 	"Defeat Elite Unit Name 12": "Op. Hidden Message",
 	"Defeat Elite Unit Name 13": "Op. No Middle Age",
-	"Defeat Elite Unit Name 14": "Op. Mark Ulta",
+	"Defeat Elite Unit Name 14": "Op. Mark Ultra",
 	"Defeat Elite Unit Name 15": "Op. Beloved Gerry.",
 
 	"Finale 1": "Op. Unknown Fire",
@@ -612,12 +613,12 @@
 	"__Encyclopedia": "",
 	"Annals-2100-Solar War | January - April": "On the 2nd of January 2100, contact with mining colonies was suddenly lost. Shortly after, multiple unkown space ships were detected entering the Solar System. 500 ships were esstimated to have entered.|| ||The enemy quickly mobilized to attack Earth and prevent travel between planets. Military units on anti space piracy operation were the first to make contact with the aliens, while governments were in disarray.|| ||After a series of orbital bombardement, allien land forces were first deployed in Western Africa.|| ||By early February, most countries had basic plans to defend themselves agaisnt the invasion. The UK, Taiwan and Japan made extensive use of AA systems to limit damage from the bombardment and prevent land invasions.|| ||In March more land invasions were started and a few countries fell to them. Colonies started to struggle to feed themselves.|| ||April was marked by failed attemps to take back control of Earth's orbit.",
 	"Annals-2100-Solar War | May - August": "Through April and May, more and more civil space ships were militarized to ",
-	"Annals-2100-Solar War | Setptember - December": "",
+	"Annals-2100-Solar War | September - December": "",
 	"Annals-2101-Solar War | January - April": "",
 	"Annals-2101-Solar War | May - August": "",
 	"Annals-2101-Solar War | Setptember - December": "",
 	"Annals-2102-End of the Solar War": "",
-	"Annals-2102-Human FTLT system intergration": "",
+	"Annals-2102-Human FTLT system integration": "",
 	"Annals-2103-Humans Move to Zoar": "When joining the Coalition, some humans goverment managed to secure deals to send war refugees to settle on smaller less established colonies. Zoar was one of these.||||The first wave of settller came from North America, central and eastern europe. Their arrival along with the creation of a new trade route passing by lead to Zoar becoming a small trading outpost.||||The result of the first wave of settlers would lead to 2 more ways in the following years.",
 	"Annals-2105-Pirate attack on Zoar": "In March of 2105, the gang of space pirate let by Morgan Reed attacked various installations of the Zoar colony.|| ||Bounties for key figures of the gang were quickly issued. Curtis Miller, a mercenary was able to capture all the targets within a week.|| ||The following trial ended up revraling that Morgan Reed was convinced by an unknown group to cause mayhem as cover for an clandestine operation.Presence this group was proven by an attack on the gun shop of Curtis' sister, Vivianne Miller.|| ||A few hideouts of the group were found thanks to Lawrence Reed but only corpses were found.|| ||Most members of the gang were released due to the lack of prison capacity. The only ones to walk away as innocent were Mary Reed due to her status as a minor, Lawrence Reed and portion of the gang under his control due to them aiding the capture of Morgan Reed and the following investigation.",	
 
@@ -646,14 +647,14 @@
 	"Enemies-C8 Mercenary Army-Spotter": "",
 	"Enemies-C8 Mercenary Army-Artilleryman": "",
 	"Enemies-C8 Mercenary Army-Grenadier": "",
-	"Enemies-C8 Mercenary Army-Bulwark": "",
+	"Enemies-C8 Mercenary Army-Bulwark": "The Bulwark power",
 	"Enemies-C8 Mercenary Army-Commanding Officer": "",
 	"Enemies-C8 Mercenary Army-Fire Support Mech": "",
 	"Enemies-C8 Mercenary Army-Attack Helicopter": "",
 
 	"Enemies-Misc.-Rigel": "",
 	"Enemies-Misc.-Curtis": "One of the stronger opponants||- Curtis is very agile, he's able to dodge most projectiles. But he still has limited stamina, ",
-	"Enemies-Misc.-THR-1": "",
+	"Enemies-Misc.-THR-1 (Throne)": "",
 	
 	"Organizations-Mercenary Teams-THR-1-Overview": "THR-1 (prononced Throne) is a mercenary team composed of 7 members.||||The team was formed and quickly grew in 2102. Most early mission that the team mamanged revolved around disabling warships lost during the Solar War.||||Eventually they shifted to doing escort contracts for merchants. The team proved itself to be capable and started to get more lucrative contracts.||||Based on the latest curently availablr information, they have been on a vacation in the colony of Zoar for a while after a big mission.",
 	"Organizations-Mercenary Teams-THR-1-Leopold LORD Storch": "Birthday: 03/05/2080||Occupation: Mercenary||||",
@@ -662,7 +663,7 @@
 	"Organizations-Mercenary Teams-THR-1-Corrine SOVEREIGN": "Birthday: 2090||Occupation: Mercenary||||",
 	"Organizations-Mercenary Teams-THR-1-Zander DUKE": "Birthday: 2088||Occupation: Mercenary||||Zander and Corrine are not blood related from what we can tell.",
 	"Organizations-Mercenary Teams-THR-1-M4-D1C JESTER": "Birthday: ??/??/????||Occupation: Mercenary||||",
-	"Organizations-Mercenary Teams-THR-1-Vincent CONDOR Varga": "Birthday: ||Occupation: Mercenary||||<!>Former NEST member<!>||||",
+	"Organizations-Mercenary Teams-THR-1-Vincent CONDOR Vidmar": "Birthday: ||Occupation: Mercenary||||<!>Former NEST member<!>||||",
 	
 	"Organizations-Mercenary Teams-Zoar Colony's Gun Shop-Overview": "As the name might suggest, this organization primarly acts as a gun store located in Zoar. The store is opporated by Vivianne Miller who manages the store and acts as a handler for Curtis Miller. ||||Curtis is the only mercenary soley working with the store but makes frequent partnerships with Mark, a local bounty hunter and more recently with Lawrence Reed, son of local space pirat Morgan Reed.||||Curtis mostly does general security contracts with the occasional bounty hunting in between.",
 	"Organizations-Mercenary Teams-Zoar Colony's Gun Shop-Curtis Miller": "Birthday: 21/05/2085||Occupation: Merc./Handyman||||Curtis Miller is the older borther of Vivianne Miller. Both were orphaned during the Solar War and moved to the Zoar colony shortly after the war's end.||||Potentially has psychic abilities. KEEP HIM UNDER SURVEILLANCE",
@@ -717,7 +718,7 @@
     "Weapon-Energy-Laser Shotgun": "Manufacturer: Long Dune Concil||||During an expedition, a sculptor found an ancient laser rifle. He would eventually manage to make it 'work' again. But due to a damaged component, the rifle shot multiple weaker beams instead of a strong one.||||This didn't deter the sculptor, and he started making refined copies of the original broken rifle.",
 
 	"Weapon-Melee-Oversized stun baton": "Manufacturer: DIC TEC||Production dates: March 2094 - May 2094||||Yeah they just made a really big stun baton and sold it as a April's fool joke. It did find a niche in the security forces of some commercial spaceships.",
-	"Weapon-Melee-Corrine's Hands": "||<!> Obsolete report: further edits are blocked <!>||||Manufacturer: Her mother|||| This report is entirely unnecessary and I won't be putting much effort in it. These are straight up, just the hands of some girl in her late teens. It poses NO threat to anyone in Nest.||||Addendum 1:||To whoever wrote this failure of a report: report immediately to the intel chief and stop messing with the logs||||Addendum 2:||To whoever has the whole janitor's closet up his ass: LALALALa No I won't do it LALALALA you can eat my shorts LALALALA||||",
+	"Weapon-Melee-Corrine's Hands": "||<!> Obsolete report: further edits are blocked <!>||||Manufacturer: Her mother|||| This report is entirely unnecessary and I won't be putting much effort in it. These are straight up, just the hands of some girl in her late teens. It poses NO threat to anyone in NEST.||||Addendum 1:||To whoever wrote this failure of a report: report immediately to the intel chief and stop messing with the logs||||Addendum 2:||To whoever has the whole janitor's closet up his ass: LALALALa No I won't do it LALALALA you can eat my shorts LALALALA||||",
 	"Weapon-Melee-Chain Axe": "Manufacturer: Unknown|| ||It's an axe connected by a chain to a brass knuckle. Zander uses them like a meteor hammer.|| ||It doesn't look like an effective weapon. Zander has found ways to use it outside of combat.",
  	"Weapon-Melee-Hook Swords": "Manufacturer: Old English Armoury||Production dates: 2070||||To answer the request of a Kung Fu club, Old English Armoury made a limited run of chinese hook swords.||||Due to how niche hook swords are, sales were below expectations. Some rumours say that they still have some in stock.",
  	"Weapon-Melee-Hunk of Steel": "Manufacturer: A lunatic||||Weighing at a respectable 147 kg and measuring an above average 1.9 m. This piece of steel isn't going to cut someone in half, it'll tear them apart.||||No one should be able to use this crime against common sense but somehow Curtis can. He told us that he uses it as coffee table.",
