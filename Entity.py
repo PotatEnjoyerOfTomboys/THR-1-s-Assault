@@ -5669,14 +5669,16 @@ def rigel_input(self, entities, level):
         entity_shoot_with_startup_lag(self, og_dist, 320)
 
     closest_target = Fun.find_closest_in_circle(self, entities, 512, "entities")
+    self.target = None
     if closest_target:
-        fortress_move_toward_point(self, closest_target, 40 * 7)
-        #fortress_move_away_point(self, closest_target, 25 * 7)
+        if self.free_var["Current attack"] not in ["Shoulder Bash", "Lance Swipe", "Giga Thrust"]:
+            fortress_move_toward_point(self, closest_target, 40 * 7)
+            fortress_move_away_point(self, closest_target, 25 * 7)
 
         angle = Fun.angle_between(closest_target, self.pos)
         self.input["Right"] = self.free_var["Move angle"] < angle
         self.input["Left"] = self.free_var["Move angle"] > angle
-
+        # self.target = closest_target
         if not -(180 - 4) + angle < self.free_var["Move angle"] < 180 - 4 + angle:
             self.input["Right"] = self.free_var["Move angle"] > angle
             self.input["Left"] = self.free_var["Move angle"] < angle
@@ -5782,13 +5784,21 @@ def rigel_act(self, entities, level):
 def rigel_draw(self, WIN, scrolling):
     self.free_var["Mech"].pos = [self.pos[0] + scrolling[0], self.pos[1] + 28 + scrolling[1]]
     self.free_var["Mech"].draw(WIN, self.free_var["Move angle"])
-    # self.free_var["Mech"].mech_parts["Arm R"]["origin"] = [26, 14]
-    # 26, 14
+
+    self.free_var["Mech"].mech_parts["Leg"]["Animation state"] = -1
+    #
+    frame_to_get = -1
+    if not self.standing_still:
+        self.animation_counter["Walk"] += round((abs(self.vel[0]) + abs(self.vel[1])//4))
+        self.animation_counter["Walk"] += 1
+        frame_to_get = self.animation_counter["Walk"] // 7 % (5 - 1) + 1
+    self.free_var["Mech"].mech_parts["Leg"]["Animation state"] = frame_to_get
+
+
+
     # Canons/wing
-    # segment offset
-    # segment angle
     for x in range(3):
-        pos = Fun.move_with_vel_angle(self.pos, 33 + x * 10, self.free_var["Segments"][f"{x+1}"]["Angle"] - 80)
+        pos = Fun.move_with_vel_angle(self.pos, 33 + x * 10, self.free_var["Move angle"] - self.free_var["Mech"].mech_parts["Arm L"]["Draw angle"] - 80)
         pos[1] -= self.free_var["Mech"].mech_parts["Arm L"]["offset"][2] - 8
         self.free_var["Segments"][f"{x + 1}"]["Pos"] = pos
 
@@ -5809,7 +5819,6 @@ def rigel_on_death(self, entities, level):
         self.status["No damage"] = 60 * 3
         self.status["No debuff"] = 60 * 3
         self.no_shoot_state = 180
-        # self.status["Last Stand"] = 0
         self.free_var["History limit"] = 25
         self.free_var["Phase"] = 2
 
@@ -5834,7 +5843,7 @@ def rigel_shoulder_bash(self, entities, level):
         self.free_var["Anti Missile Circus Spam"] = False
         animation = False
     elif self.free_var["Startup lag"] == 10:
-        # self.no_shoot_state = 130
+        Fun.play_sound("Rigel Shoulder Bash")
         self.vel = Fun.move_with_vel_angle([0, 0], 35, self.free_var["Move angle"])
 
 
@@ -5866,23 +5875,58 @@ def rigel_lance_swipe(self, entities, level):
     if start_up_lag_handler(self, 20):
         self.free_var["Current attack"] = "Giga Thrust"
 
+    angle = self.free_var["Mech"].mech_parts["Arm R"]["Draw angle"] * -1 + self.free_var["Move angle"]
+    for x in range(2):
+        Bullets.spawn_bullet(
+            self, entities,
+            Bullets.Bullet,
+            Fun.move_with_vel_angle(Fun.move_with_vel_angle(self.pos, 40, self.free_var["Move angle"] + 90 +
+                                                            self.free_var["Mech"].mech_parts["Torso"]["Draw angle"] * -1),
+                                    10, angle),
+            angle + random.uniform(-2, 2),
+            [1 + 2 * random.random(), 180 + random.randint(0, 100), 4 + round(6 * random.random()),
+             20, {"Colour": Fun.RIGEL_ENERGY}])
     if not self.free_var["Mech"].mech_animations["Torso"] and animation:
-        self.free_var["Mech"].start_animation("Torso", 20, 40, -80)
+        Fun.play_sound("Rigel Lance Swipe")
+        self.free_var["Mech"].start_animation("Torso", 20, 60, -80)
         self.free_var["Mech"].start_animation("Arm R", 20, 40, -20)
 
 
 def rigel_giga_thrust(self, entities, level):
     animation = self.free_var["Startup lag"] <= 1
     if start_up_lag_handler(self, 200):
-        # self.free_var["Current attack"] = Fun.get_random_element_from_list(["Laser Barrage", "Plasma"])
+        self.free_var["Current attack"] = Fun.get_random_element_from_list(["Laser Barrage", "Plasma"])
 
-        self.free_var["Current attack"] = "Laser Barrage"
         animation = False
+    elif self.free_var["Startup lag"] == 1 and self.target and self.free_var["Phase"] == 2:
+        self.free_var["Move angle"] = Fun.angle_between(self.target, self.pos) + random.uniform(-5, 5)    # Evil
     elif self.free_var["Startup lag"] == 15:
+        # Boost effects
+        for y in range(14):
+            angle = self.free_var["Move angle"] + random.uniform(-33, 33)
+
+            entities["particles"].append(Particles.RandomParticle2(
+                Fun.move_with_vel_angle([self.pos[0], self.pos[1] + 28], random.uniform(6, 15), angle),
+                Fun.RIGEL_ENERGY,
+                random.uniform(10, 25), Fun.get_random_element_from_list([60, 90]), angle, size=random.randint(3, 6)))
+
         self.vel = Fun.move_with_vel_angle([0, 0], 35, self.free_var["Move angle"])
 
+    elif 20 < self.free_var["Startup lag"] < 120:
+        # entities["background particles"].append(Particles.LineParticle( self.pos, Fun.RED, 1, 48, self.free_var["Move angle"], 2, 0))
+        mod = 120
+        for e in entities["entities"]:
+            if e == self:
+                continue
+            if Fun.check_point_in_cone(64, self.pos[0], self.pos[1], e.pos[0], e.pos[1], self.free_var["Move angle"], 33):
+                if e.status["Stunned"] <= mod:
+                    e.status["Stunned"] = mod
+                Fun.damage_calculation(e, 30, "Melee", death_message="Skewered by the final boss")
+                e.vel = Fun.move_with_vel_angle([0, 0], 7 * e.friction, self.free_var["Move angle"] + Fun.get_random_element_from_list([-33, 33]))
+
     if not self.free_var["Mech"].mech_animations["Torso"] and animation:
-        self.free_var["Mech"].start_animation("Torso", 20, -80, 40)
+        Fun.play_sound("Rigel Giga Thrust")
+        self.free_var["Mech"].start_animation("Torso", 20, -80, 60)
         self.free_var["Mech"].start_animation("Arm R", 20, 80, 40)
         self.free_var["Mech"].start_animation("Torso", 50, -80, -80)
         self.free_var["Mech"].start_animation("Arm R", 50, 80, 80)
@@ -5894,14 +5938,12 @@ def rigel_giga_thrust(self, entities, level):
 
 def rigel_laser_barrage(self, entities, level):
     if start_up_lag_handler(self, 90):
+        Fun.sounds_dict["Rigel Laser barrage"]["Sound"].fadeout(15)
         self.free_var["Current attack"] = Fun.get_random_element_from_list(["Missile Circus", "Raining Hell"])
         if  self.free_var["Anti Missile Circus Spam"]:
             self.free_var["Current attack"] = "Raining Hell"
-
-        # self.free_var["Current attack"] = "Shoulder Bash"
-
     if self.free_var["Startup lag"] == 1:
-    # if self.free_var["Pos history"]["1"]["Target"] is None and self.free_var["Pos history"]["2"]["Target"] is None and self.free_var["Pos history"]["3"]["Target"] is None:
+        Fun.play_sound("Rigel Laser barrage")
         # Initialize the attack
         self.free_var["Pos history"] = {
                  "1": {"Target": None, "History": []},
@@ -5931,9 +5973,9 @@ def rigel_laser_barrage(self, entities, level):
             angle = Fun.angle_between(laser["History"][0], pos)
             self.free_var["Draw angle"] = angle
             dist = Fun.distance_between(pos, laser["History"][0]) - laser["Target"].thiccness//2
-            Bullets.spawn_bullet(self, entities, Bullets.Laser, pos, angle, [0, 2, dist, 2, {"Colour": (107, 153, 165)}])
+            Bullets.spawn_bullet(self, entities, Bullets.Laser, pos, angle, [0, 2, dist, 2, {"Colour": Fun.RIGEL_ENERGY}])
             self.free_var["Segments"][l]["Angle"] = angle
-            entities["particles"].append(Particles.FireParticle(Fun.move_with_vel_angle(pos, dist, angle), colour=(107, 153, 165)))
+            entities["particles"].append(Particles.FireParticle(Fun.move_with_vel_angle(pos, dist, angle), colour=Fun.RIGEL_ENERGY))
 
             if len(laser["History"]) > self.free_var["History limit"]:
                 laser["History"].pop(0)
@@ -5942,15 +5984,45 @@ def rigel_laser_barrage(self, entities, level):
 
 
 def rigel_plasma(self, entities, level):
-    animation = True
-    if start_up_lag_handler(self, 30):
+    angle = self.free_var["Move angle"] - self.free_var["Mech"].mech_parts["Arm L"]["Draw angle"]
+    b_pos = Fun.move_with_vel_angle([self.free_var["Segments"]["1"]["Pos"][0],
+                                     self.free_var["Segments"]["1"]["Pos"][1]], 45, angle)
+
+    if start_up_lag_handler(self, 90):
+        # Shoot the bullet with tracking
+        Fun.play_sound("Rigel Plasma Shoot")
         self.free_var["Current attack"] = Fun.get_random_element_from_list(["Missile Circus", "Raining Hell"])
         if self.free_var["Anti Missile Circus Spam"]:
             self.free_var["Current attack"] = "Raining Hell"
-        animation = False
+        duration = 240
 
-    if not self.free_var["Mech"].mech_animations["Torso"] and animation:
-        pass
+        if self.free_var["Phase"] == 2:
+            duration = 480
+        Bullets.spawn_bullet(
+            self, entities,
+            Bullets.BulletHoming,
+            b_pos,
+            angle,
+            [3, duration, 45, 60, {
+                "Colour": Fun.RIGEL_ENERGY, "Targeting range": 1024, "Targeting angle": 360
+            }])
+    else:
+        if self.free_var["Startup lag"] == 2:
+            Fun.play_sound("Rigel Plasma")
+        # Make bullet bigger
+        Bullets.spawn_bullet(
+            self, entities,
+            Bullets.Bullet,
+            b_pos,
+            0,
+            [0, 4, self.free_var["Startup lag"] / 2, 30, {"Piercing": True, "Colour": Fun.RIGEL_ENERGY}])
+        # Segments point at it
+        for l in self.free_var["Segments"]:
+            self.free_var["Segments"][l]["Angle"] = {
+                "1": angle - self.free_var["Startup lag"],
+                "2": angle,
+                "3": angle + self.free_var["Startup lag"]
+            }[l]
 
 
 def rigel_missile_circus(self, entities, level):
@@ -5977,19 +6049,26 @@ def rigel_raining_hell(self, entities, level):
     animation = True
     if start_up_lag_handler(self, 61):
         self.free_var["Current attack"] = "Shoulder Bash"
-    elif self.free_var["Startup lag"] == 20:
+
+    elif self.free_var["Startup lag"] == 1 and self.free_var["Phase"] == 2:
+        self.free_var["Invert Raining Hell"] = random.random() < 0.25
+
+    elif self.free_var["Startup lag"] == 20 and not self.free_var["Invert Raining Hell"] or self.free_var["Startup lag"] == 60 and self.free_var["Invert Raining Hell"]:
+        Fun.play_sound("Mech Cannon")
         for x in range(8):
             pos = Fun.move_with_vel_angle(self.pos, 128, x * 45)
             Bullets.spawn_bullet(
                     self, entities, Bullets.Artillery, pos, 0,
                     [0, 60, 48, 50, {"Secondary explosion":{"Duration": 20, "Strength": 120, "Radius":64}, "Colour": Fun.DARK_RED, "Slowdown rate": 0.05}])
-    elif self.free_var["Startup lag"] == 40:
+    elif self.free_var["Startup lag"] == 40 and not self.free_var["Invert Raining Hell"] or self.free_var["Startup lag"] == 40 and self.free_var["Invert Raining Hell"]:
+        Fun.play_sound("Mech Cannon")
         for x in range(16):
             pos = Fun.move_with_vel_angle(self.pos, 128 * 2, x * 22.5 + 11.5)
             Bullets.spawn_bullet(
                     self, entities, Bullets.Artillery, pos, 0,
                     [0, 60, 48, 50, {"Secondary explosion":{"Duration": 20, "Strength": 120, "Radius":64}, "Colour": Fun.DARK_RED, "Slowdown rate": 0.05}])
-    elif self.free_var["Startup lag"] == 60:
+    elif self.free_var["Startup lag"] == 60 and not self.free_var["Invert Raining Hell"] or self.free_var["Startup lag"] == 20 and self.free_var["Invert Raining Hell"]:
+        Fun.play_sound("Mech Cannon")
         for x in range(24):
             pos = Fun.move_with_vel_angle(self.pos, 128 * 3, x * 15)
             Bullets.spawn_bullet(
@@ -7454,8 +7533,7 @@ enemy_repertory = {
          "faction": "FAC-3",
          "type": "Elite",
          "targeting range": R_MO, "targeting angle": D_HO, "stealth mod": S_LO, "stealth counter": C_MO,
-         # "wall hack": False, "health": H_HO * 12, "armour": 0, "damage resistances": F3_RESIT_H,
-         "wall hack": False, "health": 1, "armour": 0, "damage resistances": F3_RESIT_H,
+         "wall hack": False, "health": H_HO * 12, "armour": 0, "damage resistances": F3_RESIT_H,
          "thickness": 48,
          "vel max": V_LO * 0.8, "speed": V_LO * 0.8, "friction": V_LO * 0.8,
          "weapon": "Bloodhound Weaponry",
@@ -7486,6 +7564,7 @@ enemy_repertory = {
              },
              "Missile Circus": 0,
              "Anti Missile Circus Spam": False,
+             "Invert Raining Hell": False,
              "History limit": 15
          }
          },

@@ -6,6 +6,7 @@ import Fun
 
 
 def main_loop(WIN, CLOCK, entities, level, party_info, scrolling, scrolling_target_entities, end_with_main_player=True):
+    Fun.stop_music()
     gaming = True
     time_passed = 0
     main_player = Event.ENEMY_NO_OWNER

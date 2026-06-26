@@ -564,6 +564,7 @@ def on_hit_cremation(self, collision, entities, level):
     if collision.status["Visible"] <= 45:
         collision.status["Visible"] = 45
 
+
 def on_hit_big_iron(self, collision, entities, level):
     Particles.random_particle_2_circle(entities, self.owner.pos, 3, 25, 36, colour=Fun.YELLOW, size=3, angle_mod=180 * random.random())
     self.owner.skills[0].recharge += self.owner.skills[0].recharge_max * 0.75
@@ -824,6 +825,97 @@ class BulletSlowing(BasicBullet):
             # Visual effect for bullets that go fast
             if self.smoke_effect and self.duration % random.randint(3, 5) == 0:
                 entities["particles"].append(Particles.Smoke([self.pos[0], self.pos[1]]))
+
+
+class BulletHoming(Bullet):
+    def __init__(self, pos, angle, info, owner):
+        Bullet.__init__(self, pos, angle, info, owner)
+        self.wall_physics = Fun.none
+
+        # targeting stuff
+        self.targeting_range = info[4]["Targeting range"]
+        self.targeting_angle = info[4]["Targeting angle"]
+        self.target = False
+
+        self.manoeuvrability = 4
+        if "Manoeuvrability" in info[4]:
+            self.manoeuvrability = info[4]["Manoeuvrability"]
+
+        self.move_angle = self.angle
+        self.target_pos = False
+        if "Damage type" in info[4]:
+            self.damage_type = info[4]["Damage type"]
+        else:
+            self.damage_type = "Energy"
+
+    def act(self, entities, level):
+        if self.duration > 0:
+            # Now the missiles have a "max locking angle"
+            if self.duration % 3 == 0:
+                target = missile_seek(self, entities, self.targeting_range, self.angle,
+                                                  self.targeting_angle)
+                if target:
+                    self.target_pos = target.pos
+            if self.target_pos:
+
+                if self.duration % random.randint(5, 8) == 0:
+                    entities["particles"].append(Particles.Smoke([self.pos[0], self.pos[1]], colour=[
+                        Fun.WHITE, Fun.GRAY, self.colour
+                    ][random.randint(0, 2)]
+                                                           ))
+                self.angle = Fun.angle_between(self.target_pos, self.pos)
+
+                invert_aim = 1
+                if not -(
+                        180 - self.manoeuvrability) + self.angle < self.move_angle < 180 - self.manoeuvrability + self.angle:
+                    invert_aim = -1
+
+                # Adjust angle
+                if self.move_angle < self.angle:
+                    self.move_angle += self.manoeuvrability * invert_aim
+                    if self.move_angle > self.angle:
+                        self.move_angle = self.angle
+                elif self.move_angle > self.angle:
+                    self.move_angle += -self.manoeuvrability * invert_aim
+                    if self.move_angle < self.angle:
+                        self.move_angle = self.angle
+
+                # Value Limiter
+                if self.move_angle > 180:
+                    self.move_angle = -180 + (self.move_angle - 180)
+                if self.move_angle < -180:
+                    self.move_angle = 180 - (self.move_angle + 180)
+
+            # Make the bullet move based on the angle
+            self.pos[0] -= self.speed * math.cos(self.move_angle * math.pi / 180)
+            self.pos[1] -= self.speed * math.sin(self.move_angle * math.pi / 180)
+
+            # Check for collisions
+            for collision in entities["entities"]:
+                if self.owner.team == collision.team:
+                    continue
+
+                if Fun.collision_rect_circle(collision.collision_box.left, collision.collision_box.top,
+                                             collision.collision_box.width, collision.collision_box.height,
+                                             self.pos[0], self.pos[1], self.radius):
+                    Fun.damage_calculation(collision, self.damage, self.damage_type, death_message="Chased by a bullet")
+                    self.on_hit_handler(collision, entities, level)
+
+                    self.duration = 0
+                    self.visual_effect(self, entities)
+
+            self.duration -= 1
+
+    def draw(self, win, scrolling):
+        if self.duration > 0:
+            pg.draw.circle(win, self.colour, [self.pos[0] + scrolling[0],
+                                              self.pos[1] + scrolling[1]], self.radius)
+            # Highlight effect
+            highlight_radius = self.radius * 3
+            Fun.draw_transparent_circle(win, [self.pos[0] + scrolling[0] - highlight_radius / 2,
+                                                self.pos[1] + scrolling[1] - highlight_radius / 2,  highlight_radius],
+                                        (255 - self.colour[0], 255 - self.colour[1], 255 - self.colour[2]), # (255, 255, 255),
+                                        32, width=round(highlight_radius/4))
 
 
 class BulletDanmaku(BasicBullet):

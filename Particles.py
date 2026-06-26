@@ -1145,12 +1145,23 @@ class BossIntro:
         self.start_duration = duration
         self.duration = duration
 
-        self.boss_name = str_to_list(boss_name)
+        temp_font = create_temp_font_4(FRAME_MAX_SIZE[1])
 
-        self.written_text = ""
+        self.boss_name = str_to_list(boss_name)
+        self.boss_name.append(" ")
+        self.boss_name_texts = []
+        for count, x in enumerate(boss_name):
+            name = ""
+            for y in range(count+1):
+                name += boss_name[y]
+            self.boss_name_texts.append(temp_font.render(name, True, AMBER_LIGHT))
+
+        # self.written_text = ""
         self.particles = []
         self.bar_x_mod = 0
         self.warning_x_mod = -120
+
+        self.warning_text = temp_font.render("WARNING", True, AMBER_LIGHT)
 
         self.end_duration = -BIG_INT
 
@@ -1180,7 +1191,8 @@ class BossIntro:
 
             # draw text
             temp_font = create_temp_font_4(height)
-            text_sprite = temp_font.render("WARNING", True, AMBER_LIGHT)
+            text_sprite = self.warning_text
+            text_sprite = pg.transform.scale_by(text_sprite, z_mod)
             text_width = text_sprite.get_width() + 30 * z_mod
             text_spread = (bar_spread - text_sprite.get_height()) / 2
 
@@ -1204,18 +1216,26 @@ class BossIntro:
                     pass
             else:
                 # Write boss name
+                # Make the text for the boss be pre rendered
                 if self.duration % 30 == 0:
-                    if self.boss_name:
-                        self.written_text += self.boss_name[0]
-                        self.boss_name.pop(0)
-                        if not self.boss_name:
+                    # if self.boss_name:
+                    #     self.written_text += self.boss_name[0]
+                    #     self.boss_name.pop(0)
+                    #     if not self.boss_name:
+                    #         self.end_duration = self.duration - 240
+                    if len(self.boss_name_texts) > 1:
+                        # self.written_text += self.boss_name[0]
+                        self.boss_name_texts.pop(0)
+                        if len(self.boss_name_texts) == 1:
                             self.end_duration = self.duration - 240
 
-                name_sprite = temp_font.render(self.written_text, True, AMBER_LIGHT)
+                name_sprite = pg.transform.scale_by(self.boss_name_texts[0], z_mod)
+                # name_sprite = temp_font.render(self.written_text, True, AMBER_LIGHT)
                 WIN.blit(name_sprite, [
                     width//2 - name_sprite.get_width()//2,
                     height//2 - name_sprite.get_height()//2
                 ])
+
             # Handles shits
             for i in self.particles:
                 i.draw(WIN, scrolling)
@@ -1244,9 +1264,11 @@ class RigelIntro:
         self.status = 0
         self.letter = "R"
         self.letter_count = 0
+        self.rect = [0, 0] # Make a rect grow
 
     def draw(self, WIN, scrolling):
         width, height = FRAME_MAX_SIZE
+        z_mod = FRAME_MAX_SIZE[0] / 630
         if self.duration % 8 == 0:
             play_sound("Menu move")
             self.name_surf.blit(RIGEL_INTRO_SPRITES[self.letter][self.status], [{"R": 0, "I": 16, "G": 32, "E": 48, "L": 64}[self.letter], 0])
@@ -1257,9 +1279,10 @@ class RigelIntro:
                     self.letter_count += 1
                 self.letter = ["R", "I", "G", "E", "L"][self.letter_count]
 
-        WIN.blit(self.name_surf, [
-            width // 2 - self.name_surf.get_width() // 2,
-            height // 2 - 16
+        surf = pg.transform.scale_by(pg.transform.scale2x(self.name_surf), z_mod)
+        WIN.blit(surf, [
+            width // 2 - surf.get_width() // 2,
+            height // 2 - surf.get_height() // 2
         ])
         self.duration -= 1
 

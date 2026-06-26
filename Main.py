@@ -6,16 +6,10 @@ import sys  # Cool video https://www.youtube.com/watch?v=2Yj5mmKWukw
 
 # TODO: fix enemy spawn in defense
 # Version 1.0
-#   Bosses
-#       Rigel                   (Final boss)
-#                                   attacks
-#                                       combo
-#                                       plasma
-#                                   leg animations
-#                                   death particle
-#                                   custom intro
-#       AA Site - Drone builder (animations)
+#   Rigel death particle
 #   Character conversations & Encyclopedia
+#   More sound effects
+#   AA Site - Drone builder (animations)
 #   Voices
 #   Story elements (do small comics)
 
@@ -138,9 +132,9 @@ def main_game(party_info):
         "Missions completed": 0,
         "Time spend in mission": 0,
         "Mission historic": [],  # {"Name": <str>, "Faction": <int>}
-        # "Funds": 0,
+        "Funds": 0,
         "Upgrades": [],
-        "Funds": 10000000000, # "Upgrades": [i for i in Fun.UPGRADE_INFO],    # Used for testing
+        # "Funds": 10000000000, # "Upgrades": [i for i in Fun.UPGRADE_INFO],    # Used for testing
         "Available upgrades": [],
         "Upgrade pool": []
     }

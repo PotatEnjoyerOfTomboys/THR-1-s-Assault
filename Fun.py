@@ -34,7 +34,7 @@ start_october = (10, 1)
 current_date = (datetime.datetime.now().month, datetime.datetime.now().day)
 start_november = (11, 1)
 
-VERSION = "0.3.1"
+VERSION = "0.4"
 DEBUG_MODE =  False             # Use that to have access to debug functions
 APOSTROPHE = "'"
 DEFAULT_KEY_PRESSED, DEFAULT_KEY_COOLDOWN = 10, 7  # Could make these 2 a setting
@@ -174,8 +174,6 @@ EMPTY_SAVE_FILE = {
      		"Gear", "Epicurean Medic Rifle", # "Crippled Laddie FCS Radio", "Mk16 Flare Mortar", "Nihilist Stretcher", "Stoic Shield generator", "C4", "Radar", "Smoke Dispenser", "Binoculars", "Artillery Radio"
     ]
 }
-
-
 
 # Just to check that every save files are there
 try:
@@ -460,16 +458,25 @@ sounds_dict = {
     "Rifle 1 Shooting": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Rifle_1.ogg')), "Volume": 0.8},
     "Rifle 2 Shooting": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Rifle_2.ogg')), "Volume": 1},
     "Safety": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Safety_Click.ogg')), "Volume": 0.4},
+
     "Hover Tank Canon": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Hover Tank Cannon.ogg')), "Volume": 1.2},
+
     "Mech Booster": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Mech Booster.ogg')), "Volume": 0.6},
     "Magma Blade": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Magma Blade.ogg')), "Volume": 1.2},
     "Mech Cannon": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Mech Cannon.ogg')), "Volume": 1.2},
     "Mech Minigun": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Mech Minigun.ogg')), "Volume": 1.2},
-    "Mech Missile": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Mech Missile.ogg')), "Volume": 1},
+    "Mech Missile": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Mech Missile.ogg')), "Volume": 0.8},
 
     "Gilgamesh Sword L": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Gilgamesh Sword Light.ogg')), "Volume": 1},
     "Gilgamesh Sword M": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Gilgamesh Sword.ogg')), "Volume": 1},
     "Gilgamesh Sword H": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Gilgamesh Sword Heavy.ogg')), "Volume": 1},
+
+    "Rigel Laser barrage": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Rigel Laser barrage.ogg')), "Volume": 1},
+    "Rigel Plasma": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Rigel Plasma.ogg')), "Volume": 1},
+    "Rigel Plasma Shoot": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Rigel Plasma Shoot.ogg')), "Volume": 1},
+    "Rigel Shoulder Bash": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Rigel Shoulder Bash.ogg')), "Volume": 1},
+    "Rigel Lance Swipe": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Rigel Lance Swipe.ogg')), "Volume": 1.75},
+    "Rigel Giga Thrust": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Rigel Giga Thrust.ogg')), "Volume": 1.75},
     # "Shot gun 2 Shooting": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Shotgun.ogg')), "Volume": 0.8},
 }
 
@@ -586,6 +593,8 @@ WATER_NORMAL = (43, 127, 178)
 WATER_WASTE = (70, 123, 91)
 FIRE = (255, 50, 0)
 FIRE_GREEN = (50, 255, 0)
+
+RIGEL_ENERGY = (125//4*3, 200//4*3, 220//4*3)
 
 # UI colours
 UI_COLOUR_FONT, UI_COLOUR_HIGHLIGHT, UI_COLOUR_BACKDROP, UI_COLOUR_BACKGROUND = WHITE, GRAY, DARK, (12, 12, 12)
@@ -4459,7 +4468,8 @@ def shop_menu(WIN, CLOCK, party_info, run_info):
 
 
 def end_menu(WIN, CLOCK, status_line, elements_to_show, comment_line, elements_to_show_2=[{"Sender": "", "Message": str_to_list("")}]):
-    stop_music()
+    if CURRENT_TRACK_INFO[1] != "Menu":
+        stop_music()
     menu_overlay = pg.image.load(os.path.join("Sprites/UI/Overlay.png")).convert_alpha()
     key_pressed = DEFAULT_KEY_PRESSED * 4
 

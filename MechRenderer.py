@@ -101,7 +101,6 @@ def paint(paint_mech, new_colours):
 def paint_single_part(paint_mech, part_id, copied_mech):
     new_layers = []
     new_colours = paint_mech[part_id]["palette"]
-    # print(part["palette"])
     for sprite_layer in copied_mech[part_id]["Sprite"]:
         new_layers.append(
             swap(sprite_layer.copy(),
@@ -175,9 +174,10 @@ bloodhound_palette = {
     "Arm L": [          [128, 106, 53], [41, 41, 41], [90, 45, 45], [26, 26, 26], [226, 103, 38]],
     "Arm R": [          [128, 106, 53], [41, 41, 41], [90, 45, 45], [26, 26, 26], [226, 103, 38]],
 
-    "Wpn L": [          [96, 96, 96], [48, 48, 48], [32, 32, 32], [16, 16, 16], [249, 113, 42]],
+    "Wpn L": [          [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
 
-    "Wpn R": [          [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
+    "Wpn R": [          [96, 96, 96], [48, 48, 48], [32, 32, 32], [16, 16, 16], [249, 113, 42]],
+    # "Wpn R": [          [255, 0, 255], [255, 0, 255], [255, 0, 255], [255, 0, 255], [255, 0, 255]],
 
     "Shoulder L": [     [96, 96, 96], [48, 48, 48], [32, 32, 32], [16, 16, 16], [226, 103, 38]],
     "Shoulder R": [     [141, 117, 58], [99, 50, 50], [45, 45, 45], [29, 29, 29], [249, 113, 42]],
@@ -224,6 +224,7 @@ def desheetator_mech_part(sprite_sheet, width):
 
 
 lb_mantle_sprite, lb_mantle_animation = desheetator_mech_part(get_image('Sprites/Mech parts/LB-Mantle.png'), 51)   # width 51
+lr_orion_sprite, lr_orion_animation = desheetator_mech_part(get_image('Sprites/Mech parts/LR-Orion.png'), 35)   # width 51
 list_sprite_stack = lambda img, height: [get_sprite_stack_list(stack, height=height) for stack in img]
 bloodhound_mech = [
         {"Type": "Leg", "Sprite": get_sprite_stack_list(lb_mantle_sprite, 34), "Animation": list_sprite_stack(lb_mantle_animation, 34)},
@@ -237,7 +238,7 @@ bloodhound_mech = [
     ]
 
 rigel_mech = [
-        {"Type": "Leg", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/LR-Orion.png'), 26)},
+        {"Type": "Leg", "Sprite": get_sprite_stack_list(lr_orion_sprite, 38), "Animation": list_sprite_stack(lr_orion_animation, 38)},
         {"Type": "Torso", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/TO-Orion.png'), 64)},
         {"Type": "Head", "Sprite": get_sprite_stack_list(get_image('Sprites/Mech parts/HD-Orion.png'), 17)},
         {"Type": "Arm L", "Sprite": invert_sprite_stack('Sprites/Mech parts/AM-Rigel.png', 10)},
@@ -247,11 +248,19 @@ rigel_mech = [
     ]
 
 
-def make_part_sub(unbuilt_mech, sprite_list, p, origin, colour, owner="Torso", check_for_right=True):
+def make_part_sub(unbuilt_mech, sprite_list, p, origin, colour, owner="Torso", check_for_right=True, p3=False):
+    aaaa = [0, 0, 0]
+    if p3:
+        aaaa = get_off_set_points(unbuilt_mech["Torso"]["Sprite"], unbuilt_mech[owner]["Sprite"], (0, 255, 0),
+                                check_for_right=check_for_right)
     p4 = get_off_set_points(unbuilt_mech[owner]["Sprite"], sprite_list, colour, check_for_right=check_for_right)
-    offset = [p4[0] + p[0], p4[1] + p[1], p4[2] + p[2]]
+
+    offset = [p4[0] + p[0] + aaaa[0],
+              p4[1] + p[1] + aaaa[1],
+              p4[2] + p[2] + aaaa[2]]
+
     # offset = [p4[0]+p[0], p4[1]+p[1], p4[2] + p[2]]
-    o_x, o_y = get_origin_point(sprite_list, (0, 255, 0))
+    o_x, o_y = get_origin_point(sprite_list, colour)
     origin[0] -= o_x
     origin[1] -= o_y
     offset[0] -= o_x
@@ -301,16 +310,19 @@ def make_part(sprite_list, part_palette, part_type, unbuilt_mech, animation):
         p6 = get_off_set_points(unbuilt_mech["Arm L"]["Sprite"], sprite_list, (0, 255, 255))
         offset = [p6[0]+p4[0]+p[0], p6[1]+p4[1]+p[1], p6[2] + p[2] + p4[2]]
         owner = "Arm L"
-    if part_type == "Wpn L":
-        p4 = get_off_set_points(unbuilt_mech["Torso"]["Sprite"], unbuilt_mech["Arm L"]["Sprite"], (0, 255, 0), check_for_right=False)
-        p7 = get_off_set_points(unbuilt_mech["Arm L"]["Sprite"], sprite_list, (255, 255, 0))
-        offset = [p7[0]+p4[0]+p[0], p7[1]+p4[1]+p[1], p7[2] + p[2] + p4[2]]
-        owner = "Arm L"
-    if part_type == "Wpn R":
-        p3 = get_off_set_points(unbuilt_mech["Torso"]["Sprite"], unbuilt_mech["Arm R"]["Sprite"], (0, 255, 0), check_for_right=True)
-        p7 = get_off_set_points(unbuilt_mech["Arm R"]["Sprite"], sprite_list, (255, 255, 0))
-        offset = [p7[0]+p3[0]+p[0], p7[1]+p3[1]+p[1], p7[2] + p[2] + p3[2]]
-        owner = "Arm R"
+    if part_type in ["Wpn L", "Wpn R"]:
+        # p4 = get_off_set_points(unbuilt_mech["Torso"]["Sprite"], unbuilt_mech["Arm L"]["Sprite"], (0, 255, 0), check_for_right=False)
+        # p7 = get_off_set_points(unbuilt_mech["Arm L"]["Sprite"], sprite_list, (255, 255, 0))
+        # offset = [p7[0]+p4[0]+p[0], p7[1]+p4[1]+p[1], p7[2] + p[2] + p4[2]]
+        # owner = "Arm L"
+    # if part_type == "Wpn R":
+        owner = f"Arm {part_type[-1]}"
+        origin, offset = make_part_sub(unbuilt_mech, sprite_list, p, origin,
+                                       (255, 255, 0), owner=owner,
+                                       check_for_right=part_type == "Wpn R", p3=True)
+        # p3 = get_off_set_points(unbuilt_mech["Torso"]["Sprite"], unbuilt_mech["Arm R"]["Sprite"], (0, 255, 0), check_for_right=True)
+        # p7 = get_off_set_points(unbuilt_mech["Arm R"]["Sprite"], sprite_list, (255, 255, 0))
+        # offset = [p7[0]+p3[0]+p[0], p7[1]+p3[1]+p[1], p7[2] + p[2] + p3[2]]
 
     # offset distance
     offset_dist = 0
@@ -360,12 +372,6 @@ class Mech:
             if self.mech_parts[p]["Owner"]:
                 self.mech_parts[self.mech_parts[p]["Owner"]]["Child"].append(p)
 
-        for p in self.mech_parts:
-            if self.mech_parts[p]["Owner"]:
-                if self.mech_parts[p]["Child"]:
-                    for c in self.mech_parts[p]["Child"]:
-                        if c not in self.mech_parts[self.mech_parts[p]["Owner"]]["Child"]:
-                            self.mech_parts[self.mech_parts[p]["Owner"]]["Child"].append(c)
 
         self.backup_mech_copy = deepcopy(self.mech_parts)
         for e in self.mech_parts:
@@ -387,11 +393,6 @@ class Mech:
             if new_layer:
                 self.mech_sprite_stack.append(new_layer)
         self.pos = pos
-        # for p in self.mech_parts:
-        #     print(p)
-        #     for pp in self.mech_parts[p]:
-        #         print(pp)
-        #         print(self.mech_parts[p][pp])
 
         # {"Time": 0, "Angle Speed": 0}
         self.mech_animations = {
@@ -430,6 +431,16 @@ class Mech:
                         angle_between(self.mech_parts[child]["offset"], self.mech_parts[part]["offset"]) - info["Angle Speed"]
                     )
                     self.mech_parts[child]["offset"] = [n_offset[0], n_offset[1], self.mech_parts[part]["offset"][2]]
+
+                    for grand_child in self.mech_parts[child]["Child"]:
+                        self.mech_parts[grand_child]["Draw angle"] += info["Angle Speed"]
+
+                        # Modify offset here
+                        n_offset = move_with_vel_angle(
+                            self.mech_parts[child]["offset"], self.mech_parts[grand_child]["offset dist"],
+                            angle_between(self.mech_parts[grand_child]["offset"], self.mech_parts[child]["offset"]) - info[
+                                "Angle Speed"])
+                        self.mech_parts[grand_child]["offset"] = [n_offset[0], n_offset[1], self.mech_parts[child]["offset"][2]]
                 if info["Time"] == 0:
                     self.mech_animations[part].pop(0)
 

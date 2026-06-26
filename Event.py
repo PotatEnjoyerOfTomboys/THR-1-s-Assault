@@ -384,8 +384,8 @@ def mission_start(self, entities, bullets, level, time_passed, screen, CLOCK):
 
     # Intro manager
     if level['name'] != Fun.write_textline("Finale 2"):
-        # entities["UI particles"].append(Particles.BossIntro(boss_name=Fun.write_textline(boss_name)))
-        pass
+
+        entities["UI particles"].append(Particles.BossIntro(boss_name=Fun.write_textline(boss_name)))
     else:
         entities["UI particles"].append(Particles.MissionTitleCard(Fun.write_textline(boss_name), ""))
 

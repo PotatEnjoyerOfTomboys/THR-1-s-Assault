@@ -1,56 +1,23 @@
 {
-      "Version": "0.3.1",
+      "Version": "0.4",
       "Character weapons unlocked": {
-            "Lord": [
-                  1,
-                  2
-            ],
-            "Emperor": [
-                  1,
-                  2
-            ],
-            "Wizard": [
-                  2,
-                  1
-            ],
-            "Sovereign": [
-                  1,
-                  2
-            ],
-            "Duke": [
-                  1,
-                  2
-            ],
-            "Jester": [
-                  1,
-                  2
-            ],
-            "Condor": [
-                  1,
-                  2
-            ],
-            "Curtis": [
-                  1,
-                  2
-            ],
-            "Lawrence": [
-                  1,
-                  2
-            ],
-            "Mark": [
-                  1,
-                  2
-            ],
-            "Vivianne": [
-                  1,
-                  2
-            ]
+            "Lord": [],
+            "Emperor": [],
+            "Wizard": [],
+            "Sovereign": [],
+            "Duke": [],
+            "Jester": [],
+            "Condor": [],
+            "Curtis": [],
+            "Lawrence": [],
+            "Mark": [],
+            "Vivianne": []
       },
-      "Zoar unlocked": true,
+      "Zoar unlocked": false,
       "Faction mission count": [
-            3,
-            3,
-            5,
+            0,
+            0,
+            0,
             0,
             0,
             0
@@ -100,54 +67,26 @@
             "CFCR",
             "ASUM",
             "Old English Armoury",
+            "Factory Munition Ballistics",
             "Dickinson Technologies",
             "Manhunter Ammunitions",
             "Weapon",
             "Handgun",
             "Rifle",
+            "St-Maurice",
             "Sub Machine Gun",
             "Type 41 SMG",
-            "NEST",
-            "Infantry",
-            "Manager",
-            "Standard Shotgun",
-            "Cowboy's Repeater",
-            "Old West Firearms & Replicas",
-            "Lawrence's Cutlass & Flintlock",
-            "Mark's Rifle",
-            "Vivianne's Rifle",
-            "Annals",
-            "Enemies",
-            "Organizations",
-            "Weapon",
-            "Annals",
-            "2100",
-            "2101",
-            "2102",
-            "2103",
-            "2105",
-            "Enemies",
-            "Asset Protecting & Collection Dept.",
-            "Burning Winds Band",
-            "C8 Mercenary Army",
-            "Misc.",
-            "Organizations",
-            "Armed groups",
-            "Mercenary Teams",
-            "Weapon Manufacturer",
-            "Weapon",
-            "Handgun",
-            "Rifle",
-            "Sub Machine Gun",
-            "Sculptor",
-            "Custom Mk18 Laser cutter",
-            "Toolkit Manufacturing",
-            "Corrine's Old Rifle",
-            "Type 23 Shotgun",
-            "St-Laurent Gen 1",
-            "Corrine's Hands",
-            "Fire Support Mech",
-            "Body Guard",
-            "Skirmisher"
+            "Shotgun",
+            "Jeanne's Family Shotgun",
+            "Energy",
+            "Melee",
+            "Chain Axe",
+            "Combo",
+            "GunBlade",
+            "Heavy",
+            "Saloum Mk-2",
+            "Fortress Machine Gun",
+            "Gear",
+            "Epicurean Medic Rifle"
       ]
 }
