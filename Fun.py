@@ -175,12 +175,24 @@ EMPTY_SAVE_FILE = {
     ]
 }
 
-# Just to check that every save files are there
+# Just to check that every settings files are there
 try:
     get_from_json("Settings.json", "Everything")
 except FileNotFoundError:
     print_to_error_stream("File Setting.json missing, creating a new one")
     dict_to_json("Settings.json", {"SFX": 5.0, "Music": 5.0, "Voice": 5.0, "Screen shake": 1.0, "Language": 0})
+
+try:
+    get_from_json("Key binds.json", "Everything")
+except FileNotFoundError:
+    print_to_error_stream("Key binds.json not found, creating new one")
+    dict_to_json("Key binds.json", DEFAULT_KEY_BINDS)
+
+try:
+    get_from_json("Controller binds.json", "Everything")
+except FileNotFoundError:
+    print_to_error_stream("Controller binds.json not found, creating new one")
+    dict_to_json("Controller binds.json", DEFAULT_CONTROLLER_BINDS)
 
 zoom_amount = 0.9
 SCREEN_SHAKE_MOD = [round(get_from_json("Settings.json", "Screen shake"))]

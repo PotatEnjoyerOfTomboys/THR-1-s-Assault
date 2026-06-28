@@ -7771,3 +7771,47 @@ RIGEL_SEGMENT = Fun.get_image('Sprites/Segment.png')
 RIGEL_SEGMENT_WIDTH = RIGEL_SEGMENT.get_width()
 RIGEL_SEGMENT_HEIGHT = RIGEL_SEGMENT.get_height()
 RIGEL_SEGMENT_ORIGIN = [RIGEL_SEGMENT_WIDTH * 0.5, RIGEL_SEGMENT_HEIGHT * 0]
+
+def fake_render(boss, WIN, CLOCK):
+    bosses_to_draw = []
+    for count, b in enumerate(boss):
+        bosses_to_draw.append(Entity(enemy_repertory[b]))
+        bosses_to_draw[-1].pos = [
+            [0, 0],
+
+            [-96, -16],
+            [48, -48],
+            [96, 32],
+            [-96, 48],
+
+            [-16, 52],
+        ][count]
+        bosses_to_draw[-1].angle = random.randint(-180, 180)
+    # boss_to_draw.free_var["Move angle"] += 33
+    # boss_to_draw.free_var["Move angle"] -= 33
+    # boss_to_draw.aim_angle -= 130 -90
+    screenshot_taken = False
+
+    while True:
+        # Select
+
+        keys = pg.key.get_pressed()
+        Fun.needed_in_menu_and_game(WIN, keys)
+        # |Draw|--------------------------------------------------------------------------------------------------------
+        frame = pg.Surface((630//2, 450//2))
+        surface_to_draw = frame
+        WIN.fill(Fun.BLACK)
+
+        surface_to_draw.fill(Fun.UI_COLOUR_BACKGROUND)
+
+        for b in bosses_to_draw:
+            b.draw(surface_to_draw, [630//4, 450//4])
+        # boss_to_draw.pos[0] += 1
+        # boss_to_draw.pos[1] += 1
+        Fun.scale_render(WIN, surface_to_draw, CLOCK)
+        pg.display.update()
+        CLOCK.tick(60)
+        if not screenshot_taken:
+            Fun.screenshot(WIN)
+            screenshot_taken = True
+

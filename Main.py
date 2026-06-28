@@ -20,6 +20,7 @@ WIN_WIDTH, WIN_HEIGHT = 630, 450
 ORIGINAL_WIDTH, ORIGINAL_HEIGHT = WIN_WIDTH, WIN_HEIGHT
 WIN = pg.display.set_mode((WIN_WIDTH, WIN_HEIGHT), pg.RESIZABLE)
 pg.display.set_icon(pg.image.load(os.path.join("Sprites/Icon.ico")))
+pg.display.set_caption("THR-1's Assault")
 
 CLOCK = pg.time.Clock()
 pg.mixer.set_num_channels(32)
@@ -124,9 +125,15 @@ import Upgrades
 import Main_Loop
 
 
+# Entity.fake_render(["Fire Support Mech"], WIN, CLOCK)
+# Entity.fake_render(["Gilgamesh"], WIN, CLOCK)
+# Entity.fake_render(["Armed Shield Generator"], WIN, CLOCK)
+# ["Energy Generator", "Shield Generator", "Missile Battery", "Drone builder", "AA Laser", "Drone"]
+# Entity.fake_render(["Energy Generator", "Shield Generator", "Missile Battery", "AA Laser", "Drone"], WIN, CLOCK)
+
 def main_game(party_info):
     big_game_loop = True
-    current_mission = 1
+    current_mission = 5
     run_info = {
         "Player party": player_party,
         "Missions completed": 0,
