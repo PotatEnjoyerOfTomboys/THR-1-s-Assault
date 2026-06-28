@@ -34,7 +34,7 @@ start_october = (10, 1)
 current_date = (datetime.datetime.now().month, datetime.datetime.now().day)
 start_november = (11, 1)
 
-VERSION = "0.4"
+VERSION = "0.4.1"
 DEBUG_MODE =  False             # Use that to have access to debug functions
 APOSTROPHE = "'"
 DEFAULT_KEY_PRESSED, DEFAULT_KEY_COOLDOWN = 10, 7  # Could make these 2 a setting
