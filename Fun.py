@@ -2672,7 +2672,7 @@ def encyclopedia_menu(WIN, CLOCK):
     previous_options = []
 
     not_disable_unlocks = True
-    not_disable_unlocks = False
+    # not_disable_unlocks = False
     options = [
     ]
     #
@@ -2845,6 +2845,86 @@ def encyclopedia_menu(WIN, CLOCK):
         CLOCK.tick(60)
 
 
+def character_menu_draw(WIN, CLOCK, out_party, menu_logic, transition, win_copy, menu_overlay, character_portraits, player_party):
+    # width, height = WIN.get_size()
+    width, height = 630, 450
+    frame = pg.Surface((630, 450))
+    surface_to_draw = frame
+    WIN.fill(BLACK)
+
+    temp_ui_font = create_temp_font_2(height, font_name="Sprites/JetBrainsMono-SemiBold.ttf")
+    surface_to_draw.fill(UI_COLOUR_BACKGROUND)
+
+    x = 25
+    y = 106
+    width = 140
+
+    pos = [x - 2 + (width + 4) * len(out_party), y - 2]
+    pg.draw.rect(surface_to_draw, UI_COLOUR_NEW_BACKGROUND, [pos[0] + 2, pos[1], width, 344])
+    # Draw empty slots
+    for count in range(4):
+        pos = [x - 2 + (width + 4) * count, y - 2]
+        pg.draw.rect(surface_to_draw, DARK_GRAY, [pos[0], pos[1], width + 4, 344], width=1)
+        pg.draw.rect(surface_to_draw, BLACK, [pos[0] + 2, pos[1] + 2, 64, 64])
+
+        # Shit on top make it less empty
+        pg.draw.rect(surface_to_draw, DARK_GRAY, [pos[0]+2, pos[1] - 70, width , 16], width=1)
+
+    # Draw in current slot, selection and character info
+    pos = [x - 2 + (width + 4) * len(out_party), y - 2]
+    pg.draw.rect(surface_to_draw, AMBER, [pos[0], pos[1], width + 4, 344], width=1)
+    menu_logic.draw(surface_to_draw, [pos[0] + 2, y + 64])
+    portrait = menu_logic.options[menu_logic.selected_option]['Value']
+    if portrait in character_portraits:
+        surface_to_draw.blit(character_portraits[portrait], [pos[0] + 2, pos[1] + 2])
+        info = player_party[portrait]
+        for c, t in enumerate([
+            'Health:',
+            f'{info["Health"]}/{info["Info"]["health"]}',
+            'Armour:',
+            f'{info["Info"]["armour"]}'
+        ]):
+            surface_to_draw.blit(temp_ui_font.render(t, True, AMBER), [pos[0] + 68, pos[1] + 14 * c + 4])
+
+    # Draw already selected party members
+    for count, character in enumerate(out_party):
+        pos = [x - 2 + (width + 4) * count, y - 2]
+
+        info = player_party[character[0]]
+        pg.draw.rect(surface_to_draw, UI_COLOUR_NEW_BACKGROUND, [pos[0] - 2, pos[1] - 2, width + 4, 344])
+        surface_to_draw.blit(character_portraits[character[0]], [pos[0] + 2, pos[1] + 2])
+        pg.draw.rect(surface_to_draw, AMBER, [pos[0], pos[1], width + 4, 344], width=1)
+
+        for c, t in enumerate([
+            'Health:',
+            f'{info["Health"]}/{info["Info"]["health"]}',
+            'Armour:',
+            f'{info["Info"]["armour"]}'
+        ]):
+            surface_to_draw.blit(temp_ui_font.render(t, True, AMBER), (pos[0] + 68, pos[1] + 14 * c + 4))
+
+        # Write name, role, input and weapon in versus mode
+        surface_to_draw.blit(temp_ui_font.render(write_textline(f"CHAR-DESC-{character[0]}"), True, AMBER),
+                             (pos[0] + 2, pos[1] + 68))
+        surface_to_draw.blit(temp_ui_font.render(write_textline(f"CHAR-ROLE-{character[0]}"), True, AMBER),
+                             (pos[0] + 2, pos[1] + 64 + 14))
+        surface_to_draw.blit(temp_ui_font.render("Input", True, AMBER),
+                             (pos[0] + 2, pos[1] + 64 + 24))
+        surface_to_draw.blit(temp_ui_font.render(character[1], True, AMBER),
+                             (pos[0] + 2, pos[1] + 64 + 38))
+        if character[2]:
+            surface_to_draw.blit(temp_ui_font.render(f"{character[2]}", True, AMBER), (pos[0] + 2, pos[1] + 64 + 52))
+
+    crt(surface_to_draw)
+    surface_to_draw.blit(menu_overlay, [0, 0])
+    scale_render(WIN, surface_to_draw, CLOCK)
+    if transition:
+        transition = False
+        menu_transition_doom_screen_melt(WIN, CLOCK, WIN, win_copy)
+    pg.display.update()
+    return transition
+
+
 def character_menu(WIN, CLOCK, missions_to_choose, player_party, mission_name):
     character_portraits = {
         # THR-1
@@ -2895,10 +2975,7 @@ def character_menu(WIN, CLOCK, missions_to_choose, player_party, mission_name):
     keep_going = True
     while len(out_party) < party_limit and keep_going:
 
-        options = [
-            # {"Name": "Shop", "Value": "Shop", "On select": "Return", "Render func": "Text only"}
-
-        ]
+        options = []
         for c in player_party:
             if player_party[c]["Health"] > 0:
                 # Make sure no repeat happens
@@ -2948,70 +3025,8 @@ def character_menu(WIN, CLOCK, missions_to_choose, player_party, mission_name):
 
             # |Draw|--------------------------------------------------------------------------------------------------------
             if draw:
-                # width, height = WIN.get_size()
-                width, height = 630, 450
-                frame = pg.Surface((630, 450))
-                surface_to_draw = frame
-                WIN.fill(BLACK)
-
-                temp_ui_font = create_temp_font_2(height, font_name="Sprites/JetBrainsMono-SemiBold.ttf")
-                surface_to_draw.fill(UI_COLOUR_BACKGROUND)
-
-                x = 25
-                y = 106
-                width = 140
-
-                pg.draw.rect(surface_to_draw, UI_COLOUR_NEW_BACKGROUND, [x-2, y-2, width + 4, 344])
-                pg.draw.rect(surface_to_draw, AMBER, [x-2, y-2, width + 4, 344], width=1)
-                menu_logic.draw(surface_to_draw, [x + len(out_party) * width, y + 64])
-                portrait = menu_logic.options[menu_logic.selected_option]['Value']
-                if portrait in character_portraits:
-                    surface_to_draw.blit(character_portraits[portrait], (x + len(out_party) * width, y))
-                    info = player_party[portrait]
-                    for c, t in enumerate([
-                        "Current HP",
-                        f'{info["Health"]}',
-                        "Max HP",
-                        f'{info["Info"]["health"]}',
-                        "Armour",
-                        f'{info["Info"]["armour"]}'
-                    ]):
-                        surface_to_draw.blit(temp_ui_font.render(t, True, AMBER), (x + len(out_party) * width + 2+64, y + 12 * c))
-
-                for count, character in enumerate(out_party):
-                    pos = [x + count * width, y]
-                    info = player_party[character[0]]
-                    pg.draw.rect(surface_to_draw, UI_COLOUR_NEW_BACKGROUND, [pos[0] - 2, pos[1] - 2, width + 4, 344])
-                    pg.draw.rect(surface_to_draw, AMBER, [pos[0] - 2, pos[1] - 2, width + 4, 344], width=1)
-                    surface_to_draw.blit(character_portraits[character[0]], (pos[0], pos[1]))
-
-                    for c, t in enumerate([
-                        "Current HP",
-                        f'{info["Health"]}',
-                        "Max HP",
-                        f'{info["Info"]["health"]}'
-                        "Armour",
-                        f'{info["Info"]["armour"]}'
-                    ]):
-                        surface_to_draw.blit(temp_ui_font.render(t, True, AMBER),
-                                             (pos[0]+64, pos[1] + 12 * c))
-
-                    pp = 0
-                    surface_to_draw.blit(temp_ui_font.render(character[1], True, AMBER),
-                                             (pos[0], pos[1] + 64 + 25 * 1))
-                    # write name and role
-                    surface_to_draw.blit(temp_ui_font.render(write_textline(f"CHAR-DESC-{character[0]}"), True, AMBER),
-                                             (pos[0], pos[1] + 64))
-                    surface_to_draw.blit(temp_ui_font.render(write_textline(f"CHAR-ROLE-{character[0]}"), True, AMBER),
-                                             (pos[0], pos[1] + 64 + 12))
-
-                crt(surface_to_draw)
-                surface_to_draw.blit(menu_overlay, [0, 0])
-                scale_render(WIN, surface_to_draw, CLOCK)
-                if transition:
-                    transition = False
-                    menu_transition_doom_screen_melt(WIN, CLOCK, WIN, win_copy)
-                pg.display.update()
+                transition = character_menu_draw(WIN, CLOCK, out_party, menu_logic, transition, win_copy, menu_overlay,
+                                    character_portraits, player_party)
             CLOCK.tick(60)
 
     # Check if the mission uses the APC
@@ -3379,9 +3394,7 @@ def versus_character_menu(WIN, CLOCK, missions_to_choose, player_party, mission_
     keep_going = True
     while len(out_party) < party_limit and keep_going:
 
-        options = [
-            # {"Name": "Shop", "Value": "Shop", "On select": "Return", "Render func": "Text only"}
-        ]
+        options = []
         for c in player_party:
             name = player_party[c]["Name"]
             options.append({"Name": name, "Value": name, "On select": "Return", "Render func": "Text only"})
@@ -3450,66 +3463,9 @@ def versus_character_menu(WIN, CLOCK, missions_to_choose, player_party, mission_
 
             # |Draw|--------------------------------------------------------------------------------------------------------
             if draw:
-                # width, height = WIN.get_size()
-                width, height = 630, 450
-                frame = pg.Surface((630, 450))
-                surface_to_draw = frame
-                WIN.fill(BLACK)
 
-                temp_ui_font = create_temp_font_2(height, font_name="Sprites/JetBrainsMono-SemiBold.ttf")
-                surface_to_draw.fill(UI_COLOUR_BACKGROUND)
-
-                x = 25
-                y = 106
-                width = 140
-
-                pg.draw.rect(surface_to_draw, UI_COLOUR_NEW_BACKGROUND, [x-2, y-2, width + 4, 344])
-                pg.draw.rect(surface_to_draw, AMBER, [x-2, y-2, width + 4, 344], width=1)
-                menu_logic.draw(surface_to_draw, [x + len(out_party) * width, y + 64])
-                portrait = menu_logic.options[menu_logic.selected_option]['Value']
-                if portrait in character_portraits:
-                    surface_to_draw.blit(character_portraits[portrait], (x + len(out_party) * width, y))
-                    info = player_party[portrait]
-                    for c, t in enumerate([
-                        "Max HP",
-                        f'{info["Info"]["health"]}',
-                        "Armour",
-                        f'{info["Info"]["armour"]}'
-                    ]):
-                        surface_to_draw.blit(temp_ui_font.render(t, True, AMBER), (x + len(out_party) * width + 2+64, y + 12 * c))
-
-                for count, character in enumerate(out_party):
-                    pos = [x + count * width, y]
-                    info = player_party[character[0]]
-                    pg.draw.rect(surface_to_draw, UI_COLOUR_NEW_BACKGROUND, [pos[0] - 2, pos[1] - 2, width + 4, 344])
-                    pg.draw.rect(surface_to_draw, AMBER, [pos[0] - 2, pos[1] - 2, width + 4, 344], width=1)
-                    surface_to_draw.blit(character_portraits[character[0]], (pos[0], pos[1]))
-
-                    for c, t in enumerate([
-                        "Max HP",
-                        f'{info["Info"]["health"]}'
-                        "Armour",
-                        f'{info["Info"]["armour"]}'
-                    ]):
-                        surface_to_draw.blit(temp_ui_font.render(t, True, AMBER),
-                                             (pos[0]+64, pos[1] + 12 * c))
-
-                    pp = 0
-                    surface_to_draw.blit(temp_ui_font.render(character[1], True, AMBER),
-                                             (pos[0], pos[1] + 64 + 25 * 1))
-                    # write name and role
-                    surface_to_draw.blit(temp_ui_font.render(write_textline(f"CHAR-DESC-{character[0]}"), True, AMBER),
-                                             (pos[0], pos[1] + 64))
-                    surface_to_draw.blit(temp_ui_font.render(write_textline(f"CHAR-ROLE-{character[0]}"), True, AMBER),
-                                             (pos[0], pos[1] + 64 + 12))
-
-                crt(surface_to_draw)
-                surface_to_draw.blit(menu_overlay, [0, 0])
-                scale_render(WIN, surface_to_draw, CLOCK)
-                if transition:
-                    transition = False
-                    menu_transition_doom_screen_melt(WIN, CLOCK, WIN, win_copy)
-                pg.display.update()
+                transition = character_menu_draw(WIN, CLOCK, out_party, menu_logic, transition, win_copy, menu_overlay,
+                                    character_portraits, player_party)
             CLOCK.tick(60)
     return out_party
 

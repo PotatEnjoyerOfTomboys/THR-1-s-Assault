@@ -17,6 +17,9 @@ import sys  # Cool video https://www.youtube.com/watch?v=2Yj5mmKWukw
 #       Gilgamesh
 #       Attack Helicopter
 #   Story elements (do small comics)
+#   UI to redo
+#       Store
+#       Mission select
 
 pg.mixer.pre_init()
 pg.init()
@@ -138,7 +141,7 @@ import Main_Loop
 
 def main_game(party_info):
     big_game_loop = True
-    current_mission = 5
+    current_mission = 1
     run_info = {
         "Player party": player_party,
         "Missions completed": 0,
