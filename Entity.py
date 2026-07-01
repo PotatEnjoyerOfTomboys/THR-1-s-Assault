@@ -4763,10 +4763,6 @@ def hover_tank_draw(self, WIN, scrolling):
 
 
 # Gilgamesh
-# Desert Dune
-# Desert Flower
-# Divorce Spiral
-# Reversed Divorce Spiral
 def gilgamesh_input(self, entities, level):
     # Input functions are the IA for an enemy
     # better targeting system
@@ -5055,11 +5051,6 @@ def gilgamesh_wall(self, entities, level):
 
 
 # Fire Support Mech
-#       Quick Boost
-#       Napalm sword
-#       Cannon
-#       Minigun
-#       Missile
 def bloodhound_input(self, entities, level):
     # Input functions are the IA for an enemy
     # better targeting system
@@ -5647,14 +5638,6 @@ def attack_helicopter_draw(self, WIN, scrolling):
 
 
 # Rigel
-# Attacks
-#       Shoulder Bash           Charge forwards, hit box on whole body
-#           Lance Swipe         Large swipe with lance
-#               Giga Thrust     Charge with lance, disjointed attack
-#       Laser barrage           Shoots lots of lasers
-#       Quick Turn
-#       Plasma                  Creates a big bullet with limited homing
-#       Missile Circus          Spawn a large amount of missiles
 def rigel_input(self, entities, level):
     if self.no_shoot_state > 0:
         return

@@ -11,6 +11,11 @@ import sys  # Cool video https://www.youtube.com/watch?v=2Yj5mmKWukw
 #   More sound effects
 #   AA Site - Drone builder (animations)
 #   Voices
+#       Armored Shield generator
+#       Hover Tank
+#       Fire Support Mech
+#       Gilgamesh
+#       Attack Helicopter
 #   Story elements (do small comics)
 
 pg.mixer.pre_init()

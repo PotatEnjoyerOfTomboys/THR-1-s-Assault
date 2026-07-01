@@ -13,44 +13,50 @@ import Fun
 # Check out 60 30 10 rule
 
 # |UI things|-----------------------------------------------------------------------------------------------------------
-def draw_teammate_display(surface_to_draw, teammate, rect, font):
-    pg.draw.rect(surface_to_draw, Fun.UI_COLOUR_NEW_BACKDROP, [rect[0]-2, rect[1]-2, rect[2]+4, rect[3]+4])
-    pg.draw.rect(surface_to_draw, Fun.UI_COLOUR_NEW_BACKGROUND, rect)
-    x, y = rect[0], rect[1]
-    width, height = rect[2], rect[3]
+def new_draw_teammate_display(surface_to_draw, teammate, pos, w):
+    font = Fun.FONTS["sma"]
+    x, y, width, height = 2, 2, 630//4 * 0.9, 21.6 * 0.9
+
+    surf = pg.Surface((width+4, height+4))
+    surf.fill(Fun.UI_COLOUR_NEW_BACKDROP)
+    pg.draw.rect(surf, Fun.UI_COLOUR_NEW_BACKGROUND, [2, 2, width, height])
+
     skill_width, skill_height = width * 0.125, height * 0.5
 
     y_mid = height // 2
     max_length = width * 0.75
 
+    # Ammo
     text_colour = Fun.WHITE
     ammo_colour = Fun.AMBER
     if teammate.weapon.ammo <= teammate.weapon.max_ammo // 8:
         ammo_colour = Fun.RED
     elif teammate.weapon.ammo <= teammate.weapon.max_ammo // 2:
         ammo_colour = Fun.ORANGE
+
     # |Draws the health bar and armour|---------------------------------------------------------------------------------
-    pg.draw.rect(surface_to_draw, Fun.DARKER_RED, (x, y, width, skill_height))
-    pg.draw.rect(surface_to_draw, Fun.MED_RED, (x, y, teammate.health * width / teammate.max_health, skill_height))
-    pg.draw.rect(surface_to_draw, Fun.MED_GREEN, (x, y, teammate.armour * width / teammate.max_armour, skill_height//3))
-    surface_to_draw.blit(font.render(f"{teammate.name}", True, text_colour), (x, y))
+    pg.draw.rect(surf, Fun.DARKER_RED, (x, y, width, skill_height))
+    pg.draw.rect(surf, Fun.MED_RED, (x, y, teammate.health * width / teammate.max_health, skill_height))
+    pg.draw.rect(surf, Fun.MED_GREEN, (x, y, teammate.armour * width / teammate.max_armour, skill_height//3))
+    surf.blit(font.render(f"{teammate.name}", True, text_colour), (x, y))
 
     # Weapon stuff
-    pg.draw.rect(surface_to_draw, Fun.DARK, (x, y + y_mid, max_length, skill_height))
-    pg.draw.rect(surface_to_draw, ammo_colour, (x, y + y_mid, teammate.weapon.ammo * max_length / teammate.weapon.max_ammo,
+    pg.draw.rect(surf, Fun.DARK, (x, y + y_mid, max_length, skill_height))
+    pg.draw.rect(surf, ammo_colour, (x, y + y_mid, teammate.weapon.ammo * max_length / teammate.weapon.max_ammo,
                                                 skill_height))
     margin = 1
-    surface_to_draw.blit(font.render(f"{teammate.weapon.max_ammo}", True, text_colour), (x, y + y_mid + margin))
-    surface_to_draw.blit(font.render(f"{teammate.weapon.ammo}", True, text_colour), (x + 25, y + y_mid + margin))
-    surface_to_draw.blit(font.render(f"{teammate.weapon.ammo_pool}", True, text_colour), (x + 50, y + y_mid + margin))
+    surf.blit(font.render(f"{teammate.weapon.ammo}", True, text_colour), (x, y + y_mid + margin))
+    surf.blit(teammate.weapon.ammo_sprite, (x + 20, y + y_mid + margin))
+    surf.blit(font.render(f"{teammate.weapon.ammo_pool}", True, text_colour), (x + 32 + teammate.weapon.ammo_sprite.get_width(), y + y_mid + margin))
 
     # Skill bar recharge
     for count, s in enumerate(teammate.skills):
         x_pos = x + width * 0.75 + count * skill_width
         height_charge = s.recharge * skill_height / s.recharge_max
 
-        # pg.draw.rect(surface_to_draw, (255, 255, 255), (x_pos, y_mid, skill_width, skill_height))
-        pg.draw.rect(surface_to_draw, (0, 0, 255), (x_pos, y + y_mid, skill_width, height_charge))
+        pg.draw.rect(surf, (0, 0, 255), (x_pos, y + y_mid, skill_width, height_charge))
+
+    surface_to_draw.blit(pg.transform.scale_by(surf, w/width), pos)
 
 
 def draw_bottom_health_bar(entity, surface_to_draw, round_scrolling):
@@ -225,17 +231,22 @@ def draw(WIN, CLOCK, time_passed, scrolling, scrolling_target, level, entities, 
     # All of this is rendered below the player, allies and enemies
     boss_count = 0
     teammates_count = 0
+
+    h = Fun.FRAME_MAX_SIZE[1] / 20.8
+    w = Fun.FRAME_MAX_SIZE[0] // 4
     for p in players:
         # Health
         # [583, 416]
         h = Fun.FRAME_MAX_SIZE[1]/20.8
         w = Fun.FRAME_MAX_SIZE[0]//4   # 100
-        draw_teammate_display(
+        # draw_teammate_display(
+        #     surface_to_draw, p, [
+         #         0 + w * teammates_count + 2 * teammates_count, 2, w, h
+        #     ], temp_ui_font)
+        new_draw_teammate_display(
             surface_to_draw, p, [
-                0 + w * teammates_count + 2 * teammates_count,
-                 2,
-                w, h
-            ], temp_ui_font)
+                0 + w * teammates_count + 2 * teammates_count, 2
+            ], w)
         teammates_count += 1
 
         # Universal status bars

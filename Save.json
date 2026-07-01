@@ -1,7 +1,9 @@
 {
       "Version": "0.4",
       "Character weapons unlocked": {
-            "Lord": [],
+            "Lord": [
+                  1
+            ],
             "Emperor": [],
             "Wizard": [],
             "Sovereign": [],
@@ -15,7 +17,7 @@
       },
       "Zoar unlocked": false,
       "Faction mission count": [
-            0,
+            1,
             0,
             0,
             0,
@@ -87,6 +89,8 @@
             "Saloum Mk-2",
             "Fortress Machine Gun",
             "Gear",
-            "Epicurean Medic Rifle"
+            "Epicurean Medic Rifle",
+            "GMG-04B",
+            "Armed Shield Generator"
       ]
 }

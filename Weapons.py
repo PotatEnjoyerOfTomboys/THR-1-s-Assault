@@ -15,13 +15,17 @@ from Fun import none
 
 
 class BasicWeapon:
-    __slots__=['accuracy', 'agro_gain', 'alt_fire', 'ammo', 'ammo_cost', 'ammo_pool', 'bullet_info', 'bullet_type', 'bullets_per_shot', 'crit_multiplier', 'crit_rate', 'fire_rate', 'free_var', 'full_auto', 'gunshot_sound', 'handle', 'jam_duration', 'jam_rate', 'jamming_sound', 'laser_sight', 'max_ammo', 'max_ammo_pool', 'mods', 'name', 'passive', 'range', 'recoil', 'reload_sound', 'reload_style', 'reload_time', 'spread', 'sprite', 'volume', 'weight']
+    __slots__=['accuracy', 'agro_gain', 'alt_fire', 'ammo', 'ammo_cost', 'ammo_pool', 'ammo_sprite', 'bullet_info', 'bullet_type', 'bullets_per_shot', 'crit_multiplier', 'crit_rate', 'fire_rate', 'free_var', 'full_auto', 'gunshot_sound', 'handle', 'jam_duration', 'jam_rate', 'jamming_sound', 'laser_sight', 'max_ammo', 'max_ammo_pool', 'mods', 'name', 'passive', 'range', 'recoil', 'reload_sound', 'reload_style', 'reload_time', 'spread', 'sprite', 'volume', 'weight']
     def __init__(self, weapon):
         self.name = weapon["name"]
         #
         self.sprite = weapon["sprite"]
         if type(self.sprite) == str:
             self.sprite = Fun.get_image(self.sprite)
+
+        self.ammo_sprite = AMMO_BAR_SPRITES["Misc"]
+        if "ammo sprite" in weapon:
+            self.ammo_sprite = AMMO_BAR_SPRITES[weapon["ammo sprite"]]
         # "weakref"
         # Sounds system
         self.gunshot_sound = weapon["gunshot sound"]
@@ -2507,14 +2511,38 @@ def azura_passive(self, entities, level):
         entities["items"][-1].life_time = abs(self.dash_cooldown)
 
 
-# |Weapon Repertories|--------------------------------------------------------------------------------------------------
+AMMO_BAR_SPRITE_SHEET = Fun.get_image("Sprites/UI/Ammo.png")
+AMMO_BAR_SPRITES = {
+    "Pistol Large": AMMO_BAR_SPRITE_SHEET.subsurface((0, 0, 16, 8)),
+    "Pistol Small": AMMO_BAR_SPRITE_SHEET.subsurface((16, 0, 8, 8)),
 
+    "Rifle Large": AMMO_BAR_SPRITE_SHEET.subsurface((0, 8, 32, 8)),
+    "Rifle Medium": AMMO_BAR_SPRITE_SHEET.subsurface((32, 8, 24, 8)),
+    "Rifle Small": AMMO_BAR_SPRITE_SHEET.subsurface((56, 8, 16, 8)),
+
+    "Rimmed Large": AMMO_BAR_SPRITE_SHEET.subsurface((0, 16, 24, 8)),
+    "Rimmed Tapered": AMMO_BAR_SPRITE_SHEET.subsurface((32, 16, 24, 8)),
+    "Rimfire": AMMO_BAR_SPRITE_SHEET.subsurface((56, 16, 8, 8)), # Unsused
+
+    "Shotshell Large": AMMO_BAR_SPRITE_SHEET.subsurface((0, 24, 24, 8)),
+    "Shotshell Medium": AMMO_BAR_SPRITE_SHEET.subsurface((24, 24, 16, 8)),
+    "Shotshell Small": AMMO_BAR_SPRITE_SHEET.subsurface((40, 24, 16, 8)),
+
+    "Lead Ball Large": AMMO_BAR_SPRITE_SHEET.subsurface((0, 32, 8, 8)),
+    "Lead Ball Small": AMMO_BAR_SPRITE_SHEET.subsurface((8, 32, 8, 8)),
+
+    "Missile": AMMO_BAR_SPRITE_SHEET.subsurface((0, 40, 16, 8)),
+    "Grenade": AMMO_BAR_SPRITE_SHEET.subsurface((16, 40, 16, 8)),
+    "Misc": AMMO_BAR_SPRITE_SHEET.subsurface((32, 40, 8, 8)),
+    "None": AMMO_BAR_SPRITE_SHEET.subsurface((32, 40, 1, 1)),
+}
+# |Weapon Repertories|--------------------------------------------------------------------------------------------------
 weapon_repertory = {
     # |THR-1|-----------------------------------------------------------------------------------------------------------
     # |Lord|------------------------------------------------------------------------------------------------------------
     "Saloum Mk-2":
         {"name": "Saloum Mk-2",
-         "description": "",
+         "ammo sprite": "Missile",
          "class": "Rocket Launcher",
          "sprite": "Sprites/Weapon/THR-1/Saloum Mk-2.png",
          "gunshot sound": "Rocket launcher",
@@ -2550,8 +2578,7 @@ weapon_repertory = {
          "agro": 4},
     "GMG-04B":
         {"name": "GMG-04B",
-         "description": "Launches grenades, like the name says"
-                        " ± The base line for Throwable weapons",
+         "ammo sprite": "Grenade",
          "class": "Throwable",
          "sprite": "Sprites/Weapon/THR-1/GMG-04B.png",
          "gunshot sound": "Small arms",
@@ -2582,9 +2609,7 @@ weapon_repertory = {
          "passive": "none"},
     "Big Iron":
         {"name": "Big Iron",
-         "description": "Might as well be a smoke grenade with all that black powder"
-                        " + Deals more damage"
-                        " -- Has less ammo",
+         "ammo sprite": "Rimmed Large",
          "class": "Revolver",
          "sprite": "Sprites/Weapon/THR-1/Big iron.png",
          "gunshot sound": "Revolver shoot",
@@ -2618,7 +2643,7 @@ weapon_repertory = {
     # |Emperor|---------------------------------------------------------------------------------------------------------
     "GunBlade":
         {"name": "GunBlade",
-         "description": "",
+         "ammo sprite": "Pistol Large",
          "class": "Slash",
          "sprite": "Sprites/Weapon/THR-1/GunBlade.png",
          "gunshot sound": "Silence",
@@ -2647,7 +2672,7 @@ weapon_repertory = {
          "passive": "gunblade"},
     "Corrine's Old Rifle":
         {"name": "Corrine's Old Rifle",
-         "description": "",
+         "ammo sprite": "Rifle Medium",
          "class": "Rifle",
          "sprite": "Sprites/Weapon/THR-1/Corrine's Old Rifle.png",
          "gunshot sound": "Rifle",
@@ -2676,7 +2701,7 @@ weapon_repertory = {
          "passive": "none"},
     "Oversized stun baton":
         {"name": "Oversized stun baton",
-         "description": "",
+         "ammo sprite": "None",
          "class": "Slash",
          "sprite": "Sprites/Weapon/THR-1/Oversized stun baton.png",
          "gunshot sound": "Silence",
@@ -2706,8 +2731,7 @@ weapon_repertory = {
     # |Wizard|----------------------------------------------------------------------------------------------------------
     "Jeanne's Family Shotgun":
         {"name": "Jeanne's Family Shotgun",
-         "description": "That's Jeanne's favorite gun."
-                        "She would kill you if she saw you with it",
+         "ammo sprite": "Shotshell Large",
          "class": "Shotgun",
          "sprite": "Sprites/Weapon/THR-1/Jeanne Gun.png",
          "gunshot sound": "Shotgun 1 Shooting",
@@ -2736,6 +2760,7 @@ weapon_repertory = {
          "passive": "jeanne_shotgun_passive"},
     "Custom Mk18 Laser cutter":
         {"name": "Custom Mk18 Laser cutter",
+         "ammo sprite": "Misc",
          "class": "Rifle",
          "sprite": "Sprites/Weapon/THR-1/Custom Mk18 Laser cutter.png",
          "gunshot sound": "Skill 3",
@@ -2764,6 +2789,7 @@ weapon_repertory = {
          "passive": "laser_cutter_passive", "free var": {"Charged shot": 0}},
     "Crippled Laddie FCS Radio":
         {"name": "Crippled Laddie FCS Radio",
+         "ammo sprite": "Misc",
          "class": "Rifle",
          "sprite": "Sprites/Weapon/THR-1/Crippled Laddie FCS Radio.png",
          "gunshot sound": "Silence",
@@ -2795,7 +2821,7 @@ weapon_repertory = {
     # |Sovereign|-------------------------------------------------------------------------------------------------------
     "St-Maurice":
         {"name": "St-Maurice",
-         "description": "",
+         "ammo sprite": "Rifle Medium",
          "class": "Rifle",
          "sprite": "Sprites/Weapon/THR-1/St-Maurice.png",
          "gunshot sound": "Gun Silenced",
@@ -2824,7 +2850,7 @@ weapon_repertory = {
          "passive": "none"},
     "St-Laurent Gen 1":
         {"name": "St-Laurent Gen 1",
-         "description": "",
+         "ammo sprite": "Rifle Large",
          "class": "Rifle",
          "sprite": "Sprites/Weapon/THR-1/St-Laurent Gen 1.png",
          "gunshot sound": "Rifle 2",
@@ -2854,7 +2880,7 @@ weapon_repertory = {
          "agro": 50},
     "Unarmed":
         {"name": "Unarmed",
-         "description": "",
+         "ammo sprite": "None",
          "class": "Fist",
          "sprite": "Sprites/Weapon/THR-1/Corrine's Fists.png",
          "gunshot sound": "Silence",
@@ -2883,6 +2909,7 @@ weapon_repertory = {
          "passive": "unarmed_passive"},
     "Mk16 Flare Mortar":
         {"name": "Mk16 Flare Mortar",
+         "ammo sprite": "Misc",
          "class": "Rifle",
          "sprite": "Sprites/Weapon/THR-1/Mk16 Flare Mortar.png",
          "gunshot sound": "Silence",
@@ -2914,7 +2941,7 @@ weapon_repertory = {
     # |Duke|------------------------------------------------------------------------------------------------------------
     "Chain Axe":
         {"name": "Chain Axe",
-         "description": "",
+         "ammo sprite": "None",
          "class": "Fist",
          "sprite": "Sprites/Weapon/THR-1/Chain Axe - handle.png",
          "gunshot sound": "Silence",
@@ -2949,7 +2976,7 @@ weapon_repertory = {
          }},
     "Hook Swords":
         {"name": "Hook Swords",
-         "description": "",
+         "ammo sprite": "None",
          "class": "Slash",
          "sprite": "Sprites/Weapon/THR-1/Hook Sword.png",
          "gunshot sound": "Silence",
@@ -2980,7 +3007,7 @@ weapon_repertory = {
          "free var": {"Victim": False, "Second sword dist": 0}},
     "Gun and Ballistic Knife":
         {"name": "Gun and Ballistic Knife",
-         "description": "",
+         "ammo sprite": "Pistol Small",
          "class": "Slash",
          "sprite": "Sprites/Weapon/THR-1/Gun Fu.png",
          "gunshot sound": "Silence",
@@ -3011,7 +3038,7 @@ weapon_repertory = {
     # |Jester|----------------------------------------------------------------------------------------------------------
     "Epicurean Medic Rifle":
         {"name": "Epicurean Medic Rifle",
-         "description": "",
+         "ammo sprite": "Grenade",
          "class": "Semi-auto",
          "sprite": "Sprites/Weapon/THR-1/Epicurean Medic Rifle.png",
          "gunshot sound": "Small arms",
@@ -3040,7 +3067,7 @@ weapon_repertory = {
          "passive": "none"},
     "Nihilist Stretcher":
         {"name": "Nihilist Stretcher",
-         "description": "",
+         "ammo sprite": "None",
          "class": "Flame",
          "sprite": "Sprites/Weapon/THR-1/Nihilist Stretcher.png",
          "gunshot sound": "Silence",
@@ -3072,7 +3099,7 @@ weapon_repertory = {
          "free var": {"Victim": False, "input func": none, "team": False}},
     "Stoic Shield generator":
         {"name": "Stoic Shield generator",
-         "description": "",
+         "ammo sprite": "Misc",
          "class": "Semi-auto",
          "sprite": "Sprites/Weapon/THR-1/Shield Generator.png",
          "gunshot sound": "Small arms",
@@ -3102,7 +3129,7 @@ weapon_repertory = {
     # |Condor|----------------------------------------------------------------------------------------------------------
     "Type 41 SMG":
         {"name": "Type 41 SMG",
-         "description": "",
+         "ammo sprite": "Pistol Small",
          "class": "Semi-auto",
          "sprite": "Sprites/Weapon/THR-1/Type 41 SMG.png",
          "gunshot sound": "Rifle 1 Shooting",
@@ -3131,7 +3158,7 @@ weapon_repertory = {
          "passive": "condor_dual_smg_passive"},
     "Type 23 Shotgun":
         {"name": "Type 23 Shotgun",
-         "description": "",
+         "ammo sprite": "Shotshell Large",
          "class": "Shotgun",
          "sprite": "Sprites/Weapon/THR-1/Type 23 Shotgun.png",
          "gunshot sound": "Shotgun 2 Shooting",
@@ -3170,10 +3197,7 @@ weapon_repertory = {
          "free var": {"Charge cooldown": 0}},
     "Type 47 Rifle":
         {"name": "Type 47 Rifle",
-         "description": "They keep using this design from the 1940s even 160 years later."
-                        "It's just that good."
-                        " + More accurate, faster reload time"
-                        " -- Higher recoil, less ammo",
+         "ammo sprite": "Rifle Small",
          "class": "Semi-auto",
          "sprite": "Sprites/Weapon/THR-1/Type 47 Rifle.png",
          "gunshot sound": "Small arms",
@@ -3203,6 +3227,7 @@ weapon_repertory = {
     # |Fortress|--------------------------------------------------------------------------------------------------------
     "Fortress Machine Gun":
         {"name": "Fortress Machine Gun",
+         "ammo sprite": "Rifle Large",
          "class": "Semi-auto",
          "sprite": "Sprites/Weapon/Anime.png",
          "gunshot sound": "Rifle 1 Shooting",
@@ -3233,8 +3258,7 @@ weapon_repertory = {
     # |Curtis|----------------------------------------------------------------------------------------------------------
     "Standard Shotgun":
         {"name": "Standard Shotgun",
-         "description": "It's one of the shotgun ever made"
-                        " ± The base line for all shotguns",
+         "ammo sprite": "Shotshell Medium",
          "class": "Shotgun",
          "sprite": "Sprites/Weapon/Standard Shotgun.png",
          "gunshot sound": "Shotgun 1 Shooting",
@@ -3265,11 +3289,7 @@ weapon_repertory = {
          "agro": 5},
     "Cowboy's Repeater":
         {"name": "Cowboy's Repeater",
-         "description": "Please, go do your 'click click' outside"
-                        " ± When switch to or reloading this weapon, summons a tumbleweed"
-                        " ± that slow downs enemies on contact"
-                        " + More damage, better handling, higher crit rate"
-                        " -- Less accurate",
+         "ammo sprite": "Rimmed Tapered",
          "class": "Rifle",
          "sprite": "Sprites/Weapon/Cowboy Repeater.png",
          "gunshot sound": "Rifle 1 Shooting",
@@ -3305,7 +3325,7 @@ weapon_repertory = {
          },
     "War and Peace":
         {"name": "War and Peace",
-         "description": "",
+         "ammo sprite": "Pistol Large",
          "class": "Pistol",
          "sprite": "Sprites/Weapon/Peace.png",
          "gunshot sound": "Small arms",
@@ -3335,7 +3355,7 @@ weapon_repertory = {
          "free var": {"War angle": 0}},
     "Hunk of Steel":
         {"name": "Hunk of Steel",
-         "description": "",
+         "ammo sprite": "None",
          "class": "Blunt",
          "sprite": "Sprites/Weapon/Hunk of Steel.png",
          "gunshot sound": "Silence",
@@ -3367,7 +3387,7 @@ weapon_repertory = {
     # |Lawrence|--------------------------------------------------------------------------------------------------------
     "Lawrence's Cutlass & Flintlock":
         {"name": "Lawrence's Cutlass & Flintlock",
-         "description": "It's a nice sword",
+         "ammo sprite": "Lead Ball Large",
          "class": "Melee ",
          "sprite": "Sprites/Weapon/Son's Cutlass.png",
          "gunshot sound": "Silence",
@@ -3398,7 +3418,7 @@ weapon_repertory = {
          "free var": {"Colour": Fun.LIGHT_BLUE}},
     "Captain's Axe & Blunderbuss":
         {"name": "Captain's Axe & Blunderbuss",
-         "description": "It's a nice sword",
+         "ammo sprite": "Lead Ball Large",
          "class": "Melee ",
          "sprite": "Sprites/Weapon/Boarding Axe.png",
          "gunshot sound": "Silence",
@@ -3429,7 +3449,7 @@ weapon_repertory = {
          "free var": {"Colour": Fun.FIRE}},
     "Musket .360":
         {"name": "Musket .360",
-         "description": "",
+         "ammo sprite": "Lead Ball Small",
          "class": "Rifle",
          "sprite": "Sprites/Weapon/Musket .360.png",
          "gunshot sound": "Silence",
@@ -3461,7 +3481,7 @@ weapon_repertory = {
     # |Mark|------------------------------------------------------------------------------------------------------------
     "Mark's Rifle":
         {"name": "Mark's Real Rifle",
-         "description": "",
+         "ammo sprite": "Rifle Medium",
          "class": "Rifle",
          "sprite": "Sprites/Weapon/Mark's Real Rifle.png",
          "gunshot sound": "Gun Silenced",
@@ -3490,7 +3510,7 @@ weapon_repertory = {
          "passive": "none"},
     "Type 30 Rifle":
         {"name": "Type 30 Rifle",
-         "description": "",
+         "ammo sprite": "Rifle Medium",
          "class": "Semi-auto",
          "sprite": "Sprites/Weapon/Type 30 Rifle.png",
          "gunshot sound": "Small arms",
@@ -3519,6 +3539,7 @@ weapon_repertory = {
          "passive": "none"},
     "C4":
         {"name": "C4",
+         "ammo sprite": "Misc",
          "description": "",
          "class": "Throwable",
          "sprite": "Sprites/Weapon/C4.png",
@@ -3553,7 +3574,7 @@ weapon_repertory = {
     # |Viviane|---------------------------------------------------------------------------------------------------------
     "Vivianne's Rifle":
         {"name": "Vivianne's Rifle",
-         "description": "YOU SAID YOU WOULD NOT USE IT",
+         "ammo sprite": "Rifle Medium",
          "class": "?????",
          "sprite": "Sprites/Weapon/Vivianne Rifle.png",
          "gunshot sound": "Rifle 1 Shooting",
@@ -3583,6 +3604,7 @@ weapon_repertory = {
          "passive": "none"},
     "Vivianne's Shotgun":
         {"name": "Vivianne's Shotgun",
+         "ammo sprite": "Shotshell Small",
          "description": "What are you doing with my shotgun?",
          "class": "?????",
          "sprite": "Sprites/Weapon/Vivianne Shotgun.png",
@@ -3613,7 +3635,7 @@ weapon_repertory = {
          "passive": "none"},
     "Vivianne's Leg":
         {"name": "Vivianne's Leg",  # Make it great at countering bullets
-         "description": "",
+         "ammo sprite": "None",
          "class": "Blunt",
          "sprite": "Sprites/Weapon/Vivianne's Leg.png",
          "gunshot sound": "Silence",
@@ -3644,6 +3666,7 @@ weapon_repertory = {
     # Buggy
     "Buggy Gun":
         {"name": "Buggy Gun",
+         "ammo sprite": "Rifle Medium",
          "description": "",
          "class": "Semi-auto",
          "sprite": "Sprites/Weapon/THR-1/Unarmed.png",
@@ -3827,7 +3850,6 @@ weapon_repertory = {
     "Iguana's tail":
         {"name": "Iguana's tail",
          "sprite": "Sprites/Weapon/Tomboy/Iguana's tail.png",
-         "ammo sprite": Fun.AMMO_BAR_SPRITES["Pistol"],
          "gunshot sound": "Revolver shoot",
          "reloading sound": "Revolver reload",
          "jamming sound": "Jamming",

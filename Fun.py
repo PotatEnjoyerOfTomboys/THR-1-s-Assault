@@ -713,30 +713,6 @@ def get_outline(sprite: pg.Surface, colour=BLACK):
 ENTITY_SHADOW = get_image('Sprites/Entity Shadow.png')
 ENTITY_SHADOW_SIZE_2 = pg.transform.scale2x(ENTITY_SHADOW)
 
-AMMO_BAR_SPRITES = {"Slash": "Sprites/Ammo/Slash.png",
-                    "Trust": "Sprites/Ammo/Trust.png",
-                    "Blunt": "Sprites/Ammo/Blunt.png",
-
-                    "Pistol": "Sprites/Ammo/Pistol.png",
-
-                    "Shotgun": "Sprites/Ammo/Shotgun.png",
-                    "Slug": "Sprites/Ammo/Slug.png",
-
-                    "Rifle": "Sprites/Ammo/Rifle.png",
-                    "Toast": "Sprites/Ammo/Toast.png",
-                    "Toast Burned": "Sprites/Ammo/Toast - Burned.png",
-
-                    "Semi-auto": "Sprites/Ammo/Semi-auto.png",
-
-                    "Rocket Launcher": "Sprites/Ammo/Rocket Launcher.png",
-                    "Missile": "Sprites/Ammo/Missile.png",
-                    "Laser": "Sprites/Ammo/Laser.png",
-                    "Flame": "Sprites/Ammo/Flame.png",
-
-                    "Throwable": "Sprites/Ammo/Throwable.png",
-
-                    "?????": "Sprites/Ammo/Weird.png"}
-
 PHONETIC_ALPHABET = [
     'Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo', 'Foxtrot', 'Golf', 'Hotel', 'India', 'Juliet', 'Kilo', 'Lima', 'Mike',
     'November', 'Oscar', 'Papa', 'Québec', 'Romeo', 'Sierra', 'Tango', 'Uniform', 'Victor', 'Whiskey', 'X-Ray', 'Yanky',
@@ -2695,12 +2671,14 @@ def encyclopedia_menu(WIN, CLOCK):
     current_position = []
     previous_options = []
 
+    not_disable_unlocks = True
+    not_disable_unlocks = False
     options = [
     ]
     #
     for op in encyclopedia:
         on_select = "Return"
-        if op not in unlocked_entries:
+        if op not in unlocked_entries and not_disable_unlocks:
             continue
         options.append({"Name": op, "Value": op, "On select": on_select, "Render func": "Text only"})
 
@@ -2747,7 +2725,7 @@ def encyclopedia_menu(WIN, CLOCK):
                     encyclopedia_section = encyclopedia_section[p]
 
                 for op in encyclopedia_section:
-                    if op not in unlocked_entries:
+                    if op not in unlocked_entries and not_disable_unlocks:
                         continue
                     options.append({"Name": op, "Value": op, "On select": "Return", "Render func": "Text only"})
                 message = "Go back"
@@ -2774,7 +2752,7 @@ def encyclopedia_menu(WIN, CLOCK):
                 for p in current_position:
                     encyclopedia_section = encyclopedia_section[p]
                 for op in encyclopedia_section:
-                    if op not in unlocked_entries:
+                    if op not in unlocked_entries and not_disable_unlocks:
                         continue
                     # Text entries are strings, the rest is either a dict or list
                     on_select = "Return"
