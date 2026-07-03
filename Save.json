@@ -4,12 +4,18 @@
             "Lord": [
                   1
             ],
-            "Emperor": [],
-            "Wizard": [],
+            "Emperor": [
+                  1
+            ],
+            "Wizard": [
+                  1
+            ],
             "Sovereign": [],
             "Duke": [],
             "Jester": [],
-            "Condor": [],
+            "Condor": [
+                  1
+            ],
             "Curtis": [],
             "Lawrence": [],
             "Mark": [],
@@ -17,8 +23,8 @@
       },
       "Zoar unlocked": false,
       "Faction mission count": [
+            5,
             1,
-            0,
             0,
             0,
             0,
@@ -91,6 +97,13 @@
             "Gear",
             "Epicurean Medic Rifle",
             "GMG-04B",
-            "Armed Shield Generator"
+            "Armed Shield Generator",
+            "Corrine's Old Rifle",
+            "Custom Mk18 Laser cutter",
+            "Toolkit Manufacturing",
+            "Type 23 Shotgun",
+            "Sculptor",
+            "Manager",
+            "Body Guard"
       ]
 }

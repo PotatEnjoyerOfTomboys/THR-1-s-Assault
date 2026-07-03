@@ -15,7 +15,7 @@ import Items
 import Event
 
 
-from Fun import none
+from Fun import none, enemy_entry_unlock
 from Event import MissionEvent, loss_of_apc, trigger_constant
 
 
@@ -7797,4 +7797,3 @@ def fake_render(boss, WIN, CLOCK):
         if not screenshot_taken:
             Fun.screenshot(WIN)
             screenshot_taken = True
-

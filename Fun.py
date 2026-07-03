@@ -2528,19 +2528,17 @@ def mission_menu(WIN, CLOCK, missions_to_choose, party_info, run_info):
     new_player_party_info = {}
     x_mod = -210-63
     draw = True
+    timer = 0
     while True:
-        if x_mod < 0:
-            x_mod += 21
+        timer += 1
+        if x_mod < 0: x_mod += 21
         # Select
         do_shit = menu_logic.act(WIN, CLOCK)
         if do_shit:
             if do_shit in mission_names:
                 out_party = character_menu(WIN, CLOCK, missions_to_choose, party_info, do_shit)
 
-                if out_party:
-                    # return_value = do_shit
-                    # return_value = new_player_party_info
-                    break
+                if out_party: break
 
                 frame_1 = some_bullshit_for_transitions(WIN)
                 transition = True
@@ -2551,22 +2549,18 @@ def mission_menu(WIN, CLOCK, missions_to_choose, party_info, run_info):
                 transition, frame_1 = menu_transition_start(WIN)
 
             if do_shit == "Quit":
-                # Do that later
                 if confirmation_popup(
-                        WIN, CLOCK, [350, 100],
+                        WIN, CLOCK, [256+83, 83],
                         [
                             {"Name": "No", "Value": "No", "On select": "Return", "Render func": "Text only"},
                             {"Name": "Yes", "Value": "Yes", "On select": "Return", "Render func": "Text only"}
                         ],
-                    text="Are you sure you want to give up?"
-                ) == "Yes":
+                    text="Are you sure you want to give up?") == "Yes":
                     return {}, {}, party_info, [], True
-                pass
             menu_logic.cooldown()
 
         # |Draw|--------------------------------------------------------------------------------------------------------
         if draw:
-            # width, height = WIN.get_size()
             width, height = 630, 450
             frame = pg.Surface((630, 450))
             surface_to_draw = frame
@@ -2575,11 +2569,12 @@ def mission_menu(WIN, CLOCK, missions_to_choose, party_info, run_info):
             temp_ui_font = create_temp_font_1(height)
             surface_to_draw.fill(UI_COLOUR_BACKGROUND)
 
-            # surface_to_draw.blit(frame_1, (0, 0))
+            # Draw menu on the left
             surface_to_draw.blit(menu_sprite, [x_mod, 0])
             surface_to_draw.blit(temp_ui_font.render(write_textline("Mission title"), True, AMBER), (25 + x_mod, 25))
             menu_logic.draw(surface_to_draw, [30 + x_mod, 50])
 
+            # Draw mission details
             if menu_logic.options[menu_logic.selected_option]["Value"] in mission_names:
                 # Get mission details
                 num = 0
@@ -2590,7 +2585,7 @@ def mission_menu(WIN, CLOCK, missions_to_choose, party_info, run_info):
                 mission_details = missions_to_choose[num]
 
                 # 320
-                info_zero = [256+16, 128- 96-8]
+                info_zero = [256+2, 128- 96-8]
                 surface_to_draw.blit(temp_ui_font.render(mission_details['level']["name"], True, AMBER),
                                      (info_zero[0], info_zero[1]))
                 if mission_details["level"]['modifiers'] != ["Skip mission"]:
@@ -2600,8 +2595,11 @@ def mission_menu(WIN, CLOCK, missions_to_choose, party_info, run_info):
                     surface_to_draw.blit(temp_ui_font.render(mission_details["level"]['objective'], True, AMBER),
                                          (info_zero[0], info_zero[1] + 40))
                     enemy_count = len(mission_details["extra info"]['Enemy spawns'])
-                    surface_to_draw.blit(temp_ui_font.render(f'{enemy_count} potential hostile contact', True, AMBER),
-                                         (info_zero[0], info_zero[1] + 60))
+                    enemy_info = f'{enemy_count} potential hostile contact'
+                    if mission_details["level"]['objective'] == "Defense":
+                        enemy_info = f'{mission_details["level"]["free var"]["Defense info"]["Wave count"]} waves'
+
+                    surface_to_draw.blit(temp_ui_font.render(enemy_info, True, AMBER), (info_zero[0], info_zero[1] + 60))
 
                     # Draw map of the mission
                     map_zero = [256+16, 128+16]
@@ -2633,13 +2631,39 @@ def mission_menu(WIN, CLOCK, missions_to_choose, party_info, run_info):
                 surface_to_draw.blit(temp_ui_font.render(f'{mission_details["extra info"]["Mission Reward"]} $', True, AMBER),
                                      (info_zero[0], info_zero[1] + 80))
                 if mission_details['level']["modifiers"]:
-                    surface_to_draw.blit(temp_ui_font.render("Modifiers", True, AMBER),
-                                         (info_zero[0] + 196, info_zero[1]))
+                    mod_zero = info_zero[0] + 196+16, info_zero[1]
+                    surface_to_draw.blit(temp_ui_font.render("Modifiers", True, AMBER), mod_zero)
                     for count, m_mod in enumerate(mission_details['level']["modifiers"]):
                         surface_to_draw.blit(modifier_sprites[m_mod],
-                                             (info_zero[0] + 164+32, info_zero[1] + 18 + 32 * count))
+                                             # (info_zero[0] + 164+32+16, mod_zero[1] + 18 + 32 * count))
+                                             (mod_zero[0] , mod_zero[1] + 18 + 32 * count))
                         surface_to_draw.blit(temp_ui_font.render(m_mod, True, AMBER),
-                                             (info_zero[0] + 196+32, info_zero[1] + 18 + 32 * count + 8))
+                                             (mod_zero[0] + 33, mod_zero[1] + 18 + 32 * count + 8))
+
+            # Draw shop thing
+            if menu_logic.options[menu_logic.selected_option]["Value"] == "Shop":
+                temp_ui_font_2 = create_temp_font_5(height)
+                info_zero = [256+83, 83]
+                colour = [AMBER, [AMBER[0]//2, AMBER[1]//2, AMBER[2]//2]]
+                surface_to_draw.blit(
+                    temp_ui_font_2.render("Contact <Shopkeeper>?", True, colour[int(timer % 120 < 60)]),
+                    (info_zero[0], info_zero[1]))
+
+                for x in range(3):
+                    pg.draw.rect(surface_to_draw, colour[int(not 60 * x < timer % 180 < 60 + 60 * x)], [
+                        info_zero[0]+1 + 65 * x, info_zero[1] + 30, 55, 6])
+
+            if menu_logic.options[menu_logic.selected_option]["Value"] == "Quit":
+                temp_ui_font_2 = create_temp_font_5(height)
+                info_zero = [256+83, 83]
+                colour = [AMBER, [AMBER[0]//2, AMBER[1]//2, AMBER[2]//2]]
+                surface_to_draw.blit(
+                    temp_ui_font_2.render("Heading back to base?", True, colour[int(timer % 120 < 60)]),
+                    (info_zero[0], info_zero[1]))
+
+                for x in range(3):
+                    pg.draw.rect(surface_to_draw, colour[int(not 60 * x < timer % 180 < 60 + 60 * x)], [
+                        info_zero[0]+1 + 65 * x, info_zero[1] + 30, 55, 6])
 
             crt(surface_to_draw)
             surface_to_draw.blit(menu_overlay, [0, 0])
@@ -3131,8 +3155,7 @@ def weapons_menu(WIN, CLOCK, party_info, run_info, exit_message="Continue", from
         # Select
         do_shit = menu_logic.act(WIN, CLOCK)
         if do_shit:
-
-            if do_shit in ["Return", "Quit"]:
+            if do_shit in ["Return", "Quit"] and allow_change:
                 break
             menu_logic.cooldown()
 
@@ -3172,10 +3195,26 @@ def weapons_menu(WIN, CLOCK, party_info, run_info, exit_message="Continue", from
 
             # Display how much it would cost to change the weapons, Check for upgrades because of Seduced Shopkeeper
             if from_shop:
-                text = f"{cost}"
+                text = f"Total: {cost}"
+                y_mod = 0
+                for count, op in enumerate(menu_logic.options):
+                    if op["Render func"] == "Slider":
+                        # if not allow_change and op["Value"] != og_weapons[op["Name"]]:
+                        if op["Value"] != og_weapons[op["Name"]]:
+
+                            p_cost = 500
+                            if op["Name"] == "Emperor":
+                                if "Seduced Shopkeeper" in run_info["Upgrades"]:
+                                    p_cost = "Special favour"
+                            surface_to_draw.blit(font.render(
+                                f"{weapon_ownership_table[op['Name']][round(op['Value'], 1)]} - {p_cost}",
+                                True, AMBER), [400, base_pos[1] + 15 + y_mod])
+                            y_mod += 15
+
                 if not allow_change:
-                    text = f"{cost} - Not enough funds"
-                surface_to_draw.blit(font.render(text, True, AMBER), [400, 90])
+                    text = f"Total: {cost} - Not enough funds"
+                surface_to_draw.blit(font.render(text, True, AMBER), [400, base_pos[1] + 47 + 105 - 15])
+                pg.draw.rect(surface_to_draw, (37, 42, 38), (400, base_pos[1] + 47 + 105, 110, 2))
 
             # Draw options
             y = base_pos[1] + 15
@@ -3190,7 +3229,7 @@ def weapons_menu(WIN, CLOCK, party_info, run_info, exit_message="Continue", from
                 surface_to_draw.blit(font.render(write_textline(f"{op['Name']}", send_back=True), True, colour), pos)
 
                 if op["Render func"] == "Slider":
-                    if not allow_change and op["Value"] != og_weapons[op["Name"]]:
+                    if not allow_change and op["Value"] != og_weapons[op["Name"]] and not (op["Name"] == "Emperor" and "Seduced Shopkeeper" in run_info["Upgrades"]):
                         colour = RED
 
                     # Draw portraits to help identify
@@ -4141,7 +4180,7 @@ def shop_menu(WIN, CLOCK, party_info, run_info):
         for txt_line in split_text(lines, limit=34):
             other_services_lines.append(txt_line)
 
-    popup_pos = [28 + 36, 28 + 40]
+    popup_pos = [28 + 36+200, 28 + 40]
     draw = True
     while True:
         # Select
@@ -4160,14 +4199,14 @@ def shop_menu(WIN, CLOCK, party_info, run_info):
                 break
             if do_shit == "Other services":
                 shop_services = confirmation_popup(
-                        WIN, CLOCK, popup_pos,
+                        WIN, CLOCK, [popup_pos[0]-200, popup_pos[1]],
                         [
-                            {"Name": "Heal", "Value": "Full Heal", "On select": "Return", "Render func": "Text only"},
+                            {"Name": "Heal teammates", "Value": "Full Heal", "On select": "Return", "Render func": "Text only"},
                             {"Name": "Change weapons", "Value": "Change weapons", "On select": "Return", "Render func": "Text only"},
                             {"Name": "Reroll Upgrades", "Value": "Reroll Upgrades", "On select": "Return", "Render func": "Text only"},
                             {"Name": "Go Back", "Value": "AAAA", "On select": "Return", "Render func": "Text only"},
                         ],
-                        text="?????"
+                        text="Extra services"
                     )
                 if shop_services == "Full Heal":
                     if run_info["Funds"] >= 2750:
@@ -4195,7 +4234,7 @@ def shop_menu(WIN, CLOCK, party_info, run_info):
                             [
                                 {"Name": "Okay", "Value": "No", "On select": "Return", "Render func": "Text only"},
                             ],
-                            text="We don't make credit, come back richer."
+                            text="Not enough money."
                         )
                 if shop_services == "Change weapons":
                     weapons_menu(WIN, CLOCK, party_info, run_info, from_shop=True)
@@ -7733,6 +7772,35 @@ def enemy_entry_unlock(enemy_type, faction, save_data, WIN, CLOCK):
             text=f"Entry '{enemy_entry}' added to Databank in '{'Root\Enemies' + ["\Asset Protecting & Collection Dept.",
                                                                                   "\Burning Winds Band",
                                                                                    "\C8 Mercenary Army"][faction]}'", popup_width=UNLOCK_POPUP_WIDTH)
+        if enemy_type in ["Boss 1", "Boss 2", "True Final Boss", "Alt Zoar Final boss", "Alt THR-1 Final boss"]:
+            return
+        gun = {
+            "Manager": "Laser Carbine",
+            "Body Guard": "Laser Rifle",
+            "Heavy Sniper": "Heavy Laser",
+            "Radar Operator": "Radar",
+            "Missile Operator": "Missile Pod",
+            "Marksman": "Marker Laser",
+            "Enforcer": "ARWS",
+            "Sculptor": "Plasma Spray",
+            "Skirmisher": "Plasma Rifle",
+            "BoomStick": "Laser Shotgun",
+            "Smoker": "Smoke Dispenser",
+            "Snare": "Desert Shotgun",
+            "Crusher": "Gun Hammer",
+            "Assassin": "Pile Bunker",
+            "Infantry": "Combat Rifle",
+            "Flamer": "Flamethrower",
+            "Spotter": "Binoculars",
+            "Artilleryman": "Artillery Radio",
+            "Grenadier": "Napalm Grenade Launcher",
+            "Bulwark": "Bulwark Minigun",
+            "Commanding Officer": "Combat Rifle",
+            "Super Bulwark": "Bulwark Minigun",
+        }[enemy_entry]
+        weapon_entry_unlock(gun, save_data, WIN, CLOCK)
+
+
 
 def boss_entry_unlock(boss, faction, save_data, WIN, CLOCK):
     if boss not in save_data["Databank entries unlocked"]:

@@ -12,14 +12,13 @@ import sys  # Cool video https://www.youtube.com/watch?v=2Yj5mmKWukw
 #   AA Site - Drone builder (animations)
 #   Voices
 #       Armored Shield generator
+#           Just for the turret attack
+#           Charging!, Aiming!, FIRE        Screams of pain on death
 #       Hover Tank
 #       Fire Support Mech
 #       Gilgamesh
 #       Attack Helicopter
 #   Story elements (do small comics)
-#   UI to redo
-#       Store
-#       Mission select
 
 pg.mixer.pre_init()
 pg.init()
@@ -148,7 +147,7 @@ def main_game(party_info):
         "Time spend in mission": 0,
         "Mission historic": [],  # {"Name": <str>, "Faction": <int>}
         "Funds": 0,
-        "Upgrades": [],
+        "Upgrades": ["Seduced Shopkeeper"],
         # "Funds": 10000000000, # "Upgrades": [i for i in Fun.UPGRADE_INFO],    # Used for testing
         "Available upgrades": [],
         "Upgrade pool": []
