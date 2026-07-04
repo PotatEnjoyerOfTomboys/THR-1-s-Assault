@@ -2696,10 +2696,9 @@ def encyclopedia_menu(WIN, CLOCK):
     previous_options = []
 
     not_disable_unlocks = True
-    # not_disable_unlocks = False
+    not_disable_unlocks = False
     options = [
     ]
-    #
     for op in encyclopedia:
         on_select = "Return"
         if op not in unlocked_entries and not_disable_unlocks:
@@ -2836,7 +2835,7 @@ def encyclopedia_menu(WIN, CLOCK):
                                     sprite = get_image(f'Sprites/UI/Encyclopedia images/{text}.png')
                                     sprite_cache.update({text: sprite})
                                 surface_to_draw.blit(sprite, (280, 70 + 14 * count))
-                                count += sprite.get_height() / 14
+                                count += sprite.get_height() / 11.5
                                 continue
                         except IndexError:
                             # You mad?
@@ -3085,7 +3084,6 @@ weapon_ownership_table = {
         "Mark": ["Mark's Rifle", "Type 30 Rifle", "C4"],
         "Vivianne": ["Vivianne's Rifle", "Vivianne's Shotgun", "Vivianne's Leg"],
 }
-
 
 def weapons_menu(WIN, CLOCK, party_info, run_info, exit_message="Continue", from_shop=False):
     options = []

@@ -4013,7 +4013,7 @@ def enemy_draw_bulwark(self, WIN, scrolling):
         angle_to_add = (360 / self.weapon.reload_time) * self.no_shoot_state
 
     Fun.blitRotate(WIN, pg.transform.flip(self.weapon.sprite, True, -90 < self.aim_angle < 90),
-                   Fun.move_with_vel_angle([self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]], 10,
+                   Fun.move_with_vel_angle([self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]], 4,
                                            self.aim_angle),
                    [0, 0], 180 - self.aim_angle + angle_to_add)
     #
@@ -6891,6 +6891,7 @@ F2_RESIT_H = {"Physical": 1,    "Fire": 1,    "Explosion": 1,    "Energy": 1,   
 
 F3_RESIT_L = {"Physical": 1,    "Fire": 1,    "Explosion": 0.66, "Energy": 1,       "Melee": 1,     "Healing": 0}
 F3_RESIT_M = {"Physical": 0.75, "Fire": 1,    "Explosion": 0.5,  "Energy": 1,       "Melee": 1,     "Healing": 0}
+F3_RESIT_F = {"Physical": 0.75, "Fire": 0.25, "Explosion": 0.8,  "Energy": 1,       "Melee": 1,     "Healing": 0}
 F3_RESIT_H = {"Physical": 0.5,  "Fire": 0.25, "Explosion": 0.33, "Energy": 0.4,     "Melee": 1,     "Healing": 0}
 
 NO_RESIT_L = {"Physical": 1,    "Fire": 1,    "Explosion": 1,    "Energy": 1,       "Melee": 1,     "Healing": 0}
@@ -7359,7 +7360,7 @@ enemy_repertory = {
          "type": "Shock",
          "targeting range": R_MO, "targeting angle": 60, "stealth mod": S_LO, "stealth counter": C_MO,
          "wall hack": False,
-         "health": H_MH, "armour": A_MH, "damage resistances": F3_RESIT_M,
+         "health": H_MH, "armour": A_MH, "damage resistances": F3_RESIT_F,
          "thickness": T_MO, "vel max": V_LO, "speed": 1.5, "friction": 1.5,
          "weapon": "Flamethrower",
          "func input": "enemy_input_faction_3_basic", "func act": "enemy_act_type_1", "func draw": "enemy_draw_basic",
@@ -7755,6 +7756,7 @@ RIGEL_SEGMENT_WIDTH = RIGEL_SEGMENT.get_width()
 RIGEL_SEGMENT_HEIGHT = RIGEL_SEGMENT.get_height()
 RIGEL_SEGMENT_ORIGIN = [RIGEL_SEGMENT_WIDTH * 0.5, RIGEL_SEGMENT_HEIGHT * 0]
 
+
 def fake_render(boss, WIN, CLOCK):
     bosses_to_draw = []
     for count, b in enumerate(boss):
@@ -7773,6 +7775,14 @@ def fake_render(boss, WIN, CLOCK):
     # boss_to_draw.free_var["Move angle"] += 33
     # boss_to_draw.free_var["Move angle"] -= 33
     # boss_to_draw.aim_angle -= 130 -90
+    bosses_to_draw[-1].aim_angle = -145
+    bosses_to_draw[-1].time = 2
+    # bosses_to_draw[-1].angle = -160
+    # bosses_to_draw[-1].free_var["Move angle"] = -145
+    # bosses_to_draw[-1].free_var["Move angle"] = -145
+    # bosses_to_draw[-1].free_var["Machine Gun Angle"] = -105
+    # bosses_to_draw[-1].draw_angle = 125
+
     screenshot_taken = False
 
     while True:

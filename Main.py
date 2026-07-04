@@ -131,13 +131,34 @@ import Entity
 import Upgrades
 import Main_Loop
 
-
-# Entity.fake_render(["Fire Support Mech"], WIN, CLOCK)
+# Entity.fake_render(["Attack Helicopter"], WIN, CLOCK)
 # Entity.fake_render(["Gilgamesh"], WIN, CLOCK)
 # Entity.fake_render(["Armed Shield Generator"], WIN, CLOCK)
-# ["Energy Generator", "Shield Generator", "Missile Battery", "Drone builder", "AA Laser", "Drone"]
 # Entity.fake_render(["Energy Generator", "Shield Generator", "Missile Battery", "AA Laser", "Drone"], WIN, CLOCK)
 
+# ||~Body guard||||
+# ||~Heavy Sniper||||
+# ||~Radar Operator||||
+# ||~Missile Operator||||
+# ||~Marksman||||
+# ||~Enforcer||||
+# Professional Jerks||~Manager||||Within the  .||||It's said that the turn over rate for this position is quite high and that
+# ||~AA Site||||
+
+# Mean Lean Killing Machine||~Skirmisher||||Reptilian military tradition favours using light mobile troops. As a result reptilian skirmishers are one of most common type of infantry in their armies.||||
+# ||~BoomStick||||
+# ||~Snare||||
+# ||~Crusher||||
+# ||~Assassin||||
+# ||~Sculptor||||
+
+# C8 Army Grunt||~Infantry||||The C8 Mercenary Army makes all it's recruits start as basic infantry. After a short time, an infantryman can apply to get a specialization.||||If the infantryman passes the specialization course. He will be changing positions to that specialization.||||Specialists have a better pay than basic infantryman.
+# C8 Army Specialist||~Flamer||||The flamer's uniform features a unique
+# C8 Army Specialist||~Spotter||||
+# C8 Army Specialist||~Artilleryman||||
+# C8 Army Specialist||~Grenadier||||,
+
+# Elite Merc. Team THR-1||~||||||
 def main_game(party_info):
     big_game_loop = True
     current_mission = 1
