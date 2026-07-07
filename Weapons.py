@@ -4784,14 +4784,14 @@ weapon_repertory = {
 }
 # Encyclopedia notes
 # 	"Weapon-Energy-Laser Carbine": "",
-#   Manufacturer: 2nd Weapons RnD Division||Power Supply: ?????||||A variant of the <laser rifle>. It is still an experimental design but testing shows promising results.||||The goal of this design is to reduce overall length while retaining capabilities. If successful, it might very well become a replacement to the original.
+#   Manufacturer: Zither's 2nd Weapons RnD Division||Power Supply: ?????||||A variant of the <laser rifle>. It is still an experimental design but testing shows promising results.||||The goal of this design is to reduce overall length while retaining capabilities. If successful, it might very well become a replacement to the original.
 # 	"Weapon-Energy-Heavy Laser": "",
-#   Manufacturer: 2nd Weapons RnD Division||Power Supply: ?????||||An upgraded version of the <laser rifle>. Due to its increased production cost, it only gets assigned to troops with
+#   Manufacturer: Zither's 2nd Weapons RnD Division||Power Supply: ?????||||An upgraded version of the <laser rifle>. Due to its increased production cost, it only gets assigned to troops who proved themselves to be a valuable asset beyond just being a meat shield.
 # 	"Weapon-Energy-Marker Laser": "",
-#   Manufacturer: 2nd Weapons RnD Division||Power Supply: ?????||||Another variant of the <laser rifle>. Based on analysis of a captured example, we know that it the beam causes a form of radiation to makes most materials glow.||||The way the weapon is fielded implies that it's used to mark tactically significant targets for elimination.
+#   Manufacturer: Zither's 2nd Weapons RnD Division||Power Supply: ?????||||Another variant of the <laser rifle>. Based on analysis of a captured example, we know that it the beam causes a form of radiation to makes most materials glow.||||The way the weapon is fielded implies that it's used to mark tactically significant targets for elimination.
 
 # 	"Weapon-Heavy-ARWS": "",
-#   Manufacturer: 1st and 3rd Weapons RnD Division||||The All Range Weapon System is name given to an add-on to the
+#   Manufacturer: Zither's 1st and 3rd Weapons RnD Division||||The All Range Weapon System is name given to an add-on to the
 # 	"Weapon-Heavy-Napalm Grenade Launcher": "",
 #   Manufacturer: Steel Wings Heavy Ind.||Caliber: 50mm Grenade||||
 # 	"Weapon-Gear-Artillery Radio": "",

@@ -8,8 +8,15 @@ import sys  # Cool video https://www.youtube.com/watch?v=2Yj5mmKWukw
 # Version 1.0
 #   Rigel death particle
 #   Character conversations & Encyclopedia
+#       Convo
+#       Encyclopedia
+#           Annals
+#               00
+#               01
+#               02
+#           Organizations
+#
 #   More sound effects
-#   AA Site - Drone builder (animations)
 #   Voices
 #       Armored Shield generator
 #           Just for the turret attack
@@ -131,37 +138,14 @@ import Entity
 import Upgrades
 import Main_Loop
 
-# Entity.fake_render(["Attack Helicopter"], WIN, CLOCK)
-# Entity.fake_render(["Gilgamesh"], WIN, CLOCK)
-# Entity.fake_render(["Armed Shield Generator"], WIN, CLOCK)
-# Entity.fake_render(["Energy Generator", "Shield Generator", "Missile Battery", "AA Laser", "Drone"], WIN, CLOCK)
 
-# ||~Body guard||||
-# ||~Heavy Sniper||||
-# ||~Radar Operator||||
-# ||~Missile Operator||||
-# ||~Marksman||||
-# ||~Enforcer||||
-# Professional Jerks||~Manager||||Within the  .||||It's said that the turn over rate for this position is quite high and that
-# ||~AA Site||||
-
-# Mean Lean Killing Machine||~Skirmisher||||Reptilian military tradition favours using light mobile troops. As a result reptilian skirmishers are one of most common type of infantry in their armies.||||
 # ||~BoomStick||||
-# ||~Snare||||
-# ||~Crusher||||
-# ||~Assassin||||
-# ||~Sculptor||||
+# ||~Snare||||Snares are a type of reptilian infantry whose role is to entrap and or weaken enemies.
 
-# C8 Army Grunt||~Infantry||||The C8 Mercenary Army makes all it's recruits start as basic infantry. After a short time, an infantryman can apply to get a specialization.||||If the infantryman passes the specialization course. He will be changing positions to that specialization.||||Specialists have a better pay than basic infantryman.
-# C8 Army Specialist||~Flamer||||The flamer's uniform features a unique
-# C8 Army Specialist||~Spotter||||
-# C8 Army Specialist||~Artilleryman||||
-# C8 Army Specialist||~Grenadier||||,
-
-# Elite Merc. Team THR-1||~||||||
+# Elite Merc. Team THR-1||~THR-1||||
 def main_game(party_info):
     big_game_loop = True
-    current_mission = 1
+    current_mission = 1.
     run_info = {
         "Player party": player_party,
         "Missions completed": 0,

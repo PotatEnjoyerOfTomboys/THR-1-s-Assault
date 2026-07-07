@@ -4326,9 +4326,9 @@ def aa_site_act_init(self, entities, level):
     entities["entities"][-1].force_draw = True
     entities["entities"].append(Entity(enemy_repertory["Missile Battery"], team=self.team, pos=pos[1], start_angle=random.randint(-180, 180)))
     entities["entities"][-1].force_draw = True
-    entities["entities"].append(Entity(enemy_repertory["Drone builder"], team=self.team, pos=pos[2], start_angle=random.randint(-180, 180)))
-    entities["entities"][-1].force_draw = True
     entities["entities"].append(Entity(enemy_repertory["Shield Generator"], team=self.team, pos=pos[3], start_angle=random.randint(-180, 180)))
+    entities["entities"][-1].force_draw = True
+    entities["entities"].append(Entity(enemy_repertory["Drone builder"], team=self.team, pos=pos[2], start_angle=random.randint(-180, 180)))
     entities["entities"][-1].force_draw = True
     self.func_act = aa_site_act_energy_generator
 
@@ -4425,7 +4425,10 @@ def aa_site_act_drone_factory(self, entities, level):
 
     if drone_count < 12:
         if start_up_lag_handler(self, 60):
-            pos = Fun.random_point_in_circle(self.pos, 16)
+            #
+            pos = Fun.move_with_vel_angle(self.pos, 16, self.angle)
+            for x in range(8):
+                entities["particles"].append(Particles.Smoke(Fun.random_point_in_circle(self.pos, 5)))
             entities["entities"].append(Entity(enemy_repertory["Drone"], team=self.team, pos=pos,
                                                start_angle=random.randint(-180, 180)))
 
@@ -4502,7 +4505,8 @@ def aa_site_draw_shield_generator(self, WIN, scrolling):
 
 def aa_site_draw_drone_factory(self, WIN, scrolling):
     h_mod = 1
-    Fun.draw_spritestack(WIN, Fun.SPRITE_HOVER_TANK_CHASSIS,
+    animation_state = round(self.free_var["Startup lag"] / 5)
+    Fun.draw_spritestack(WIN, Fun.SPRITE_AA_SITE_FACTORY[animation_state],
                             [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
                              self.angle, height_diff=h_mod)
 
@@ -7247,10 +7251,10 @@ enemy_repertory = {
         {"name": "Snare",
          "faction": "FAC-2",
          "type": "Grunt",
-         "targeting range": R_MO, "targeting angle": 60, "stealth mod": S_LO, "stealth counter": C_MH,
+         "targeting range": R_MO, "targeting angle": 60, "stealth mod": S_LO, "stealth counter": C_HO,
          "wall hack": False,
          "health": H_MH, "armour": A_MO, "damage resistances": F2_RESIT_H,
-         "thickness": T_LM, "vel max": V_HO, "speed": 1.5, "friction": 1.5,
+         "thickness": T_LM, "vel max": V_HO*1.25, "speed": 1.5, "friction": 1.5,
          "weapon": "Desert Shotgun",
          "func input": "enemy_input_faction_2_basic",
          "func act": "enemy_act_type_1",
@@ -7762,22 +7766,23 @@ def fake_render(boss, WIN, CLOCK):
     for count, b in enumerate(boss):
         bosses_to_draw.append(Entity(enemy_repertory[b]))
         bosses_to_draw[-1].pos = [
-            [0, 0],
-
-            [-96, -16],
-            [48, -48],
-            [96, 32],
-            [-96, 48],
-
-            [-16, 52],
+            [-2, 0],
+            [-55, -25],
+            [-55, 25],
+            [60, 25],
+            [45, -35],
+            [10, -45],
+            [30, -12],
         ][count]
-        bosses_to_draw[-1].angle = random.randint(-180, 180)
+        bosses_to_draw[-1].angle = random.randint(-135, -45)
+    for b in bosses_to_draw:
+        b.aim_angle = b.angle + random.randint(-35, 35)
     # boss_to_draw.free_var["Move angle"] += 33
     # boss_to_draw.free_var["Move angle"] -= 33
     # boss_to_draw.aim_angle -= 130 -90
     bosses_to_draw[-1].aim_angle = -145
-    bosses_to_draw[-1].time = 2
-    # bosses_to_draw[-1].angle = -160
+    # bosses_to_draw[-1].time = 2
+    bosses_to_draw[-1].angle = -160
     # bosses_to_draw[-1].free_var["Move angle"] = -145
     # bosses_to_draw[-1].free_var["Move angle"] = -145
     # bosses_to_draw[-1].free_var["Machine Gun Angle"] = -105
@@ -7807,3 +7812,7 @@ def fake_render(boss, WIN, CLOCK):
         if not screenshot_taken:
             Fun.screenshot(WIN)
             screenshot_taken = True
+            # for x in range(90):
+            #     CLOCK.tick(60)
+            # return
+

@@ -774,6 +774,11 @@ SPRITE_AA_SITE_SHIELD = get_sprite_stack_list(get_image('Sprites/Vehicles/AA Sit
 SPRITE_AA_SITE_LASER = get_sprite_stack_list(get_image('Sprites/Vehicles/AA Site - Laser.png'), 50)
 SPRITE_AA_SITE_TURRET = get_sprite_stack_list(get_image('Sprites/Vehicles/AA Site - Laser Turret.png'), 12)
 
+SPRITE_AA_SITE_FACTORY_SHEET = get_image('Sprites/Vehicles/AA Site - Drone Factory.png')
+SPRITE_AA_SITE_FACTORY = [
+    get_sprite_stack_list(SPRITE_AA_SITE_FACTORY_SHEET.subsurface((0 + 50 * p, 0, 50, 1250)), 50) for p in range(13)
+]
+
 
 # |Radio transmission sprites|-----------------------------------------------------------------------------------------
 def desheetator_radio(sprite_sheet, height):
