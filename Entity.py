@@ -5817,7 +5817,7 @@ def rigel_on_death(self, entities, level):
                 size=Fun.get_random_element_from_list([3, 4, 6])))
         return
     # Make death particle
-    entities["UI particles"].append(Particles.RigelDeathParticle(self.pos, 1200))
+    entities["UI particles"].append(Particles.RigelDeathParticle(self.pos, 1200, self.free_var["Mech"]))
 
     level["events"].append(
         MissionEvent("Finishing", Event.trigger_on_for, False, [Event.change_scrolling_target], free_var={"Timer": 60 * 5, "Manual target": self.pos}))
@@ -7521,7 +7521,8 @@ enemy_repertory = {
          "faction": "FAC-3",
          "type": "Elite",
          "targeting range": R_MO, "targeting angle": D_HO, "stealth mod": S_LO, "stealth counter": C_MO,
-         "wall hack": False, "health": H_HO * 12, "armour": 0, "damage resistances": F3_RESIT_H,
+         # "wall hack": False, "health": H_HO * 12, "armour": 0, "damage resistances": F3_RESIT_H,
+         "wall hack": False, "health": 1, "armour": 0, "damage resistances": F3_RESIT_H,
          "thickness": 48,
          "vel max": V_LO * 0.8, "speed": V_LO * 0.8, "friction": V_LO * 0.8,
          "weapon": "Bloodhound Weaponry",

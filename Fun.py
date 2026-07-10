@@ -6980,7 +6980,7 @@ def enemy_squad_generator(current_mission, faction=0, modified_point_budget=0):
 
 
 # @timeme
-def map_generator(current_mission, testing=False, defense_mode=False):
+def map_generator(current_mission, testing=False, defense_mode=False, level_objective="Defense"):
     w = (255, 255, 255, 255)
     full_wall = [w, w, w, w, w, w, w, w]
 
@@ -7010,7 +7010,12 @@ def map_generator(current_mission, testing=False, defense_mode=False):
     # Get size of the map
     if not defense_mode:
         mum = 10 + current_mission//3 * 3
+        if level_objective == "Seek and Destroy":
+            mum = round(mum * 0.7)
+
         min_size, max_size = 4, {"odd": mum - 1, "even": mum}[meme(mum)]
+        if max_size - min_size <= min_size:
+            max_size = max_size + min_size + 1
         # print(f"{max_size=}")
         num = random.randint(min_size, max_size - min_size)
         map_width = {"odd": num-1, "even": num}[meme(num)]
@@ -7019,8 +7024,7 @@ def map_generator(current_mission, testing=False, defense_mode=False):
         map_height, map_width = 4, 4
 
     get_seg_side = lambda seg_img, side: seg_img.subsurface(side)
-    columns = [
-    ]
+    columns = []
 
     # Generate the map
     map_sprite = pg.Surface((map_width * 8, map_height * 8))
@@ -7153,7 +7157,6 @@ def map_generator(current_mission, testing=False, defense_mode=False):
             size_control = caseoh
             biggest_bubble = count
 
-
     for count, bubble in enumerate(potential_bubbles):
         if count == biggest_bubble:
             continue
@@ -7267,9 +7270,10 @@ def level_generator(possible_levels, party_info, run_info, current_mission=1, mi
                 level["name"] = write_textline("Finale 2")
             else:
                 level["name"] = write_textline("Finale 3")
+
     # Bosses get their own generator
     if level["objective"] == "Defense":
-        level_map = map_generator(current_mission, defense_mode=True)
+        level_map = map_generator(current_mission, defense_mode=True, level_objective=level['objective'])
     elif level["objective"] == "Defeat Elite Unit":
         # Get random maps
         segment_bank = []
@@ -7278,7 +7282,7 @@ def level_generator(possible_levels, party_info, run_info, current_mission=1, mi
                 segment_bank.append(pg.image.load(f'Maps/{current_mission}/{x}').convert())
         level_map = get_random_element_from_list(segment_bank)
     else:
-        level_map = map_generator(current_mission)
+        level_map = map_generator(current_mission, level_objective=level['objective'])
     level.update({"width height": [level_map.get_width() * 32, level_map.get_height() * 32]})
     # White     (255, 255, 255)     Walls
     # Teal      (0, 255, 255)       Walls, sprite
@@ -7469,6 +7473,7 @@ def level_generator(possible_levels, party_info, run_info, current_mission=1, mi
                 possible_objective_zone.pop(num)
                 # "Cap points": [{"Pos": [x, y], "Cap gauge": 0, "Captured": False}]
         if level["objective"] == "Seek and Destroy":
+            point_budget = round(point_budget * 0.7)
             level["events"].append(['Goal', {'rects': [], 'Conditions': 'trigger_check_zero_enemies'}, True, ['win']])
         if level["objective"] == "Eliminate Commander":
             # Double point budget

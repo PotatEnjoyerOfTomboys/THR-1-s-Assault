@@ -15,7 +15,16 @@ import sys  # Cool video https://www.youtube.com/watch?v=2Yj5mmKWukw
 #               01
 #               02
 #           Organizations
-#
+#               Merc. Team
+#                   THR-1 profiles
+#                   Zoar Profiles
+#               Manufacturers
+#                   Old West
+#                   Socrates
+#                   FMB
+#                   N&B
+#                   CFCR
+#                   Old English armoury
 #   More sound effects
 #   Voices
 #       Armored Shield generator
@@ -139,20 +148,16 @@ import Upgrades
 import Main_Loop
 
 
-# ||~BoomStick||||
-# ||~Snare||||Snares are a type of reptilian infantry whose role is to entrap and or weaken enemies.
-
-# Elite Merc. Team THR-1||~THR-1||||
 def main_game(party_info):
     big_game_loop = True
-    current_mission = 1.
+    current_mission = 1
     run_info = {
         "Player party": player_party,
         "Missions completed": 0,
         "Time spend in mission": 0,
         "Mission historic": [],  # {"Name": <str>, "Faction": <int>}
         "Funds": 0,
-        "Upgrades": ["Seduced Shopkeeper"],
+        "Upgrades": [],
         # "Funds": 10000000000, # "Upgrades": [i for i in Fun.UPGRADE_INFO],    # Used for testing
         "Available upgrades": [],
         "Upgrade pool": []

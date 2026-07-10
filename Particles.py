@@ -1021,19 +1021,22 @@ class MissionStartText:
 
 
 class RadioTransmission:
-    def __init__(self, sprite, text, colour, duration, extra_parts=()):
+    def __init__(self, sprite, text, colour, duration, extra_parts=(), cooldown=3):
         self.survive_wipe = True  # Should it survive FPS boosting measures
         self.duration = duration
         self.sprite = sprite
         self.text = text
         self.translate_text()
+        new_text = []
+        for t in self.text:
+            new_text.append(str_to_list(t))
+        self.text = new_text
         self.colour = colour
-        # self.text = []
-        # for x in text:
-        #     self.text.append(pg.font.SysFont("system", 25).render(x, True, color))
-        # self.pos = [pos[0] - self.text.get_width() // 2,
-        #             pos[1] - self.text.get_height() // 2]
         self.extra_parts = extra_parts
+
+        self.text_to_render = [""]
+        self.text_cooldown_time = cooldown
+        self.text_cooldown = 0
 
     def draw(self, WIN, scrolling):
         # Fade in
@@ -1042,20 +1045,34 @@ class RadioTransmission:
             # Draws the text box
             width = WIN.get_width()
             height = WIN.get_height()
-
             high_point = height - 24 - 64 * zoom
             left_point = width // 2 - 303 * zoom
             draw_transparent_rect(WIN, [left_point, high_point - 4, round(606 * zoom), round(72 * zoom)],
                                   (25, 25, 25), 125)
 
+
             # Draws the sprite
             WIN.blit(pg.transform.scale_by(self.sprite, zoom), [left_point + 6, high_point])
+
+            # Get the text to write
+            if self.text_cooldown == 0:
+                if self.text:
+                    if self.text[0]:
+                        self.text_to_render[-1] += self.text[0][0]
+                        self.text[0].pop(0)
+                        self.text_cooldown = self.text_cooldown_time
+                    else:
+                        self.text.pop(0)
+                        self.text_to_render.append("")
+                        self.text_cooldown = self.text_cooldown_time * 2
+            else:
+                self.text_cooldown -= 1
 
             # Writes the text
             y_mod = 0
             # Recheck text because that line might have broken everything
             temp_font = pg.font.SysFont("system", round(0.06 * height))
-            for text_to_draw in self.text:
+            for text_to_draw in self.text_to_render:
                 text_sprite = temp_font.render(text_to_draw, True, self.colour)
                 WIN.blit(text_sprite, [left_point + 6 + (68 * zoom), high_point + y_mod])
                 y_mod += text_sprite.get_height()
@@ -1067,9 +1084,14 @@ class RadioTransmission:
 
             self.text = self.extra_parts[0][1]
             self.translate_text()
+            new_text = []
+            for t in self.text:
+                new_text.append(str_to_list(t))
+            self.text = new_text
             self.colour = self.extra_parts[0][2]
             self.duration = self.extra_parts[0][3]
             self.extra_parts.pop(0)
+            self.text_to_render = [""]
 
     def translate_text(self):
         if type(self.text) == str:
@@ -1288,15 +1310,22 @@ class RigelIntro:
 
 
 class RigelDeathParticle:
-    def __init__(self, pos, duration):
+    def __init__(self, pos, duration, mech):
         self.survive_wipe = True
         self.pos = [pos[0], pos[1] - 16]
-
         # Other properties
         self.duration = duration
         self.particles = []  # Stores the GrowingCircle particles
         # GrowingCircleTransparent
-        # Add
+        # Add parts breaking apart
+        self.mech = mech
+        self.parts = {
+            "Leg": {"Pos": pos, "Angle": 0, "Vel": 0, "Time": 0},
+            "Torso": {"Pos": pos, "Angle": 0, "Vel": 6, "Time": 240},
+            "Head": {"Pos": pos, "Angle": random.uniform(70, 110), "Vel": 6, "Time": 360},
+            "Arm L": {"Pos": pos, "Angle": 0, "Vel": 6, "Time": 360},
+            "Arm R": {"Pos": pos, "Angle": 0, "Vel": 6, "Time": 360}
+        }
 
     def draw(self, WIN, scrolling):
         if self.duration > 0:
@@ -1307,16 +1336,16 @@ class RigelDeathParticle:
             else:
                 self.particles.append(RandomParticle2(
                     [self.pos[0], self.pos[1]],
-                    (int(64 - math.sin(self.duration * 0.025) * 64),
-                     int(96 - math.sin(self.duration * 0.035) * 64),
-                     int(64 - math.sin(self.duration * 0.005) * 64)),
+                    (int(RIGEL_ENERGY[0] - math.sin(self.duration * 0.025) * 64),
+                     int(RIGEL_ENERGY[1] - math.sin(self.duration * 0.035) * 64),
+                     int(RIGEL_ENERGY[2] - math.sin(self.duration * 0.005) * 64)),
                     3 * random.random(), 45, 360 * random.random(), size=3))
                 if self.duration % 45 == 0:
                     play_sound("Betel Death")
                     mod = random.random()
                     pos = random_point_in_circle(self.pos, 32)
                     self.particles.append(GrowingCircleTransparent(
-                        pos, (55, 11, 72), 1 * mod, random.randint(25 + round(20 * mod), 75), 0, 0, alpha=125))
+                        pos, RIGEL_ENERGY, 1 * mod, random.randint(25 + round(20 * mod), 75), 0, 0, alpha=125))
 
             for i in self.particles:
                 i.draw(WIN, scrolling)

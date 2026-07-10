@@ -81,7 +81,7 @@ def weather_handler(self, entities, bullets, level, time_passed, screen, CLOCK):
                                                                          duration, 180, size=random.randint(2, 5)))
 
 
-def radio_handler(entities, transmission):
+def radio_handler(entities, transmission, cooldown=3):
     # This is just way better
     for x in entities["UI particles"]:
         if type(x) == Particles.RadioTransmission:
@@ -89,7 +89,7 @@ def radio_handler(entities, transmission):
                 x.extra_parts.append(t)
             return
     entities["UI particles"].append(Particles.RadioTransmission(Fun.SPRITE_RADIO_VIVIANNE[4], [], Fun.WHITE, 0,
-                                                          extra_parts=transmission))
+                                                          extra_parts=transmission, cooldown=3))
 
 
 # |Enemy Spawn Function|------------------------------------------------------------------------------------------------
@@ -302,6 +302,7 @@ trigger_ep_finished = {"rects": [], "Conditions": trigger_check_m6e_end}  # Hand
 
 # |Mission events|------------------------------------------------------------------------------------------------------
 def mission_start(self, entities, bullets, level, time_passed, screen, CLOCK):
+
     track_to_play = "Mission 1"
     if level['objective'] != "Defeat Elite Unit":
         allies = []
@@ -327,7 +328,13 @@ def mission_start(self, entities, bullets, level, time_passed, screen, CLOCK):
         radio_handler(entities, [
             [sprite[0], f"RADIO-START-{a}-{level['objective']}", Fun.AMBER, 240]
             ])
-
+        if level['objective'] == "Escort":
+            radio_handler(entities,
+                          {
+                              "THR-1": [[Fun.SPRITE_RADIO_EMPLOYER[0], "Follow the red line", Fun.AMBER, 300]],
+                              "Zoar Colonists": [[Fun.SPRITE_RADIO_MAKOTO[0], "", Fun.AMBER, 300]],
+                          }[level["Player party"]]
+                          )
         # Get music to play
         if level["mission number"] > 5:
             track_to_play = "Mission 2"
