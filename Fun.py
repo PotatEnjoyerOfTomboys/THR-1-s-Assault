@@ -138,6 +138,7 @@ EMPTY_SAVE_FILE = {
     "Zoar unlocked": False,
     "Faction mission count": [0, 0, 0, 0, 0, 0],
     "Databank entries unlocked": [
+        "21st Century Timeline", "2021 - 2040", "2041 - 2060", "2061 - 2080", "2081 - 2099",
         "Annals",
             "2100", "Solar War | January - April", "Solar War | May - August", "Solar War | September - December",
             "2101", "Solar War | January - April", "Solar War | May - August", "Solar War | September - December",
@@ -152,7 +153,7 @@ EMPTY_SAVE_FILE = {
         "Organizations",
             "Armed groups", "Asset Protecting & Collection Dept.", "Burning Winds Band", "C8 Mercenary Army",
         "Mercenary Teams",
-            "THR-1", "Overview", "Leopold LORD Storch", "Kai KAISER", "Jeanne WIZARD McNeil", "Corrine SOVEREIGN", "Zander DUKE", "M4-D1C JESTER", "Vincent CONDOR Varga",
+            "THR-1", "Overview", "Leopold LORD Storch", "Kai EMPEROR", "Jeanne WIZARD McNeil", "Corrine SOVEREIGN", "Zander DUKE", "M4-D1C JESTER", "Vincent CONDOR Varga",
             "Zoar Colony's Gun Shop", "Overview", # "Curtis Miller", "Vivianne Miller", "Lawrence Reed", "Mark",
 		"Weapon Manufacturer",
             "Socrates",
@@ -461,6 +462,12 @@ sounds_dict = {
     "Curtis Slide": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Player/Slide.ogg')), "Volume": 0.35},
     "Curtis Switch": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Player/player_switch.ogg')),
                       "Volume": 0.25},
+    "Corrine Ping": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Player/Ping.ogg')), "Volume": 0.9},
+    "Jeanne Building": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Player/Jeanne Building.ogg')), "Volume": 0.9},
+    "Zander Smoke": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Player/Zander Smoke.ogg')), "Volume": 1.3},
+    "Vincent Unbreaking": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Player/Vincent Unbreaking.ogg')), "Volume": 0.9},
+    "Vincent Armour Break": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Player/Vincent Armour Break.ogg')), "Volume": 0.9},
+    "Beast Mode": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Player/Beast Mode.ogg')), "Volume": 0.9},
 
     # New sounds!
     "Gun Silenced": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Rifle_Silenced.ogg')), "Volume": 1},
@@ -472,6 +479,8 @@ sounds_dict = {
     "Safety": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Safety_Click.ogg')), "Volume": 0.4},
 
     "Hover Tank Canon": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Hover Tank Cannon.ogg')), "Volume": 1.2},
+
+    "Armoured Shield Generator Railgun": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Armoured Shield Generator Railgun.ogg')), "Volume": 1.2},
 
     "Mech Booster": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Mech Booster.ogg')), "Volume": 0.6},
     "Magma Blade": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Magma Blade.ogg')), "Volume": 1.2},
@@ -490,6 +499,27 @@ sounds_dict = {
     "Rigel Lance Swipe": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Rigel Lance Swipe.ogg')), "Volume": 1.75},
     "Rigel Giga Thrust": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Rigel Giga Thrust.ogg')), "Volume": 1.75},
     # "Shot gun 2 Shooting": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Shotgun.ogg')), "Volume": 0.8},
+
+    "Armoured Shield Generator Charging": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Voice/Armoured Shield Generator Charging.ogg')), "Volume": 1},
+    "Armoured Shield Generator Aiming": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Voice/Armoured Shield Generator Aiming.ogg')), "Volume": 1},
+    "Armoured Shield Generator Fire": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Voice/Armoured Shield Generator Fire.ogg')), "Volume": 1},
+
+    "Attack Helicopter Attack": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Voice/Attack Helicopter Attack.ogg')), "Volume": 0.9},
+    "Attack Helicopter Death Scream": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Voice/Attack Helicopter Death Scream.ogg')), "Volume": 0.9},
+    "Attack Helicopter Fire": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Voice/Attack Helicopter Fire.ogg')), "Volume": 0.9},
+    "Attack Helicopter Nails": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Voice/Attack Helicopter Nails.ogg')), "Volume": 0.9},
+    "Attack Helicopter Locked On": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Voice/Attack Helicopter Locked On.ogg')), "Volume": 0.9},
+
+    "Bloodhound Burn": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Voice/Bloodhound Burn.ogg')), "Volume": 1},
+    "Bloodhound Take That": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Voice/Bloodhound Take That.ogg')), "Volume": 1},
+    "Bloodhound And That": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Voice/Bloodhound And That.ogg')), "Volume": 1},
+    "Bloodhound Disappear": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Voice/Bloodhound Disappear.ogg')), "Volume": 1},
+    "Bloodhound RATATATATA": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Voice/Bloodhound RATATATATA.ogg')), "Volume": 1},
+
+    "Hover Tank Eat That": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Voice/Hover Tank Eat That.ogg')), "Volume": 1.3},
+    "Hover Tank Get Some": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Voice/Hover Tank Get Some.ogg')), "Volume": 1.3},
+    "Hover Tank Get In My Way": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Voice/Hover Tank Get In My Way.ogg')), "Volume": 1.3},
+    "Hover Tank Take That": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Voice/Hover Tank Take That.ogg')), "Volume": 1.3},
 }
 
 
@@ -2319,6 +2349,231 @@ def game_intro(WIN, CLOCK, controls, player):
         scale_render(WIN, surface_to_draw, CLOCK)
         pg.display.update()
         CLOCK.tick(60)
+
+
+def story_event(WIN, CLOCK, party, event_to_play):
+    transition, frame_1 = menu_transition_start(WIN)
+    controller = PseudoPlayer()
+    event_script = {
+        "THR-1":
+            {
+                "Start": [
+                    {"Name": "", "Text": [""], "Image": get_image('Sprites/Story/THR-1/Start 1.png')},
+                    {"Name": "LORD", "Text": ["Secretary sent us a job contract."], "Image": get_image('Sprites/Story/THR-1/Start 2.png')},
+                    {"Name": "EMPEROR", "Text": ["It's been a while since she talked to us."], "Image": False},
+                    {"Name": "WIZARD", "Text": ["It wouldn't hurt to look at it?"], "Image": False},
+                    {"Name": "LORD", "Text": ["1 million!"], "Image": get_image('Sprites/Story/THR-1/Start 3.png')},
+                    {"Name": "WIZARD", "Text": ["Is she thinking we're stupid, she'd be overpaying us."], "Image": False},
+                    {"Name": "EMPEROR", "Text": ["It might not be a trap, I think she's out of options."], "Image": False},
+                    {"Name": "EMPEROR", "Text": ["We could take the contract. If it gets too dicey we bail out."], "Image": False},
+                    {"Name": "WIZARD", "Text": ["I guess we could..."], "Image": False},
+                    {"Name": "LORD", "Text": ["Let's do that!"], "Image": get_image('Sprites/Story/THR-1/Start 4.png')},
+                ],
+                "Event 1": [
+                    {"Name": "EMPEROR", "Text": ["Don't you find this job strange?"], "Image": get_image('Sprites/Story/THR-1/Event 1 1.png')},
+                    {"Name": "LORD", "Text": ["Beside how it came out of nowhere, no."], "Image": False},
+                    {"Name": "EMPEROR", "Text": ["After that job, she said she's done working with us."], "Image": False},
+                    {"Name": "LORD", "Text": ["I think it's like you said; she's out of options."], "Image": get_image('Sprites/Story/THR-1/Event 1 2.png')},
+                    {"Name": "EMPEROR", "Text": ["I'm starting to reconsider the job."], "Image": False},
+                    {"Name": "LORD", "Text": ["I'm not too concerned about this."], "Image": False},
+                    {"Name": "LORD", "Text": ["It's totally shady, but we did worse in the past."], "Image": get_image('Sprites/Story/THR-1/Event 1 3.png')},
+                    {"Name": "EMPEROR", "Text": ["Maybe we should ask ourselves if we're being taken advantage of."], "Image": get_image('Sprites/Story/THR-1/Event 1 4.png')},
+                ],
+                "Event 2": [
+                    {"Name": "EMPEROR", "Text": ["What's that?!"], "Image": get_image('Sprites/Story/THR-1/Event 2 1.png')},
+                    {"Name": "EMPEROR", "Text": ["Documents?"], "Image": get_image('Sprites/Story/THR-1/Event 2 2.png')},
+                    {"Name": "Written on the first page", "Text": ["Project Orion: Betelgeuse Plan..."], "Image": False},
+                    {"Name": "EMPEROR", "Text": ["Didn't Vincent mention something like that?"], "Image": False},
+                    {"Name": "CONDOR", "Text": ["Kai, we are about to move! Get back"], "Image": get_image('Sprites/Story/THR-1/Event 2 3.png')},
+                    {"Name": "EMPEROR", "Text": ["I'm on my way! I found intel I want you to check!"], "Image": False},
+                ],
+                "Ending Win": [
+                    {"Name": "", "Text": [], "Image": get_image('Sprites/Story/THR-1/Win 1.png')},
+                    {"Name": "EMPEROR", "Text": ["There's something she is not telling us."], "Image": False},
+                    {"Name": "EMPEROR", "Text": ["Let's see if I get answers."], "Image": get_image('Sprites/Story/THR-1/Win 2.png')},
+                    {"Name": "EMPEROR", "Text": ["Project Orion?"], "Image": get_image('Sprites/Story/THR-1/Win 3.png')},
+                    {"Name": "EMPEROR", "Text": ["She has to be hiding something."], "Image": get_image('Sprites/Story/THR-1/Win 4.png')},
+                    {"Name": "EMPEROR", "Text": ["I know from Condor that the Betelgeuse plan failed"], "Image": get_image('Sprites/Story/THR-1/Win 5.png')},
+                    {"Name": "EMPEROR", "Text": ["Are they going to use the anomaly has a weapon?"], "Image": get_image('Sprites/Story/END WIN.png')},
+                ],
+                "Ending Loss": [
+                    {"Name": "Secretary", "Text": ["I was expecting better results..."], "Image": get_image('Sprites/Story/THR-1/Loss 1.png')},
+                    {"Name": "Secretary", "Text": ["But it's not unsalvageable..."], "Image": get_image('Sprites/Story/THR-1/Loss 2.png')},
+                    {"Name": "Secretary", "Text": ["You proved yourselves useful enough..."], "Image": get_image('Sprites/Story/THR-1/Loss 3.png')},
+                    {"Name": "Secretary", "Text": ["Of course, you're not getting any rewards. But I'll see if I can cover some of your costs"], "Image": get_image('Sprites/Story/END LOSS.png')}
+                ],
+            },
+        "Zoar": {
+                "Start": [
+                    {"Name": "Vivianne", "Text": ["Curtis started to have headaches not long after replacing my leg."], "Image": get_image('Sprites/Story/Zoar/Start 1.png')},
+                    {"Name": "Vivianne", "Text": ["He also told me about a dream he keeps having."], "Image": False},
+                    {"Name": "Vivianne", "Text": ["It's about a mountain in the desert."], "Image": get_image('Sprites/Story/Zoar/Start 2.png')},
+                    {"Name": "Vivianne", "Text": ["There's a small salt flat there."], "Image": get_image('Sprites/Story/Zoar/Start 3.png')},
+                    {"Name": "Vivianne", "Text": ["Something there is calling for him."], "Image": get_image('Sprites/Story/Zoar/Start 4.png')},
+                    {"Name": "Vivianne", "Text": ["Makoto told us that a mercenary army was deployed to investigate an anomaly in the desert."], "Image": False},
+                    {"Name": "Vivianne", "Text": ["Curtis is convinced that it's what was calling him."], "Image": False},
+                    {"Name": "Vivianne", "Text": [" We are leaving tomorrow with Lawrence and Mark to figure this thing out."], "Image": False},
+                ],
+                "Event 1": [
+                    {"Name": "Vivianne", "Text": ["Do you have a moment Mark?"], "Image": get_image('Sprites/Story/Zoar/Event 1 1.png')},
+                    {"Name": "Mark", "Text": ["Yes."], "Image": False},
+                    {"Name": "Vivianne", "Text": ["I think Curtis is losing his mind..."], "Image": get_image('Sprites/Story/Zoar/Event 1 2.png')},
+                    {"Name": "Vivianne", "Text": ["Since I got attacked at the shop."], "Image": False},
+                    {"Name": "Mark", "Text": ["He's your brother, it's normal to worry about him."], "Image": get_image('Sprites/Story/Zoar/Event 1 3.png')},
+                    {"Name": "Mark", "Text": ["But I wouldn't."], "Image": False},
+                    {"Name": "Vivianne", "Text": ["How can think that?!"], "Image": False},
+                    {"Name": "Mark", "Text": ["He can handle himself."], "Image": False},
+                    {"Name": "Mark", "Text": ["We should both know that."], "Image": False},
+                    {"Name": "", "Text": [], "Image": get_image('Sprites/Story/Zoar/Event 1 4.png')},
+                    {"Name": "Vivianne", "Text": ["But I can't help it"], "Image": get_image('Sprites/Story/Zoar/Event 1 5.png')},
+                ],
+                "Event 2": [
+                    {"Name": "Lawrence", "Text": ["Come on, I can tell you wish to talk with me."], "Image": get_image('Sprites/Story/Zoar/Event 2 1.png')},
+                    {"Name": "Vivianne", "Text": ["Yeah..."], "Image": False},
+                    {"Name": "Vivianne", "Text": ["Aren't you bothered about Curtis?"], "Image": get_image('Sprites/Story/Zoar/Event 2 2.png')},
+                    {"Name": "Vivianne", "Text": ["What he's going through can't be normal."], "Image": False},
+                    {"Name": "Lawrence", "Text": ["Something latent in him might be awakening."], "Image": False},
+                    {"Name": "Vivianne", "Text": ["Something latent?"], "Image": get_image('Sprites/Story/Zoar/Event 2 3.png')},
+                    {"Name": "Lawrence", "Text": ["You must have head about psychics at some point."], "Image": False},
+                    {"Name": "Lawrence", "Text": ["Curtis might be like that."], "Image": False},
+                    {"Name": "Lawrence", "Text": ["Anyway, we have to keep moving if we want to figure it out."], "Image": False},
+                    {"Name": "Vivianne", "Text": ["You're right."], "Image": False},
+                ],
+                "Ending Win": [
+                    {"Name": "Curtis", "Text": ["I've been feeling great for the past few days. The headaches and visions are gone."], "Image": get_image('Sprites/Story/Zoar/Win 1.png')},
+                    {"Name": "Curtis", "Text": ["I wasn't able to realize how worried Vivianne was about me."], "Image": False},
+                    {"Name": "Curtis", "Text": ["I feel bad for that."], "Image": False},
+                    {"Name": "Curtis", "Text": ["But now strange things are happening to me."], "Image": False},
+                    {"Name": "Curtis", "Text": ["I see people enter the shop before they set their foot in."], "Image": get_image('Sprites/Story/Zoar/Win 2.png')},
+                    {"Name": "Curtis", "Text": ["I can tell exactly where my bullets will land before touching the trigger."], "Image": get_image('Sprites/Story/Zoar/Win 3.png')},
+                    {"Name": "Curtis", "Text": ["I knew what Vivianne would tell me on the radio before she says a word."], "Image": get_image('Sprites/Story/Zoar/Win 4.png')},
+                    {"Name": "Curtis", "Text": ["I'm now asking myself..."], "Image": get_image('Sprites/Story/Zoar/Win 5.png')},
+                    {"Name": "Curtis", "Text": ["Am I still truly human?"], "Image": get_image('Sprites/Story/END WIN.png')},
+                ],
+                "Ending Loss": [
+                    {"Name": "Vivianne", "Text": ["In the end we never found what was calling my brother."], "Image": get_image('Sprites/Story/Zoar/Loss 1.png')},
+                    {"Name": "Vivianne", "Text": ["We only met a mercenary team, fought with them before leaving."], "Image": False},
+                    {"Name": "Vivianne", "Text": ["Whatever was calling Curtis stopped"], "Image": False},
+                    {"Name": "Vivianne", "Text": ["He keeps looking at the desert during the night"], "Image": get_image('Sprites/Story/Zoar/Loss 2.png')},
+                    {"Name": "Vivianne", "Text": ["He told me that he wonders what it was."], "Image": get_image('Sprites/Story/Zoar/Loss 2 A.png')},
+                    {"Name": "Vivianne", "Text": ["and why  he's hearing voices talking among themselves"], "Image": get_image('Sprites/Story/Zoar/Loss 2 B.png')},
+                    {"Name": "Vivianne", "Text": ["He's lucid at least. I guess that's our new normal..."], "Image": get_image('Sprites/Story/Zoar/Loss 3.png')},
+                    {"Name": "", "Text": [], "Image": get_image('Sprites/Story/END LOSS.png')}
+                ],
+        }
+    }[party][event_to_play]
+
+    sprite_zero = [40, 107.5//2]
+    sprites = []
+    text_to_write = ""
+    draw = True
+    fade_mod = 4
+
+    skip = True
+
+    for e in event_script:
+        # Fade in square
+        if e["Image"]:
+            for x in range(256//fade_mod):
+                keys = pg.key.get_pressed()
+                needed_in_menu_and_game(WIN, keys)
+                controller.get_input(keys)
+
+                if controller.input["Interact"] and not skip:
+                    skip = True
+                    e["Image"].set_alpha(256)
+                    break
+                elif skip and not controller.input["Interact"]:
+                    skip = False
+
+                if draw:
+                    width, height = 630, 450
+                    frame = pg.Surface((630, 450))
+                    surface_to_draw = frame
+                    WIN.fill(BLACK)
+
+                    temp_ui_font = create_temp_font_1(height)
+                    temp_ui_font_2 = create_temp_font_5(height)
+                    # surface_to_draw.fill(UI_COLOUR_BACKGROUND)
+
+                    pg.draw.rect(surface_to_draw, (140, 100, 13), [sprite_zero[0]-2, sprite_zero[1]-2, 554, 279])
+                    pg.draw.rect(surface_to_draw, (26, 26, 26), [sprite_zero[0], sprite_zero[1], 550, 275])
+                    for s in sprites:
+                        surface_to_draw.blit(s, sprite_zero)
+                    e["Image"].set_alpha(x * fade_mod + fade_mod)
+                    surface_to_draw.blit(e["Image"], sprite_zero)
+                    # text_to_write
+                    name = temp_ui_font_2.render(e["Name"], True, AMBER)
+                    surface_to_draw.blit(name, (315 - name.get_width() // 2, 335))
+                    text = temp_ui_font.render(text_to_write, True, AMBER)
+                    surface_to_draw.blit(text, (315 - text.get_width() // 2, 360))
+
+                    # 550, 275
+                    crt(surface_to_draw)
+                    scale_render(WIN, surface_to_draw, CLOCK)
+                    transition = menu_transition_handler(WIN, CLOCK, frame_1, transition)
+                    pg.display.update()
+                CLOCK.tick(60)
+
+            sprites.append(e["Image"])
+
+        loaded_text = [str_to_list(l) for l in e["Text"]]
+        text_to_write = ""
+        timer = 0
+        time_to_die = 25
+        while time_to_die > 0:
+            keys = pg.key.get_pressed()
+            needed_in_menu_and_game(WIN, keys)
+            controller.get_input(keys)
+
+            if controller.input["Interact"] and not skip:
+                skip = True
+                break
+            elif skip and not controller.input["Interact"]:
+                skip = False
+
+            # Play text
+            if timer % 8 == 0:
+                if loaded_text:
+                    if loaded_text[0]:
+                        text_to_write += loaded_text[0][0]
+                        loaded_text[0].pop(0)
+                    else:
+                        loaded_text.pop(0)
+                        if loaded_text:
+                            text_to_write = ""
+                else:
+                    time_to_die -= 1
+
+            # Give option to get out
+            if draw:
+                width, height = 630, 450
+                frame = pg.Surface((630, 450))
+                surface_to_draw = frame
+                WIN.fill(BLACK)
+
+                temp_ui_font = create_temp_font_1(height)
+                temp_ui_font_2 = create_temp_font_5(height)
+
+                pg.draw.rect(surface_to_draw, (140, 100, 13), [sprite_zero[0]-2, sprite_zero[1]-2, 554, 279])
+                pg.draw.rect(surface_to_draw, (26, 26, 26), [sprite_zero[0], sprite_zero[1], 550, 275])
+                for s in sprites:
+                    surface_to_draw.blit(s, sprite_zero)
+                # text_to_write
+                name = temp_ui_font_2.render(e["Name"], True, AMBER)
+                surface_to_draw.blit(name, (315 - name.get_width() // 2, 335))
+                text = temp_ui_font.render(text_to_write, True, AMBER)
+                surface_to_draw.blit(text, (315 - text.get_width() // 2, 360))
+
+                # 550, 275
+                crt(surface_to_draw)
+                scale_render(WIN, surface_to_draw, CLOCK)
+                transition = menu_transition_handler(WIN, CLOCK, frame_1, transition)
+                pg.display.update()
+            CLOCK.tick(60)
+            timer += 1
+
+
 
 
 def pygame_splash_screen(WIN, CLOCK):
@@ -4310,7 +4565,7 @@ def shop_menu(WIN, CLOCK, party_info, run_info):
                                 sender = get_random_element_from_list(["Lord", "Emperor", "Wizard", "Sovereign", "Duke", "Jester", "Condor"])
                             else:
                                 sender = get_random_element_from_list(["Curtis", "Lawrence", "Mark", "Vivianne"])
-                            transmission = f"Shop-{sender}-Party-Bought-{random.randint(1, 3)}"
+                            transmission = f"Shop-{sender}-Party-Bought-{random.randint(1, 2)}"
 
                         comms_log.elements_to_show.append(
                             {"Sender": sender, "Message": str_to_list(write_textline(transmission))}
@@ -6458,10 +6713,6 @@ def update_translation_files():
         #
 
 
-def weight_system(gun):
-    pass
-
-
 def needed_in_menu_and_game(WIN, keys):
     # Handle events
     for event in pg.event.get():
@@ -6469,8 +6720,6 @@ def needed_in_menu_and_game(WIN, keys):
             continue
         elif event.type == pg.QUIT:
             sys.exit()
-
-            # quit()
         elif event.type == pg.VIDEORESIZE:
             width, height = event.size
             if width < 630:
@@ -7016,6 +7265,10 @@ def map_generator(current_mission, testing=False, defense_mode=False, level_obje
         min_size, max_size = 4, {"odd": mum - 1, "even": mum}[meme(mum)]
         if max_size - min_size <= min_size:
             max_size = max_size + min_size + 1
+        if min_size % 2 != 0:
+            min_size += 1
+        if max_size % 2 != 0:
+            max_size += 1
         # print(f"{max_size=}")
         num = random.randint(min_size, max_size - min_size)
         map_width = {"odd": num-1, "even": num}[meme(num)]
@@ -7262,7 +7515,6 @@ def level_generator(possible_levels, party_info, run_info, current_mission=1, mi
             name = write_textline(f"{level['objective']} Name {random.randint(0, 15)}")
         level["name"] = name
     else:
-        # if run_info["Time spend in mission"]/60/60 < 25 and False:
         if run_info["Time spend in mission"]/60/60 < 20:
             level["name"] = write_textline("Finale 1")
         else:

@@ -540,11 +540,7 @@ def spawn_enemy_squad_defense(entities, level, pos):
     searching_point = True
     chosen_waypoint = [0, 0]
     while searching_point:
-        # [round(self.pos[0] / 32) * 32, round(self.pos[1] / 32) * 32]
-        chosen_waypoint = [
-            round(random.randint(0, level["width height"][0]) / 32) * 32,
-            round(random.randint(0, level["width height"][1]) / 32) * 32
-        ]
+        chosen_waypoint = level["pathfinding"]["points"][f'{random.randint(0, len(level["pathfinding"]["points"]) - 1)}']
         searching_point = False
         for w in level["map"]:
             if Fun.distance_between(pos, chosen_waypoint) < 256:

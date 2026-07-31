@@ -104,8 +104,8 @@ def paint_single_part(paint_mech, part_id, copied_mech):
     for sprite_layer in copied_mech[part_id]["Sprite"]:
         new_layers.append(
             swap(sprite_layer.copy(),
-                 [(0, 0, 0), MECH_COL_1, MECH_COL_2, MECH_COL_3, MECH_ACCENT, MECH_LIGHT],
-                 [(0, 0, 0, 0), new_colours[0], new_colours[1], new_colours[2], new_colours[3], new_colours[4]])
+                 [(0, 0, 0), MECH_COL_1, MECH_COL_2, MECH_COL_3, MECH_ACCENT, MECH_LIGHT, (255, 0, 0), (255, 0, 255), (0, 255, 0), (0, 255, 0), (0, 255, 255), (0, 255, 255), (255, 255, 0)],
+                 [(0, 0, 0, 0), new_colours[0], new_colours[1], new_colours[2], new_colours[3], new_colours[4], (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0)])
         )
     paint_mech[part_id]["Sprite"] = new_layers
     if copied_mech[part_id]["Animation"]:
@@ -115,9 +115,11 @@ def paint_single_part(paint_mech, part_id, copied_mech):
             for animation_layer in animation_frame:
                 empty_frame.append(
                     swap(animation_layer.copy(),
-                         [(0, 0, 0), MECH_COL_1, MECH_COL_2, MECH_COL_3, MECH_ACCENT, MECH_LIGHT],
-                         [(0, 0, 0, 0), new_colours[0], new_colours[1], new_colours[2], new_colours[3], new_colours[4]])
+                         [(0, 0, 0), MECH_COL_1, MECH_COL_2, MECH_COL_3, MECH_ACCENT, MECH_LIGHT, (255, 0, 0), (255, 0, 255), (0, 255, 0), (0, 255, 0), (0, 255, 255), (0, 255, 255), (255, 255, 0)],
+                         [(0, 0, 0, 0), new_colours[0], new_colours[1], new_colours[2], new_colours[3], new_colours[4], (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0)])
                 )
+                # (255, 0, 0), (255, 0, 255), (0, 255, 0), (0, 255, 0), (0, 255, 255), (0, 255, 255), (255, 255, 0)
+                # (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0)
             all_animation.append(empty_frame.copy())
         paint_mech[part_id]["Animation"] = all_animation
 
@@ -283,7 +285,7 @@ def make_part(sprite_list, part_palette, part_type, unbuilt_mech, animation):
         offset[0] -= o_x
         offset[1] -= o_y
 
-
+    # (255, 0, 0), (255, 0, 255), (0, 255, 0), (0, 255, 0), (0, 255, 255), (0, 255, 255), (255, 255, 0)
     # There to simplify code
     if part_type not in ["Torso", "Leg"]:
         p = get_off_set_points(unbuilt_mech["Leg"]["Sprite"], unbuilt_mech["Torso"]["Sprite"], (255, 0, 0))

@@ -4,37 +4,10 @@ import random
 import sys  # Cool video https://www.youtube.com/watch?v=2Yj5mmKWukw
 
 
-# TODO: fix enemy spawn in defense
 # Version 1.0
-#   Rigel death particle
-#   Character conversations & Encyclopedia
-#       Convo
-#       Encyclopedia
-#           Annals
-#               00
-#               01
-#               02
-#           Organizations
-#               Merc. Team
-#                   THR-1 profiles
-#                   Zoar Profiles
-#               Manufacturers
-#                   Old West
-#                   Socrates
-#                   FMB
-#                   N&B
-#                   CFCR
-#                   Old English armoury
 #   More sound effects
-#   Voices
-#       Armored Shield generator
-#           Just for the turret attack
-#           Charging!, Aiming!, FIRE        Screams of pain on death
-#       Hover Tank
-#       Fire Support Mech
-#       Gilgamesh
-#       Attack Helicopter
-#   Story elements (do small comics)
+#   Voices      Armored Shield generator         on death        Screams of pain
+#               Gilgamesh                        Editing
 
 pg.mixer.pre_init()
 pg.init()
@@ -49,7 +22,7 @@ CLOCK = pg.time.Clock()
 pg.mixer.set_num_channels(32)
 
 
-# Move that here so that you don't start on a black screen
+# Moved that here so that you don't start on a black screen
 def pygame_splash_screen(WIN, CLOCK):
     width, height = 630, 450
     stage = 100
@@ -150,6 +123,9 @@ import Main_Loop
 
 def main_game(party_info):
     big_game_loop = True
+    party_being_used = "THR-1"
+    if "Curtis" in party_info:
+        party_being_used = "Zoar"
     current_mission = 1
     run_info = {
         "Player party": player_party,
@@ -173,7 +149,11 @@ def main_game(party_info):
     Fun.update_available_upgrades(run_info)
     # add upgrades to the upgrade pool
     end_status = "Loss"
+
     # Meta game loop
+    level = {"name": "Shitass"}
+    Fun.story_event(WIN, CLOCK, party_being_used, "Start")
+
     Fun.weapons_menu(WIN, CLOCK, party_info, run_info)
     while big_game_loop and current_mission <= 15:
         Fun.loading_screen(WIN, CLOCK)
@@ -374,27 +354,24 @@ def main_game(party_info):
                         "Name": level["name"], "Mission": current_mission, "Faction": level["faction"],
                         "Deployed team": deployed_team, "Surviving deployed team": surviving_deployed_team, "Objective": level["objective"]
                     })
+
+                    if current_mission == 5:
+                        Fun.story_event(WIN, CLOCK, party_being_used, "Event 1")
+                    if current_mission == 10:
+                        Fun.story_event(WIN, CLOCK, party_being_used, "Event 2")
                     current_mission += 1
                 if end_status == "Loss":
                     big_game_loop = False
 
-        # Story stuff
-        # Start
-        # THR-1         Secretary contacts Lord and Emperor asking them if they can do an urgent job.
-        # Zoar          Shortly after dealing with the Nest and the entity Betelgeuse, Curtis kept getting headaches and visions of a salt lake in the desert. Makoto tells them that a few armed groups have arrived at the planet and seem to be searching for one too
-        # Story Beat 1
-        # THR-1         Emperor asks Lord if he finds the job strange, as last time Secretary claimed that she wouldn't ever work with them again. Lord does agree that it's strange but doesn't question it much, the pay is very good. Emperor thinks it's too good
-        # Zoar          Vivianne talks to Mark about Curtis' condition, she worried that Curtis' is losing it. Mark says that Curtis probably has a gut feeling about whatever they are looking for. Vivianne asks Mark if that's all it takes for him. Mark says that everyone else seemingly going into the desert is proof enough for him.
-        # Story Beat 2
-        # THR-1         Emperor finds documents talking about a weapon that can be found in the desert. Condor asks him what he found, Emperor says it's just basic intel.
-        # Zoar          Vivianne talks to Lawrence about Curtis' condition, she asks Lawrence if he went through something similar. Lawrence says that he hasn't but heard about long time spaceship pilots being able to
-        # Endings
-        # THR-1 Good    THR-1 gets paid, but Emperor presses on Secretary to tell him what that mission was about. She says that they just helped her client get something needed for project Orion but that's all she knows.
-        # THR-1 Bad     Secretary says that they failed the mission, but she can still manage to salvage the situation. They don't get paid as much as promised.
-        # Zoar Good     Curtis
-        # Zoar Bad      Curtis
     # Run end screen
     Fun.end_run_menu(WIN, CLOCK, run_info, party_info, end_status)
+
+    # Check if an ending should be played
+    if current_mission >= 15 and end_status != "Loss":
+        if level["name"] == Fun.write_textline("Finale 1"):
+            Fun.story_event(WIN, CLOCK, party_being_used, "Ending Win")
+        else:
+            Fun.story_event(WIN, CLOCK, party_being_used, "Ending Loss")
 
     # Unlock stuff here
     # Check through the run history

@@ -162,7 +162,6 @@ def leopold_gauntlet_punch(self, skill, entities, level):
         if "IS VERSUS" in self.free_var:
             damage = 80
         entities["screen shake"] = [20, 5, self.aim_angle, 20]
-        # TODO: Add visual effect
 
         if "Taunt" in self.free_var:
             self.agro *= 1.5
@@ -189,6 +188,7 @@ def leopold_gauntlet_punch(self, skill, entities, level):
             if Fun.distance_between(e.pos, self.pos) < 160:
                 e.target = self
             if Fun.check_point_in_rotated_rectangle([corner_1, corner_2, corner_3, corner_4], e.pos):
+                entities["background particles"].append(Particles.GrowingCircle(e.pos, Fun.DARK_RED, 4, 16, 1, 2))
                 Fun.damage_calculation(e, damage, "Melee", death_message="Punched by Lord")
                 e.vel = Fun.move_with_vel_angle([0, 0], knockback, self.angle)
                 if "IS BOSS" in e.free_var:
@@ -220,7 +220,6 @@ def leopold_gauntlet_punch(self, skill, entities, level):
 
 
 def leopold_beast_mode(self, skill, entities, level):
-    # TODO: Add sound
     if self.weapon.ammo == 0:
         if self.weapon.ammo_pool > 0:
             self.weapon.ammo += 1
@@ -238,6 +237,7 @@ def leopold_beast_mode(self, skill, entities, level):
     self.did_agro_raise = 60 * 3
     # Particle effect should be always moving toward the user
     if skill.first_active_frame:
+        Fun.play_sound("Beast Mode")
         entities["particles"].append(Particles.GrowingCircle(self.pos, Fun.WHITE, 4, 16, 0, 16))
         entities["background particles"].append(Particles.BeastModeParticle(self.pos, 5*60* mod, Fun.ORANGE))
 
@@ -403,7 +403,6 @@ def kai_mega_buff(self, skill, entities, level):
 
 # |Wizard|--------------------------------------------------------------------------------------------------------------
 def jeanne_building(self, skill, entities, level):
-    # TODO: Needs sounds
     place = self.input["Interact"]
     self.no_shoot_state += 1
 
@@ -474,6 +473,7 @@ def jeanne_building(self, skill, entities, level):
                                                 size=(2, 4))
                         )
                     break
+        Fun.play_sound("Jeanne Building")
         return
 
     # Build Preview
@@ -558,7 +558,9 @@ def corrine_detect_targets(self, skill, entities, level):
         if Fun.check_point_in_circle(self.targeting_range, self.pos[0], self.pos[1], e.pos[0], e.pos[1]):
             entities["particles"].append(Particles.GrowingCircleEntityBound(e, Fun.DARK_GREEN, "Visible", 2))
             e.status["Visible"] += duration
-    # TODO: Add visual effect and sound
+
+    entities["background particles"].append(Particles.GrowingCircle(self.pos, Fun.DARK_GREEN, 4, 64, 1, 4))
+    Fun.play_sound("Corrine Ping")
 
 
 # |Duke|----------------------------------------------------------------------------------------------------------------
@@ -609,7 +611,7 @@ def zander_smoke_screen(self, skill, entities, level):
     # Lowers agro to a -10
     if self.agro > -10:
         self.agro = -10
-    # TODO: Add sound
+    Fun.play_sound("Zander Smoke")
 
 
 # |Jester|--------------------------------------------------------------------------------------------------------------
@@ -729,7 +731,7 @@ def vincent_armour_breaker(self, skill, entities, level):
                 Fun.move_with_vel_angle(self.pos, 6, angle),
                 [Fun.LIGHT_GREEN, Fun.DARK_GREEN][num], 4 * [1, 1.75][num], 15, angle, size=4 * [1, 2][num]))
 
-    Fun.play_sound("Hitting 1") # TODO: Give a new sound effect, need to sound like a big crunch
+    Fun.play_sound("Vincent Armour Break")
 
 
 def vincent_last_stand(self, skill, entities, level):
@@ -745,12 +747,16 @@ def vincent_last_stand(self, skill, entities, level):
         entities["particles"].append(Particles.RandomParticle2(
             Fun.move_with_vel_angle(self.pos, dist, angle), Fun.DARK_RED, speed, time, angle - 180,
             size=Fun.get_random_element_from_list([3, 4 ,6])))
-    # TODO: Add sound
+    Fun.play_sound("Skill 3")
 
 
 # |Fortress APC|--------------------------------------------------------------------------------------------------------
 def fortress_mortar(self, skill, entities, level):
-    # TODO: add visual effect
+    angle = self.free_var["Move angle"] + 226 - 180
+    for p in range(16):
+        entities["particles"].append(Particles.Smoke(
+            Fun.move_with_vel_angle(Fun.move_with_vel_angle(self.pos, 22.6274, angle), p * 7 * random.random()+ 32, self.angle + random.uniform(-8, 8))))
+
     Bullets.spawn_bullet(
             self, entities, Bullets.Artillery, self.mouse_pos, self.angle,
             [2, 60, 64,
@@ -893,7 +899,7 @@ def lawrence_flame_canyon(self, skill, entities, level):
         fire_mod = 2
     if "Slow Burn" in self.free_var:
         duration_mod = 2
-    # TODO: add visual effect
+
     for x in range(14):
         Bullets.spawn_bullet(
             self, entities,
@@ -925,7 +931,6 @@ def lawrence_flame_burst(self, skill, entities, level):
     if "Slow Burn" in self.free_var:
         duration_mod = 2
 
-    # TODO: add visual effect
     for x in range(14 * 5):
         Bullets.spawn_bullet(
             self, entities,

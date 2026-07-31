@@ -332,7 +332,7 @@ def effect_remote_detonation(self, entities, level):
 
 
 def effect_dashing_blue_balls(self, entities, level):
-    # Todo: Add sound effect
+    Fun.play_sound("Dodge", modified_volume=0.7)
     for x in range(3):
         Bullets.spawn_blue_balls(
             self.owner, entities,
@@ -432,7 +432,7 @@ def effect_mastermind(self, entities, level):
 
 
 def effect_kicking_blue_balls(self, entities, level):
-    # Todo: Add sound effect
+    Fun.play_sound("Hitting 2")
     for x in range(3):
         Bullets.spawn_blue_balls(
             self.owner, entities,
@@ -614,7 +614,7 @@ def effect_pierce(self, entities, level):
 
 
 def effect_unbreaking_blue_balls(self, entities, level):
-    # Todo: Add sound effed
+    Fun.play_sound("Vincent Unbreaking")
     for x in range(36):
         Bullets.spawn_blue_balls(
             self.owner, entities,

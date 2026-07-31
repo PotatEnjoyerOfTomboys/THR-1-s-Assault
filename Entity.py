@@ -3226,8 +3226,7 @@ def fortress_draw(self, WIN, scrolling):
     # 226
     # angle = 226 + self.free_var["Move angle"]
     pos = [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1] - 16]
-    angle = self.free_var["Move angle"] + 226 - 180
-    pos = Fun.move_with_vel_angle(pos, 22.6274, angle)
+    pos = Fun.move_with_vel_angle(pos, 22.6274, self.free_var["Move angle"] + 226 - 180)
     Fun.draw_spritestack(WIN, Fun.SPRITE_FORTRESS_APC_TURRET, pos, self.aim_angle + 90, height_diff=0.5)
 
 
@@ -4221,7 +4220,7 @@ def armoured_shield_generator_act(self, entities, level):
 
         # Railgun attack
         if start_up_lag_handler(self, 550, key="Startup lag railgun"):
-            Fun.play_sound("Electricity 2", modified_volume=1.2)
+            Fun.play_sound("Armoured Shield Generator Railgun", modified_volume=1.2)
             Bullets.spawn_bullet(
                 self, entities,
                 Bullets.LaserDanmaku2,
@@ -4294,6 +4293,11 @@ def armoured_shield_generator_draw(self, WIN, scrolling):
     Fun.draw_spritestack(WIN, Fun.SPRITE_ARMORED_GENERATOR_TURRET, pos, self.aim_angle + 90, height_diff=h_mod)
 
 
+def armoured_shield_generator_on_death(self, entities, level):
+    entities["UI particles"].append(
+        Particles.ArmouredShieldGeneratorDeathParticle(self.pos, 300, self.free_var["Move angle"], self.aim_angle))
+
+
 # AA Site
 def aa_site_input(self, entities, level):
     target, target_angle, wall_in = entity_target_detection(self, entities, level)
@@ -4349,7 +4353,17 @@ def aa_site_act_energy_generator(self, entities, level):
     Fun.status_manager(self, entities)
 
 
+def aa_site_on_death(self, entities, level):
+    entities["particles"].append(Particles.NewExplosionEffect([self.pos[0], self.pos[1]],
+                                                              duration=90,
+                                                              particles=17,
+                                                              radius=4,
+                                                              particle_growth=3))
+    Fun.play_sound("Explosion", "SFX")
+
+
 def aa_site_on_death_energy_generator(self, entities, level):
+    aa_site_on_death(self, entities, level)
     for e in entities["entities"]:
         if e.team != self.team:
             continue
@@ -4461,6 +4475,7 @@ def aa_site_act_missile_battery(self, entities, level):
 
 
 def aa_site_on_death_shield_generator(self, entities, level):
+    aa_site_on_death(self, entities, level)
     if self.free_var["Shield Target"]:
         self.free_var["Shield Target"].armour = 0
 
@@ -4573,10 +4588,13 @@ def hover_tank_input(self, entities, level):
     closest_target = Fun.find_closest_in_circle(self, entities, 512, "entities")
     if closest_target:
         fortress_move_toward_point(self, closest_target, 40 * 7)
-        fortress_move_away_point(self, closest_target, 25 * 7)
+        # fortress_move_away_point(self, closest_target, 25 * 7)
+
         if self.free_var["Run people over"] <= 0:
             self.free_var["Run people over"] = 250
             self.input["Dash"] = True
+            # if  Fun.sounds_dict["Hover Tank Get Some"]["Sound"].get_num_channels() == 0:
+            #     Fun.play_sound("Hover Tank Get In My Way", "Voice")
         else:
             self.free_var["Run people over"] -=1
 
@@ -4659,7 +4677,8 @@ def hover_tank_act(self, entities, level):
     # entities["background particles"].append(Fun.LineParticle(drawing_pos, Fun.RED, 1, length, angle, 1, 0))
 
     # entities["UI particles"].append(Fun.AimPoint(self.mouse_pos))
-    self.weapon.passive(self, entities, level)
+    if self.free_var["Startup lag"] == 180 and Fun.sounds_dict["Hover Tank Take That"]["Sound"].get_num_channels() == 0 and Fun.sounds_dict["Hover Tank Eat That"]["Sound"].get_num_channels() == 0:
+        Fun.play_sound("Hover Tank Get Some", "Voice")
     if self.free_var["Grenade Shakedown"] > 0:
 
         if self.time % 3 == 0 and self.free_var["Allow machine gun"]:
@@ -4706,6 +4725,11 @@ def hover_tank_act(self, entities, level):
         if round(p) != round(self.aim_angle) and self.time % 12 == 0:
             Fun.play_sound("Chain click")
     elif self.free_var["Grenade Shakedown"] > -180:
+        print(self.free_var["Grenade Shakedown"] )
+        if self.free_var["Grenade Shakedown"] == 0:
+            Fun.sounds_dict["Hover Tank Take That"]["Sound"].stop()
+            Fun.play_sound(Fun.get_random_element_from_list(["Hover Tank Take That", "Hover Tank Eat That"]), "Voice")
+
         self.free_var["Grenade Shakedown"] -= 1
         angle = self.free_var["Grenade Shakedown"] * 6 + self.free_var["Grenade Shakedown angle"][0]
         self.free_var["Move angle"] = angle
@@ -4730,6 +4754,7 @@ def hover_tank_act(self, entities, level):
         # Shoot grenades
     else:
         self.free_var["Grenade Shakedown"] = 800
+    self.weapon.passive(self, entities, level)
 
     # |Status effects|----------------------------------------------------------------------------------------------
     # ha ha, Fun go brr
@@ -4764,6 +4789,11 @@ def hover_tank_draw(self, WIN, scrolling):
                          self.aim_angle + 90, height_diff=h_mod)
     Fun.draw_spritestack(WIN, Fun.SPRITE_HOVER_TANK_GUN, [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1] - 24 * h_mod],
                          self.free_var["Machine Gun Angle"] + 90, height_diff=h_mod)
+
+
+def hover_tank_on_death(self, entities, level):
+    entities["UI particles"].append(
+        Particles.HoverTankDeathParticle(self.pos, 300, self.free_var["Move angle"], self.aim_angle, self.free_var["Machine Gun Angle"]))
 
 
 # Gilgamesh
@@ -4829,6 +4859,11 @@ def gilgamesh_act(self, entities, level):
     if self.draw_aim_line or self.weapon.laser_sight:
         entities["background particles"].append(Particles.LineParticle(
             Fun.move_with_vel_angle(self.pos, 20, self.aim_angle), Fun.BLUE, 1, self.weapon.range-20, self.aim_angle, 2, 0))
+
+
+def gilgamesh_on_death(self, entities, level):
+    entities["UI particles"].append(
+        Particles.GilgameshDeathParticle(self.pos, 300, self.angle, self.aim_angle, self.draw_angle, self.weapon, self.draw_rotated_dist, self.weapon_draw_dist))
 
 
 def gilgamesh_attack_1(self, entities, level):
@@ -5179,12 +5214,19 @@ def bloodhound_draw(self, WIN, scrolling):
     self.free_var["Mech"].mech_parts["Leg"]["Animation state"] = frame_to_get
 
 
+def bloodhound_on_death(self, entities, level):
+    entities["UI particles"].append(Particles.BloodHoundDeathParticle(self.pos, 1200, self.free_var["Mech"], self.free_var["Move angle"]))
+
+
 def bloodhound_hadean_missile(self, entities, level):
     if start_up_lag_handler(self, 200):
         self.no_shoot_state = 10
         self.free_var["Current attack"] = Fun.get_random_element_from_list(["Minigun", "Blade", "Blade"])
 
     elif 30 <= self.free_var["Startup lag"] <= 190 and self.free_var["Startup lag"] % 10 == 0:
+        if self.free_var["Startup lag"] % 40 == 0 and 40 < self.free_var["Startup lag"]:
+            Fun.play_sound("Bloodhound And That", "Voice")
+
         # spawn fire
         angle = self.free_var["Mech"].mech_parts["Torso"]["Draw angle"] * -1 + self.free_var["Move angle"]
         Fun.play_sound("Mech Missile")
@@ -5200,6 +5242,7 @@ def bloodhound_hadean_missile(self, entities, level):
                                                                           "Growth": 2,
                                                                           "Damage mod": 0.75}}])
     elif self.free_var["Startup lag"] == 29:
+        Fun.play_sound("Bloodhound Take That", "Voice")
         for x in ["Side Boost L", "Side Boost R", "Side Boost L", "Side Boost R", "Side Boost L", "Side Boost R"]:
             self.free_var["Boost type"].append(x)
 
@@ -5254,6 +5297,9 @@ def bloodhound_magma_blade(self, entities, level):
         self.free_var["Current attack"] = Fun.get_random_element_from_list(["Canon", "Canon", "Missile"])
         animation = False
 
+    elif self.free_var["Startup lag"] == 80:
+        Fun.play_sound("Bloodhound Burn", "Voice")
+
     elif 80 < self.free_var["Startup lag"] < 110:
         # spawn fire
         angle = self.free_var["Mech"].mech_parts["Arm R"]["Draw angle"] * -1 + self.free_var["Move angle"]
@@ -5301,6 +5347,8 @@ def bloodhound_canon(self, entities, level):
             [2, 60, 50,
              30, {"Secondary explosion":{"Duration": 20, "Strength": 120, "Radius":64}, "Colour": Fun.DARK_RED, "Slowdown rate": 0.05}])
     elif self.free_var["Startup lag"] == 2:
+
+        Fun.play_sound("Bloodhound Disappear", "Voice")
         self.free_var["Boost type"] = ["Backward Boost"]
 
 
@@ -5389,10 +5437,7 @@ def bloodhound_boost(self, entities, level):
 
 
 # Attack Helicopter
-# TODO: Make missile types behave more differently, add pattern
-# Incendiary    .
-# HE            .
-# Shrapnel      .
+#   Could add different missile patterns
 def attack_helicopter_input(self, entities, level):
     # Input functions are the IA for an enemy
     # better targeting system
@@ -5444,6 +5489,14 @@ def attack_helicopter_input(self, entities, level):
             self.free_var["Run people over"] -=1
 
     entity_shoot_startup_handler(self)
+    if self.free_var["Startup lag"] == 120:
+        Fun.play_sound("Attack Helicopter Locked On")
+    if self.free_var["Startup lag"] == 190:
+        Fun.play_sound({"HE": "Attack Helicopter Attack",
+                           "Incendiary": "Attack Helicopter Fire",
+                           "Shrapnel": "Attack Helicopter Nails"
+                           }[self.free_var["Rocket type"]])
+
     # Stunned status manager
     # Fun.stunned_manager(self)
     return target, target_angle
@@ -5520,35 +5573,37 @@ def attack_helicopter_act(self, entities, level):
 
         # |Main fire|-----------------------------------------------------------------------------------------------
         if self.input["Shoot"]:
+            #
+            # Fun.sounds_dict["Hover Tank Take That"]["Sound"].stop()
+            # Fun.play_sound(Fun.get_random_element_from_list(["Hover Tank Take That", "Hover Tank Eat That"]), "Voice")
             if self.weapon.ammo != 0 and self.shot_allowed:
                 # |Main fire|-------------------------------------------------------------------------------------------
-                # self.shoot_bullet(entities, level)
                 # Fires rockets (HE, Incendiary, Grapeshot)
-                m_type = random.random()
-                b_info = [5, 160, 4, 80, {"Targeting range": 300,
-                                          "Targeting angle": 5,
-                                          "Manoeuvrability": 2,
-                                          "Target": "enemies",
-                                          "Secondary explosion": {"Duration": 10,
-                                                                  "Growth": 6,
-                                                                  "Damage mod": 1}}]
-                b_class = Bullets.Missile
-                if m_type < 0.33:
-                    b_info[4]["Secondary explosion"] = {
+                b_info = [5, 160, 4, 80,
+                          {"Targeting range": 300, "Targeting angle": 5, "Manoeuvrability": 2,  "Target": "enemies",
+                           "Secondary explosion": {
+                               "HE": {"Duration": 10, "Growth": 6, "Damage mod": 1},
+                               "Incendiary": {
                         "Amount of Bullets": 16,
                         "Bullet Info": [5, 90, 4, 5,
                                         {"Particle allowed": True, "Burn chance": 1, "Burn duration": 30,
                                          "Colour": Fun.FIRE}]
-                    }
-                    b_class = Bullets.MissileIncendiary
-                if m_type > 0.66:
-                    b_info[4]["Secondary explosion"] = {
+                    },
+                               "Shrapnel": {
                         "Amount of Bullets": 16,
                         "Bullet Info": [5, 90, 4, 5,
                                         {}],
                         "Angle range": 33
                     }
-                    b_class = Bullets.MissileShrapnel
+                           }[self.free_var["Rocket type"]]
+                           }
+                          ]
+
+                b_class = {"HE": Bullets.Missile,
+                           "Incendiary": Bullets.MissileIncendiary,
+                           "Shrapnel": Bullets.MissileShrapnel
+                           }[self.free_var["Rocket type"]]
+
                 for x in range(8):
                     Bullets.spawn_bullet(
                         self, entities, b_class,
@@ -5557,6 +5612,13 @@ def attack_helicopter_act(self, entities, level):
                         self.aim_angle + [0, 0, -7.5, 7.5, -15, 15, -22.5, 22.5][x], b_info)
                     # self.slowdown_rate = 1 - random.random() * 2
 
+
+                self.free_var["Rocket type"] = Fun.get_random_element_from_list(
+                    {
+                        "HE": ["Incendiary", "Shrapnel"],
+                        "Incendiary": ["HE", "Shrapnel"],
+                        "Shrapnel": ["HE", "Incendiary"]
+                     }[self.free_var["Rocket type"]])
                 # tell if the trigger was pressed
                 if not self.weapon.full_auto:
                     self.shot_allowed = False
@@ -5639,6 +5701,12 @@ def attack_helicopter_draw(self, WIN, scrolling):
     Fun.draw_spritestack(WIN, Fun.SPRITE_ATTACK_HELICOPTER_BLADE, Fun.move_with_vel_angle(
         [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1] - 37 * h_mod], 20, self.aim_angle),
                          self.time * 13.5, height_diff=h_mod)
+
+
+def attack_helicopter_on_death(self, entities, level):
+    Fun.play_sound("Attack Helicopter Death Scream", "Voice")
+    entities["UI particles"].append(
+        Particles.AttackHelicopterDeathParticle(self.pos, 300, self.aim_angle, self.time))
 
 
 # Rigel
@@ -5734,7 +5802,7 @@ def rigel_act(self, entities, level):
     # Handle Missile Circus
     if self.free_var["Missile Circus"] > 0:
         if self.free_var["Missile Circus"] % 4 == 0:
-            Fun.play_sound("Mech Missile")  # TODO: Give his own missile sound
+            Fun.play_sound("Mech Missile")
             angle = self.free_var["Move angle"] - 180 - random.uniform(-45, 45)
             mod = random.random()
             Bullets.spawn_bullet(
@@ -5770,6 +5838,9 @@ def rigel_act(self, entities, level):
 
 def rigel_draw(self, WIN, scrolling):
     self.free_var["Mech"].pos = [self.pos[0] + scrolling[0], self.pos[1] + 28 + scrolling[1]]
+
+    WIN.blit(Fun.ENTITY_SHADOW_SIZE_2, [self.free_var["Mech"].pos[0] - 64 + scrolling[0], self.free_var["Mech"].pos[1] + 64 + scrolling[1]], special_flags=pg.BLEND_RGBA_SUB)
+
     self.free_var["Mech"].draw(WIN, self.free_var["Move angle"])
 
     self.free_var["Mech"].mech_parts["Leg"]["Animation state"] = -1
@@ -5780,8 +5851,6 @@ def rigel_draw(self, WIN, scrolling):
         self.animation_counter["Walk"] += 1
         frame_to_get = self.animation_counter["Walk"] // 7 % (5 - 1) + 1
     self.free_var["Mech"].mech_parts["Leg"]["Animation state"] = frame_to_get
-
-
 
     # Canons/wing
     for x in range(3):
@@ -5817,7 +5886,7 @@ def rigel_on_death(self, entities, level):
                 size=Fun.get_random_element_from_list([3, 4, 6])))
         return
     # Make death particle
-    entities["UI particles"].append(Particles.RigelDeathParticle(self.pos, 1200, self.free_var["Mech"]))
+    entities["UI particles"].append(Particles.RigelDeathParticle(self.pos, 1200, self.free_var["Mech"], self.free_var["Move angle"]))
 
     level["events"].append(
         MissionEvent("Finishing", Event.trigger_on_for, False, [Event.change_scrolling_target], free_var={"Timer": 60 * 5, "Manual target": self.pos}))
@@ -7054,7 +7123,8 @@ enemy_repertory = {
     # Armored Shield Generator
     "Armed Shield Generator": {
         "name": "Armed Shield Generator", "faction": "FAC-1",
-        "health": H_HO * 20, "armour": 0, "damage resistances": FO_RESIT,
+        # "health": H_HO * 20, "armour": 0, "damage resistances": FO_RESIT,
+        "health": 1, "armour": 0, "damage resistances": FO_RESIT,
         "sprites": "Sprites/Player/THR-1/Condor.png",
 
         "thickness": 60, "vel max": V_MO, "speed": 2.2, "friction": 0.7,
@@ -7064,7 +7134,7 @@ enemy_repertory = {
         # AI
         "func input": "armoured_shield_generator_input", "func act": "armoured_shield_generator_act",
         "func draw": "armoured_shield_generator_draw",
-        "on death": "none",
+        "on death": "armoured_shield_generator_on_death",
         "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
         "wall hack": False,
         "free var": {"Move angle": 0,
@@ -7077,7 +7147,6 @@ enemy_repertory = {
                      "IS BOSS": True, "Grenade Shakedown": 600, "Grenade Shakedown angle": 0, "Run people over": 250,
                      "Startup lag": 0, "Startup time": 240}
     },
-    # Hover Tank
     # AA Site
     # AA laser            Targets last position of a player. Infinite range
     "AA Laser": {
@@ -7091,7 +7160,7 @@ enemy_repertory = {
         "weapon": "Hover Tank Cannon",
         # AI
         "func input": "aa_site_input", "func act": "aa_site_act_aa_laser", "func draw": "aa_site_draw_aa_laser",
-        "on death": "none",
+        "on death": "aa_site_on_death",
         "targeting range": R_HO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
         "wall hack": True,
         "free var": {"AA Site": True, "Pos history": [], "History limit": 100, "Draw angle": 0}
@@ -7109,7 +7178,7 @@ enemy_repertory = {
         # AI
         "func input": "aa_site_input", "func act": "aa_site_act_drone_factory",
         "func draw": "aa_site_draw_drone_factory",
-        "on death": "none",
+        "on death": "aa_site_on_death",
         "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
         "wall hack": False,
         "free var": {"AA Site": True, "Startup lag": 0}
@@ -7127,7 +7196,7 @@ enemy_repertory = {
         # AI
         "func input": "aa_site_input", "func act": "aa_site_act_missile_battery",
         "func draw": "aa_site_draw_missile_battery",
-        "on death": "none",
+        "on death": "aa_site_on_death",
         "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
         "wall hack": False,
         "free var": {"AA Site": True, "Startup lag": 0, "Pos history": []}
@@ -7300,6 +7369,7 @@ enemy_repertory = {
     "Hover Tank": {
         "name": "Hover Tank", "faction": "FAC-2",
         "health": H_HO * 20, "armour": 0, "damage resistances": FO_RESIT,
+        # "health": 1, "armour": 0, "damage resistances": FO_RESIT,
         "sprites": "Sprites/Player/THR-1/Condor.png",
 
         "thickness": 60, "vel max": V_MO, "speed": 2.2, "friction": 0.7,
@@ -7308,7 +7378,7 @@ enemy_repertory = {
         "weapon": "Hover Tank Cannon",
         # AI
         "func input": "hover_tank_input", "func act": "hover_tank_act", "func draw": "hover_tank_draw",
-        "on death": "none",
+        "on death": "hover_tank_on_death",
         "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
         "wall hack": False,
         "free var": {"Move angle": 0,
@@ -7318,7 +7388,7 @@ enemy_repertory = {
     },
     "Gilgamesh": {
         "name": "Gilgamesh", "faction": "FAC-2",
-        "health": H_HO * 20, "armour": 0, "damage resistances": GILG_RESIT,
+        "health": H_HO * 22, "armour": 0, "damage resistances": GILG_RESIT,
         "sprites": "Sprites/Enemies/Gilgamesh.png", "Sprite Height": 40,
 
         "thickness": 28, "vel max": V_HO, "speed": 8, "friction": 4,
@@ -7327,7 +7397,7 @@ enemy_repertory = {
         "weapon": "Desert's Wind",
         # AI
         "func input": "gilgamesh_input", "func act": "gilgamesh_act", "func draw": "enemy_draw_advanced_gun",
-        "on death": "none",
+        "on death": "gilgamesh_on_death",
         "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
         "wall hack": False,
         "free var": {"IS BOSS": True,
@@ -7472,7 +7542,7 @@ enemy_repertory = {
          "faction": "FAC-3",
          "type": "Elite",
          "targeting range": R_MO, "targeting angle": D_HO, "stealth mod": S_LO, "stealth counter": C_MO,
-         "wall hack": False, "health": H_HO * 24, "armour": 0, "damage resistances": F3_RESIT_H,
+         "wall hack": False, "health": H_HO * 22, "armour": 0, "damage resistances": F3_RESIT_H,
          "thickness": 48,
          "vel max": V_LO * 0.8, "speed": V_LO * 0.8, "friction": V_LO * 0.8,
          "weapon": "Bloodhound Weaponry",
@@ -7481,7 +7551,7 @@ enemy_repertory = {
          "func act": "bloodhound_act",
          "func draw": "bloodhound_draw",
          # "func draw": "enemy_draw_basic",
-         "sprites": "Sprites/Enemies/Bulwark.png", "on death": "none",
+         "sprites": "Sprites/Enemies/Bulwark.png", "on death": "bloodhound_on_death",
          "free var": {
              "IS BOSS": True,
              "Mech": MechRenderer.Mech(MechRenderer.bloodhound_mech, MechRenderer.bloodhound_palette, [0, -350]),
@@ -7497,6 +7567,7 @@ enemy_repertory = {
     "Attack Helicopter": {
         "name": "Attack Helicopter", "faction": "FAC-3",
         "health": H_HO * 20, "armour": 0, "damage resistances": FO_RESIT,
+        # "health": 1, "armour": 0, "damage resistances": FO_RESIT,
         "sprites": "Sprites/Player/THR-1/Condor.png",
 
         "thickness": 60, "vel max": V_MO, "speed": 6.2, "friction": 4,
@@ -7505,10 +7576,10 @@ enemy_repertory = {
         "weapon": "Attack Helicopter Weaponry",
         # AI
         "func input": "attack_helicopter_input", "func act": "attack_helicopter_act", "func draw": "attack_helicopter_draw",
-        "on death": "none",
+        "on death": "attack_helicopter_on_death",
         "targeting range": R_MO, "targeting angle": 180, "stealth mod": S_LO, "stealth counter": C_LM,
         "wall hack": False,
-        "free var": {"Move angle": 0,
+        "free var": {"Move angle": 0, "Rocket type": "HE",
                      "Machine Gun Angle": -90, "Allow machine gun": False,
                      "IS BOSS": True, "Grenade Shakedown": 600, "Grenade Shakedown angle": 0, "Run people over": 250,
                      "Startup lag": 0, "Startup time": 240}
@@ -7521,8 +7592,8 @@ enemy_repertory = {
          "faction": "FAC-3",
          "type": "Elite",
          "targeting range": R_MO, "targeting angle": D_HO, "stealth mod": S_LO, "stealth counter": C_MO,
-         # "wall hack": False, "health": H_HO * 12, "armour": 0, "damage resistances": F3_RESIT_H,
-         "wall hack": False, "health": 1, "armour": 0, "damage resistances": F3_RESIT_H,
+         "wall hack": False, "health": H_HO * 12, "armour": 0, "damage resistances": F3_RESIT_H,
+         # "wall hack": False, "health": 1, "armour": 0, "damage resistances": F3_RESIT_H,
          "thickness": 48,
          "vel max": V_LO * 0.8, "speed": V_LO * 0.8, "friction": V_LO * 0.8,
          "weapon": "Bloodhound Weaponry",
@@ -7560,7 +7631,8 @@ enemy_repertory = {
     # Curtis
     "Curtis": {
         "name": "Curtis", "faction": "Zoar Colonists",
-        "health": 200*4, "armour": 50, "damage resistances": CU_RESIT,
+        # "health": 200*4, "armour": 50, "damage resistances": CU_RESIT,
+        "health": 1, "armour": 1, "damage resistances": CU_RESIT,
         "sprites": "Sprites/Player/Curtis.png",
 
         "dash": {"speed": DS_HO, "i-frames": 24, "charge": 25},
@@ -7778,7 +7850,7 @@ def fake_render(boss, WIN, CLOCK):
         bosses_to_draw[-1].angle = random.randint(-135, -45)
     for b in bosses_to_draw:
         b.aim_angle = b.angle + random.randint(-35, 35)
-    # boss_to_draw.free_var["Move angle"] += 33
+    bosses_to_draw[-1].free_var["Move angle"] = -50
     # boss_to_draw.free_var["Move angle"] -= 33
     # boss_to_draw.aim_angle -= 130 -90
     bosses_to_draw[-1].aim_angle = -145
@@ -7813,7 +7885,42 @@ def fake_render(boss, WIN, CLOCK):
         if not screenshot_taken:
             Fun.screenshot(WIN)
             screenshot_taken = True
-            # for x in range(90):
-            #     CLOCK.tick(60)
-            # return
 
+
+def fake_render_mech_parts(boss, WIN, CLOCK):
+    bosses_to_draw = []
+    for count, b in enumerate(boss):
+        bosses_to_draw.append(b)
+        print(b)
+
+    screenshot_taken = False
+
+    while True:
+        # Select
+
+        keys = pg.key.get_pressed()
+        Fun.needed_in_menu_and_game(WIN, keys)
+        # |Draw|--------------------------------------------------------------------------------------------------------
+        frame = pg.Surface((630//2, 450//2))
+        surface_to_draw = frame
+        WIN.fill(Fun.BLACK)
+
+        surface_to_draw.fill(Fun.UI_COLOUR_BACKGROUND)
+
+        for count, b in enumerate(bosses_to_draw):
+            # b.draw(surface_to_draw, [630//4, 450//4])
+            # b.draw(surface_to_draw, [630//4, 450//4])
+            Fun.draw_spritestack(frame, b, [
+            [630//4 + -96, 450//4],
+            [630//4 + -32, 450//4],
+            [630//4 + 32, 450//4],
+            [630//4 + 96, 450//4],
+        ][count], -75, height_diff=0.7)
+        # boss_to_draw.pos[0] += 1
+        # boss_to_draw.pos[1] += 1
+        Fun.scale_render(WIN, surface_to_draw, CLOCK)
+        pg.display.update()
+        CLOCK.tick(60)
+        if not screenshot_taken:
+            Fun.screenshot(WIN)
+            screenshot_taken = True

@@ -1,3 +1,4 @@
+import Fun
 from Fun import *
 
 import random
@@ -1310,7 +1311,7 @@ class RigelIntro:
 
 
 class RigelDeathParticle:
-    def __init__(self, pos, duration, mech):
+    def __init__(self, pos, duration, mech, angle):
         self.survive_wipe = True
         self.pos = [pos[0], pos[1] - 16]
         # Other properties
@@ -1320,11 +1321,11 @@ class RigelDeathParticle:
         # Add parts breaking apart
         self.mech = mech
         self.parts = {
-            "Leg": {"Pos": pos, "Angle": 0, "Vel": 0, "Time": 0},
-            "Torso": {"Pos": pos, "Angle": 0, "Vel": 6, "Time": 240},
-            "Head": {"Pos": pos, "Angle": random.uniform(70, 110), "Vel": 6, "Time": 360},
-            "Arm L": {"Pos": pos, "Angle": 0, "Vel": 6, "Time": 360},
-            "Arm R": {"Pos": pos, "Angle": 0, "Vel": 6, "Time": 360}
+            "Leg": {"Pos": [pos[0], pos[1]+18], "Angle": 0, "Vel": 0, "Time": 0, "Draw angle": angle, "Shadow offset": -6},
+            "Torso": {"Pos": pos.copy(), "Angle": random.uniform(-180, 180), "Vel": 1, "Time": 0, "Draw angle": angle, "Shadow offset": -6},
+            "Head": {"Pos": [pos[0], pos[1]-12], "Angle": random.uniform(70, 110), "Vel": 5, "Time": 0, "Draw angle": angle, "Shadow offset": -6},
+            "Arm L": {"Pos": pos.copy(), "Angle": random.uniform(-180, 0), "Vel": 4, "Time": 0, "Draw angle": angle, "Shadow offset": -6},
+            "Arm R": {"Pos": pos.copy(), "Angle": random.uniform(0, 180), "Vel": 4, "Time": 0, "Draw angle": angle, "Shadow offset": -12}
         }
 
     def draw(self, WIN, scrolling):
@@ -1347,8 +1348,287 @@ class RigelDeathParticle:
                     self.particles.append(GrowingCircleTransparent(
                         pos, RIGEL_ENERGY, 1 * mod, random.randint(25 + round(20 * mod), 75), 0, 0, alpha=125))
 
-            for i in self.particles:
-                i.draw(WIN, scrolling)
+            for p in self.parts:
+                self.parts[p]["Pos"] = move_with_vel_angle(self.parts[p]["Pos"], self.parts[p]["Vel"], self.parts[p]["Angle"])
+                WIN.blit(ENTITY_SHADOW_SIZE_2, [self.parts[p]["Pos"][0] - 32 + scrolling[0], self.parts[p]["Pos"][1] + self.parts[p]["Shadow offset"] + scrolling[1]],
+                         special_flags=pg.BLEND_RGBA_SUB)
+                pos = [
+                    self.parts[p]["Pos"][0] + scrolling[0],
+                     self.parts[p]["Pos"][1] - self.parts[p]["Vel"] * (1 - math.sin(self.parts[p]["Time"]/ 6)) * 10 + scrolling[1]
+                ]
+                draw_spritestack(WIN, self.mech.mech_parts[p]["Sprite"], pos, self.parts[p]["Draw angle"], height_diff=0.7)
+
+                if self.parts[p]["Vel"] > 0:
+                    self.parts[p]["Vel"] *= 0.98
+
+                self.parts[p]["Time"] += 1
+
+            for i in self.particles: i.draw(WIN, scrolling)
+
+            self.duration -= 1
+
+
+class BloodHoundDeathParticle:
+    # In another project, could be used for death animations of mechs
+    def __init__(self, pos, duration, mech, angle):
+        self.survive_wipe = True
+        self.pos = [pos[0], pos[1] - 16]
+        # Other properties
+        self.duration = duration
+        self.start_duration = duration
+        self.particles = []  # Stores the GrowingCircle particles
+        # GrowingCircleTransparent
+        # Add parts breaking apart
+        self.mech = mech
+        self.parts = {
+            "Leg": {"Pos": [pos[0], pos[1] + mech.mech_parts["Torso"]["offset"][2]], "Angle": 0, "Vel": 0, "Time": 0, "Draw angle": angle, "Shadow offset": -6},
+            "Torso": {"Pos": pos.copy(), "Angle": 0, "Vel": 0, "Time": 0, "Draw angle": angle, "Shadow offset": -6},
+            "Head": {"Pos": [pos[0], pos[1]-12], "Angle": random.uniform(70, 110), "Vel": 5, "Time": 0, "Draw angle": angle, "Shadow offset": -6},
+            "Arm L": {"Pos": pos.copy(), "Angle": random.uniform(-180, 0), "Vel": 4, "Time": 0, "Draw angle": angle, "Shadow offset": -6},
+            "Arm R": {"Pos": pos.copy(), "Angle": random.uniform(0, 180), "Vel": 4, "Time": 0, "Draw angle": angle, "Shadow offset": -12}
+        }
+
+    def draw(self, WIN, scrolling):
+        if self.duration > 0:
+            self.particles.append(FireParticle(random_point_in_circle(self.pos, 48)))
+
+            if self.duration == self.start_duration:
+                play_sound("Betel Death")
+                mod = random.random()
+                pos = random_point_in_circle(self.pos, 32)
+                self.particles.append(GrowingCircleTransparent(pos, FIRE, 1 * mod, random.randint(25 + round(20 * mod), 75), 0, 0, alpha=125))
+
+            # Handle parts
+            for p in self.parts:
+                self.parts[p]["Pos"] = move_with_vel_angle(self.parts[p]["Pos"], self.parts[p]["Vel"], self.parts[p]["Angle"])
+                WIN.blit(ENTITY_SHADOW_SIZE_2, [self.parts[p]["Pos"][0] - 32 + scrolling[0], self.parts[p]["Pos"][1] + self.parts[p]["Shadow offset"] + scrolling[1]],
+                         special_flags=pg.BLEND_RGBA_SUB)
+                pos = [
+                    self.parts[p]["Pos"][0] + scrolling[0],
+                     self.parts[p]["Pos"][1] - self.parts[p]["Vel"] * (1 - math.sin(self.parts[p]["Time"]/ 6)) * 10 + scrolling[1]
+                ]
+                draw_spritestack(WIN, self.mech.mech_parts[p]["Sprite"], pos, self.parts[p]["Draw angle"], height_diff=0.7)
+
+                if self.parts[p]["Vel"] > 0:
+                    self.parts[p]["Vel"] *= 0.98
+
+                self.parts[p]["Time"] += 1
+
+            for i in self.particles: i.draw(WIN, scrolling)
+            self.duration -= 1
+
+
+class ArmouredShieldGeneratorDeathParticle:
+    def __init__(self, pos, duration, angle, aim_angle):
+        self.survive_wipe = True
+        self.pos = [pos[0], pos[1]]
+        # Other properties
+        self.duration = duration
+        self.start_duration = duration
+        self.particles = []  # Stores the GrowingCircle particles
+        self.angle = angle
+        self.aim_angle = aim_angle
+
+    def draw(self, WIN, scrolling):
+        if self.duration > 0:
+            if self.duration == 50:
+                self.particles.append(NewExplosionEffect([self.pos[0], self.pos[1]],
+                                                                          duration=50,
+                                                                          particles=32,
+                                                                          radius=28,
+                                                                          particle_growth=8))
+                play_sound("Explosion", "SFX")
+
+            if self.duration > 35:
+                if self.duration % 75 == 0:
+                    self.particles.append(NewExplosionEffect(random_point_in_circle(self.pos, 32),
+                                                             duration=25,
+                                                             particles=8,
+                                                             radius=14,
+                                                             particle_growth=8))
+                    play_sound("Explosion", "SFX")
+
+                angle = 360 * random.random()
+                pos = move_with_vel_angle(self.pos, 16 * random.random(), angle)
+                for x in range(3):
+                    self.particles.append(
+                        RandomParticle2(
+                            pos,
+                            [(128, 255, 255), (125, 200, 220), (85, 220, 160)][x % 3],
+                            1.5 + random.uniform(0, 2),
+                            round(10 + 10 * random.random()),
+                            angle + (random.random() - 0.5) * 6, size=[1, 2, 4][x % 3])
+                    )
+                h_mod = 0.75
+
+                pos = [self.pos[0], self.pos[1] + 8]
+                draw_spritestack(WIN, SPRITE_ARMORED_GENERATOR_CHASSIS,
+                                     [pos[0] + scrolling[0], pos[1] + scrolling[1]],
+                                     self.angle + 90, height_diff=h_mod)
+                pos = [pos[0] + scrolling[0], pos[1] + scrolling[1] - 30 * h_mod]
+                angle = self.angle + 226 - 180
+                pos = move_with_vel_angle(pos, 22.6274, angle)
+                draw_spritestack(WIN, SPRITE_ARMORED_GENERATOR_TURRET, pos, self.aim_angle + 90,
+                                     height_diff=h_mod)
+
+            for i in self.particles: i.draw(WIN, scrolling)
+
+            self.duration -= 1
+
+
+class HoverTankDeathParticle:
+    def __init__(self, pos, duration, angle, aim_angle, gun_angle):
+        self.survive_wipe = True
+        self.pos = [pos[0], pos[1]]
+        # Other properties
+        self.duration = duration
+        self.start_duration = duration
+        self.particles = []  # Stores the GrowingCircle particles
+        self.angle = angle
+        self.aim_angle = aim_angle
+        self.gun_angle = gun_angle
+        h_mod = 0.75
+        self.turret_pos = [self.pos[0], self.pos[1] - 17 * h_mod]
+        self.gun_pos = [self.pos[0], self.pos[1] - 24 * h_mod]
+
+    def draw(self, WIN, scrolling):
+        if self.duration > 0:
+            if self.duration == self.start_duration:
+                self.particles.append(NewExplosionEffect([self.pos[0], self.pos[1]],
+                                                                          duration=50,
+                                                                          particles=32,
+                                                                          radius=28,
+                                                                          particle_growth=8))
+                play_sound("Explosion", "SFX")
+
+            time_passed = self.start_duration - self.duration
+            mod = self.duration/self.start_duration
+            self.gun_pos = move_with_vel_angle(self.gun_pos, mod * 2, self.gun_angle - 180)
+            self.turret_pos = move_with_vel_angle(self.turret_pos, mod * 1, self.aim_angle - 180)
+
+            WIN.blit(Fun.ENTITY_SHADOW, (self.gun_pos[0] - 16 + scrolling[0], self.gun_pos[1] + scrolling[1]),
+                     special_flags=pg.BLEND_RGBA_SUB)
+            WIN.blit(Fun.ENTITY_SHADOW_SIZE_2, (self.turret_pos[0] - 32 + scrolling[0], self.turret_pos[1] + scrolling[1]),
+                     special_flags=pg.BLEND_RGBA_SUB)
+
+            h_mod = 0.75
+            draw_spritestack(WIN, SPRITE_HOVER_TANK_CHASSIS,
+                                 [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
+                                 self.angle + 90, height_diff=h_mod)
+            draw_spritestack(WIN, SPRITE_HOVER_TANK_TURRET,
+                                 [self.turret_pos[0] + scrolling[0],
+                                  self.turret_pos[1] + scrolling[1] - 4 * (1 - math.sin(time_passed/ 6)) * 5 * mod],
+                                 self.aim_angle + 90, height_diff=h_mod)
+            draw_spritestack(WIN, SPRITE_HOVER_TANK_GUN,
+                                 [self.gun_pos[0] + scrolling[0],
+                                  self.gun_pos[1] + scrolling[1] - 6 * (1 - math.sin(time_passed/ 6)) * 7 * mod],
+                                 self.gun_angle + 90, height_diff=h_mod)
+
+            for i in self.particles: i.draw(WIN, scrolling)
+
+            self.duration -= 1
+
+
+class AttackHelicopterDeathParticle:
+    def __init__(self, pos, duration, angle, start_time):
+        self.survive_wipe = True
+        self.pos = [pos[0], pos[1]]
+        # Other properties
+        self.duration = duration
+        self.start_duration = duration
+        self.particles = []  # Stores the GrowingCircle particles
+        self.angle = angle
+        self.start_time = start_time
+
+    def draw(self, WIN, scrolling):
+        if self.duration > 0:
+            h_mod = 0.75
+            if self.duration == 50:
+                self.particles.append(NewExplosionEffect([self.pos[0], self.pos[1]],
+                                                                          duration=50,
+                                                                          particles=32,
+                                                                          radius=28,
+
+                                                                          particle_growth=8))
+                play_sound("Explosion", "SFX")
+
+            if self.duration > 35:
+                self.pos[1] += 1
+                mod = self.start_duration - self.duration
+                angle = mod * 4
+                height_mod = 22 * mod / self.start_duration
+                WIN.blit(ENTITY_SHADOW_SIZE_2, move_with_vel_angle(
+                    (self.pos[0] - 32 + scrolling[0], self.pos[1] + 11 - height_mod + scrolling[1]), 20, self.angle + angle),
+                         special_flags=pg.BLEND_RGBA_SUB)
+
+                draw_spritestack(WIN, SPRITE_ATTACK_HELICOPTER,
+                                     [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1]],
+                                     self.angle + angle + 90, height_diff=h_mod)
+
+                draw_spritestack(WIN, SPRITE_ATTACK_HELICOPTER_BLADE, move_with_vel_angle(
+                    [self.pos[0] + scrolling[0], self.pos[1] + scrolling[1] - 37 * h_mod], 20, self.angle + angle),
+                                     self.start_time * 13.5 + self.duration, height_diff=h_mod)
+
+            for i in self.particles: i.draw(WIN, scrolling)
+
+            self.duration -= 1
+
+
+class GilgameshDeathParticle:
+    def __init__(self, pos, duration, angle, aim_angle, draw_angle, weapon, draw_rotated_dist, weapon_draw_dist):
+        self.survive_wipe = True
+        self.pos = [pos[0], pos[1]]
+        self.weapon = weapon
+        # Other properties
+        img = get_image("Sprites/Effect/GilgameshDeath.png")
+        self.sprites = [img.subsurface((img.get_width() - 40 * (x + 1), 0, 40, 40)) for x in range(img.get_width()//40)]
+        self.duration = duration
+        self.start_duration = duration
+        self.particles = []  # Stores the GrowingCircle particles
+        self.angle = angle
+        self.aim_angle = aim_angle
+        self.draw_angle = draw_angle
+
+        self.weapon_pos = self.pos.copy()
+        self.draw_rotated_dist = draw_rotated_dist
+        self.weapon_draw_dist = weapon_draw_dist
+
+        self.frame_to_get = 0
+
+    def draw(self, WIN, scrolling):
+        if self.duration > 0:
+            WIN.blit(Fun.ENTITY_SHADOW, (self.pos[0] - 16 + scrolling[0], self.pos[1] + 11 + scrolling[1]),
+                     special_flags=pg.BLEND_RGBA_SUB)
+
+            if self.frame_to_get >= -8 and (self.start_duration-self.duration) % 9 == 0:
+                self.frame_to_get -= 1
+
+            # Draws the player
+            WIN.blit(self.sprites[self.frame_to_get], (
+            self.pos[0] - 20 + scrolling[0], self.pos[1] - 20 + scrolling[1]))
+
+            # Draw the gun
+            mod = self.duration/(self.start_duration-30)
+            if mod < 0:
+                mod = 0
+            self.weapon_pos = Fun.move_with_vel_angle(self.weapon_pos, 2*mod, self.aim_angle)
+
+            self.draw_angle += 2 * mod
+
+            draw_pos = [self.weapon_pos[0] + scrolling[0], self.weapon_pos[1] + scrolling[1]]
+
+            # self.draw_angle
+            drawing_pos = Fun.move_with_vel_angle(draw_pos, 6 + self.weapon_draw_dist, self.aim_angle)
+            drawing_pos = Fun.move_with_vel_angle(drawing_pos, self.draw_rotated_dist, self.aim_angle + self.draw_angle)
+            origin = [0, self.weapon.sprite.get_height() // 2]
+
+            Fun.blitRotate(WIN, pg.transform.flip(self.weapon.sprite, True, -90 < self.aim_angle < 90),
+                           drawing_pos, origin, 180 - self.aim_angle + self.draw_angle)
+            WIN.blit(Fun.ENTITY_SHADOW, (drawing_pos[0]-16, drawing_pos[1] + 11),
+                     special_flags=pg.BLEND_RGBA_SUB)
+
+
+            for i in self.particles: i.draw(WIN, scrolling)
 
             self.duration -= 1
 

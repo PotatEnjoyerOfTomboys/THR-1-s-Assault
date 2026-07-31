@@ -1,0 +1,109 @@
+{
+ "version": "auto-py-to-exe-configuration_v1",
+ "pyinstallerOptions": [
+  {
+   "optionDest": "noconfirm",
+   "value": true
+  },
+  {
+   "optionDest": "filenames",
+   "value": "C:/Python projects/THR-1s Assault/Main.py"
+  },
+  {
+   "optionDest": "onefile",
+   "value": true
+  },
+  {
+   "optionDest": "console",
+   "value": false
+  },
+  {
+   "optionDest": "icon_file",
+   "value": "C:/Python projects/THR-1s Assault/Sprites/Icon.ico"
+  },
+  {
+   "optionDest": "clean_build",
+   "value": false
+  },
+  {
+   "optionDest": "strip",
+   "value": false
+  },
+  {
+   "optionDest": "noupx",
+   "value": false
+  },
+  {
+   "optionDest": "disable_windowed_traceback",
+   "value": false
+  },
+  {
+   "optionDest": "uac_admin",
+   "value": false
+  },
+  {
+   "optionDest": "uac_uiaccess",
+   "value": false
+  },
+  {
+   "optionDest": "argv_emulation",
+   "value": false
+  },
+  {
+   "optionDest": "bootloader_ignore_signals",
+   "value": false
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Python projects/THR-1s Assault/Main_Loop.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Python projects/THR-1s Assault/Bullets.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Python projects/THR-1s Assault/Entity.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Python projects/THR-1s Assault/Event.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Python projects/THR-1s Assault/Fun.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Python projects/THR-1s Assault/Items.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Python projects/THR-1s Assault/MechRenderer.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Python projects/THR-1s Assault/Particles.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Python projects/THR-1s Assault/Render.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Python projects/THR-1s Assault/Skills.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Python projects/THR-1s Assault/Upgrades.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Python projects/THR-1s Assault/Weapons.py;."
+  }
+ ],
+ "nonPyinstallerOptions": {
+  "increaseRecursionLimit": true,
+  "manualArguments": ""
+ }
+}

@@ -21,13 +21,13 @@
             "Mark": [],
             "Vivianne": []
       },
-      "Zoar unlocked": false,
+      "Zoar unlocked": true,
       "Faction mission count": [
             5,
             1,
             0,
-            0,
-            0,
+            4,
+            1,
             0
       ],
       "Databank entries unlocked": [
@@ -104,6 +104,14 @@
             "Type 23 Shotgun",
             "Sculptor",
             "Manager",
-            "Body Guard"
+            "Body Guard",
+            "Rigel",
+            "Standard Shotgun",
+            "Cowboy's Repeater",
+            "Old West Firearms & Replicas",
+            "Lawrence's Cutlass & Flintlock",
+            "Mark's Rifle",
+            "Vivianne's Rifle",
+            "NEST"
       ]
 }
