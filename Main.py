@@ -126,10 +126,9 @@ def main_game(party_info):
         "Player party": player_party,
         "Missions completed": 0,
         "Time spend in mission": 0,
-        "Mission historic": [],  # {"Name": <str>, "Faction": <int>}
-        # "Funds": 0,
+        "Mission historic": [],
+        "Funds": 0,
         "Upgrades": [],
-        "Funds": 10000000000, # "Upgrades": [i for i in Fun.UPGRADE_INFO],    # Used for testing
         "Available upgrades": [],
         "Upgrade pool": []
     }
