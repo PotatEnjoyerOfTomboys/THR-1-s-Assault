@@ -681,6 +681,7 @@ def defense_mission(self, entities, bullets, level, time_passed, screen, CLOCK):
 
 def artillery_strike(self, entities, bullets, level, time_passed, screen, CLOCK):
     if time_passed % 320 == 319:
+        Fun.play_sound("Artillery 1")
         Bullets.spawn_bullet(
                 ENEMY_NO_OWNER, entities, Bullets.Artillery,
             Fun.move_with_vel_angle(

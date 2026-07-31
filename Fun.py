@@ -372,7 +372,7 @@ sounds_dict = {
     "Charge": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Skill_charge.ogg')), "Volume": 1},
     "Charge 2": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Skill_charge_2.ogg')), "Volume": 1},
     # ||
-    "Explosion": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Explosion.ogg')), "Volume": 0.125},
+    "Explosion": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Explosion.ogg')), "Volume": 0.25},
     "Fire 1": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Fire_1.ogg')), "Volume": 0.05},
     "Sardine Blows Up": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Sardine_Blows_Up.ogg')), "Volume": 0.6},
 
@@ -468,8 +468,13 @@ sounds_dict = {
     "Vincent Unbreaking": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Player/Vincent Unbreaking.ogg')), "Volume": 0.9},
     "Vincent Armour Break": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Player/Vincent Armour Break.ogg')), "Volume": 0.9},
     "Beast Mode": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Player/Beast Mode.ogg')), "Volume": 0.9},
+    "Jeanne Buff": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Player/Jeanne Buff.ogg')), "Volume": 0.9},
 
     # New sounds!
+
+    "Artillery 1": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Gun/Artillery 1.ogg')), "Volume": 1.1},
+    "Artillery 2": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/Gun/Artillery 2.ogg')), "Volume": 1.3},
+
     "Gun Silenced": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Rifle_Silenced.ogg')), "Volume": 1},
     "Shotgun 1 Shooting": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Shotgun_Shoot_Pump.ogg')), "Volume": 0.8},
     "Shotgun 2 Shooting": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Shotgun.ogg')), "Volume": 0.8},
@@ -500,9 +505,9 @@ sounds_dict = {
     "Rigel Giga Thrust": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Sound effects/New Boss/Rigel Giga Thrust.ogg')), "Volume": 1.75},
     # "Shot gun 2 Shooting": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Firearms/Shotgun.ogg')), "Volume": 0.8},
 
-    "Armoured Shield Generator Charging": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Voice/Armoured Shield Generator Charging.ogg')), "Volume": 1},
-    "Armoured Shield Generator Aiming": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Voice/Armoured Shield Generator Aiming.ogg')), "Volume": 1},
-    "Armoured Shield Generator Fire": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Voice/Armoured Shield Generator Fire.ogg')), "Volume": 1},
+    "Armoured Shield Generator Charging": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Voice/Armoured Shield Generator Charging.ogg')), "Volume": 2},
+    "Armoured Shield Generator Aiming": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Voice/Armoured Shield Generator Aiming.ogg')), "Volume": 2.3},
+    "Armoured Shield Generator Fire": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Voice/Armoured Shield Generator Fire.ogg')), "Volume": 2},
 
     "Attack Helicopter Attack": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Voice/Attack Helicopter Attack.ogg')), "Volume": 0.9},
     "Attack Helicopter Death Scream": {"Sound": pg.mixer.Sound(os.path.join('Sounds/Voice/Attack Helicopter Death Scream.ogg')), "Volume": 0.9},
@@ -1690,8 +1695,7 @@ def settings_menu(WIN, CLOCK, also_pause=False):
          "Slider": {"Limits": [0, 10], "Mod": 0.5, "Display mod": 1}},
         {"Name": "Screen shake", "Value": settings_value["Screen shake"], "On select": "Slider", "Render func": "Slider",
             "Slider": {"Limits": [0.01, 5], "Mod": 0.5, "Display mod": 1}},
-        {"Name": "Language", "Value": settings_value["Language"], "On select": "Slider", "Render func": "Slider",
-         "Slider": {"Limits": [0, 1], "Mod": 0.01, "Display mod": 1}},
+        # {"Name": "Language", "Value": settings_value["Language"], "On select": "Slider", "Render func": "Slider", "Slider": {"Limits": [0, 1], "Mod": 0.01, "Display mod": 1}},
         {"Name": "Rebind", "Value": "Rebind", "On select": "Return", "Render func": "Text only"},
         {"Name": "Menu Quit", "Value": "Quit", "On select": "Return", "Render func": "Text only"},
     ]
@@ -1785,7 +1789,7 @@ def settings_menu(WIN, CLOCK, also_pause=False):
                                    "Music": menu_logic.options[1]["Value"],
                                    "Voice": menu_logic.options[2]["Value"],
                                    "Screen shake": menu_logic.options[3]["Value"],
-                                   "Language": int(menu_logic.options[4]["Value"])
+                                   "Language": 0
                                    })
     # {"SFX": 5.0, "Voice": 5.0, "Music": 5.0, "Render zoom": 1.0, "Screen shake": 1.0,
     #                   "Language": 0}
@@ -2690,11 +2694,13 @@ def game_credits(WIN, clock):
     draw = True
     seperator = "-----"
     real_credits = [
-        [seperator, "Development", seperator], "",
+        [seperator, "Main Development", seperator], "",
         "Seigneur des Patates",
         "", "",
-        [seperator, write_textline("Credits additional"), seperator], "",
-        "",
+        [seperator, "Additional Help", seperator], "",
+        ["AngKaiser", "Voice Acting"],
+        ["a_little_slow", "Beta Testing"],
+        ["am bardo", "Beta Testing"],
         write_textline("Credits Thanks")
     ]
     while True:

@@ -2246,6 +2246,7 @@ class ArtilleryFlare(Artillery):
             self.duration -= 1
         if self.duration == 0:
             if self.duration == 0:
+                Fun.play_sound("Explosion")
                 # Explode here
                 radius = self.secondary_explosion["Radius"]
                 entities["particles"].append(Particles.GrowingCircleTransparent(
@@ -2282,7 +2283,7 @@ class ArtillerySmoke(Artillery):
             self.duration -= 1
         if self.duration == 0:
             # Explode here
-            Fun.play_sound("Grenade 3", "SFX")
+            Fun.play_sound("Grenade 3")
             # for p in range(self.secondary_explosion["Radius"] * 2):
             #     entities["particles"].append(Fun.Smoke(
             #         Fun.random_point_in_circle(self.pos, self.secondary_explosion["Radius"]),

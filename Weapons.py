@@ -518,6 +518,7 @@ def laser_cutter_alt(self, entities, level):
 def radio_alt(self, entities, level):
     if self.input["Shoot"] and self.no_shoot_state == 0 and self.shot_allowed and self.weapon.ammo > 0:
         self.no_shoot_state = 30
+        Fun.play_sound("Artillery 2")
         # ArtilleryFlare
         Bullets.spawn_bullet(
             self, entities,
@@ -2340,6 +2341,7 @@ def binoculars_passive(self, entities, level):
 
 def artillery_radio_passive(self, entities, level):
     if self.target and self.no_shoot_state == 0:
+        Fun.play_sound("Artillery 1")
         Bullets.spawn_bullet(
             self, entities, Bullets.Artillery, self.target.pos.copy(), self.angle,
             self.weapon.bullet_info)
@@ -2739,7 +2741,7 @@ weapon_repertory = {
          "jamming sound": "Jamming",
          "sound level": 0.86,
          "accuracy": 4,
-         "spread": 24,
+         "spread": 20,
          "handle": 6,
          "recoil": 60,
          "full auto": True,
@@ -2748,7 +2750,7 @@ weapon_repertory = {
          "bullet type": "Bullet",
          "bullets per shot": 10,
          "ammo cost": 1,
-         "bullet info": [6, 15, 3, 40, {"Piercing": True, "Smoke": False}],
+         "bullet info": [5.4, 35, 3, 40, {"Piercing": True, "Smoke": False}],
          "max ammo": 10,
          "ammo pool": 150,
          "crit rate": 0,

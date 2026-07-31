@@ -522,7 +522,7 @@ def jeanne_guns_blazing(self, skill, entities, level):
                 Particles.random_particle_2_circle(entities, i.pos, 4, 15, 36, colour=Fun.RED,
                                              angle_mod=180 * random.random())
                 self.free_var["Ammo"] = 25
-    # TODO: Add sound
+    Fun.play_sound("Jeanne Buff")
 
 
 # |Sovereign|-----------------------------------------------------------------------------------------------------------
@@ -681,8 +681,6 @@ def m3d1c_robot_fuck_off(self, skill, entities, level):
         if e_dist < dist:
             Fun.damage_calculation(e, damage, "Melee", death_message="Insulted to death")
             e.vel = Fun.move_with_vel_angle([0,0], (dist-e_dist)*0.4, Fun.angle_between(e.pos, self.pos))
-            # e.status["Stunned"] += 120
-    # TODO: Add voice line
     Fun.play_sound("Electricity 2")
 
     duration = 9

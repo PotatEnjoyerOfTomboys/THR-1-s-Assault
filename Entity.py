@@ -4234,8 +4234,15 @@ def armoured_shield_generator_act(self, entities, level):
                     }
                 ]}])
         elif self.free_var["Startup lag railgun"] > 350:
+            if self.free_var["Startup lag railgun"] == 351:
+                Fun.play_sound("Armoured Shield Generator Charging", "Voice")
             colour_pool = [Fun.YELLOW_LIGHT]
             if self.free_var["Startup lag railgun"] > 425:
+                if self.free_var["Startup lag railgun"] == 426:
+                    print("Aiming!!!!")
+                    Fun.play_sound("Armoured Shield Generator Aiming", "Voice")
+                if self.free_var["Startup lag railgun"] == 530:
+                    Fun.play_sound("Armoured Shield Generator Fire", "Voice")
                 colour_pool.append(Fun.ORANGE)
                 Fun.play_sound("Charging", modified_volume=0.9)
             for x in range(2):

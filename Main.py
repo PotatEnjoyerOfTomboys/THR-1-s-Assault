@@ -4,11 +4,6 @@ import random
 import sys  # Cool video https://www.youtube.com/watch?v=2Yj5mmKWukw
 
 
-# Version 1.0
-#   More sound effects
-#   Voices      Armored Shield generator         on death        Screams of pain
-#               Gilgamesh                        Editing
-
 pg.mixer.pre_init()
 pg.init()
 pg.joystick.init()
@@ -132,9 +127,9 @@ def main_game(party_info):
         "Missions completed": 0,
         "Time spend in mission": 0,
         "Mission historic": [],  # {"Name": <str>, "Faction": <int>}
-        "Funds": 0,
+        # "Funds": 0,
         "Upgrades": [],
-        # "Funds": 10000000000, # "Upgrades": [i for i in Fun.UPGRADE_INFO],    # Used for testing
+        "Funds": 10000000000, # "Upgrades": [i for i in Fun.UPGRADE_INFO],    # Used for testing
         "Available upgrades": [],
         "Upgrade pool": []
     }
